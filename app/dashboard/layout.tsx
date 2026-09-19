@@ -27,7 +27,7 @@ export default function DashboardLayout({
   }
 
   const navItems = [
-    { href: '/', label: 'Dashboard', icon: '📊' },
+    { href: '/dashboard', label: 'Dashboard', icon: '📊' },
     { href: '/products', label: 'Products', icon: '📦' },
     { href: '/orders', label: 'Orders', icon: '📋' },
     { href: '/deliveries', label: 'Deliveries', icon: '🚚' },
