@@ -1,0 +1,120 @@
+.onboarding-page {
+  background: var(--gray);
+  padding: clamp(2rem, 6vw, 5rem) 1rem;
+}
+
+.onboarding-shell {
+  width: min(100%, 960px);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: clamp(2rem, 6vw, 5rem);
+  align-items: start;
+}
+
+.onboarding-copy {
+  padding-top: 0.5rem;
+}
+
+.onboarding-copy .crumbs {
+  margin-bottom: 2.5rem;
+}
+
+.onboarding-kicker {
+  color: var(--orange);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.onboarding-copy h1 {
+  margin-top: 0.6rem;
+  color: var(--navy);
+  font-size: clamp(2rem, 5vw, 3.6rem);
+}
+
+.onboarding-copy > p:last-child {
+  margin-top: 1rem;
+  max-width: 38ch;
+}
+
+.onboarding-form {
+  padding: clamp(1.25rem, 4vw, 2.25rem);
+  background: var(--white);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 45px -30px rgba(11, 31, 58, 0.65);
+}
+
+.onboarding-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.onboarding-form label {
+  display: grid;
+  gap: 0.4rem;
+  color: var(--navy);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.onboarding-form label > span {
+  color: var(--charcoal);
+  font-weight: 400;
+}
+
+.onboarding-form input,
+.onboarding-form textarea {
+  width: 100%;
+  border: 1px solid var(--rule);
+  border-radius: 0.55rem;
+  padding: 0.75rem 0.85rem;
+  background: var(--white);
+  color: var(--charcoal);
+  font: 400 1rem/1.4 var(--font-body);
+}
+
+.onboarding-form textarea {
+  resize: vertical;
+}
+
+.onboarding-form > label {
+  margin-top: 1rem;
+}
+
+.onboarding-submit {
+  width: 100%;
+  margin-top: 1.25rem;
+  min-height: 3rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--orange);
+  color: var(--white);
+  font: 700 1rem var(--font-body);
+  cursor: pointer;
+}
+
+.onboarding-submit:hover {
+  background: var(--navy);
+}
+
+.onboarding-confirmation {
+  margin-top: 0.8rem;
+  color: var(--orange);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .onboarding-shell,
+  .onboarding-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .onboarding-copy .crumbs {
+    margin-bottom: 1.5rem;
+  }
+}
