@@ -123,7 +123,7 @@ section { padding-block: clamp(3.5rem, 7vw, 6rem); }
 .cat--big h3 { font-size: clamp(1.8rem, 3vw, 2.4rem); }
 .cat--mid { grid-column: span 3; }
 .cat--small { grid-column: span 3; }
-.cat--tile { background: var(--navy); }
+.cat--tile { background: var(--navy); color: var(--white); }
 .cat--tile::after { display: none; }
 .cat--tile svg { position: absolute; right: 1.2rem; top: 1.2rem; width: 54px; height: 54px; stroke: var(--white); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .cat:focus-visible { outline-color: var(--orange); }

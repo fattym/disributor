@@ -223,7 +223,7 @@ export default function CartPage() {
                         max={item.stock_quantity}
                         value={item.quantity}
                         onChange={(e) => updateQuantity(item.variant_id, Number(e.target.value))}
-                        className="w-12 text-center px-1 py-0.5 border border-zinc-300 dark:border-zinc-700 rounded bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                        className="w-16 text-center px-1 py-0.5 border border-zinc-300 dark:border-zinc-700 rounded bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
                       />
                       <p className="text-xs text-zinc-500 mt-1">KSh {(item.unit_price * item.quantity).toLocaleString()}</p>
                     </div>
@@ -256,8 +256,11 @@ export default function CartPage() {
                         Sign in
                       </button>
                       <button
-                        onClick={() => setGuestMode(true)}
-                        className="flex-1 px-5 py-2.5 border border-[#0B1F3A] rounded-md text-[#0B1F3A] font-medium hover:bg-[#E63B00]/10 transition-colors"
+                        onClick={() => {
+                          setGuestMode(true);
+                          setStep('delivery');
+                        }}
+                        className="flex-1 px-5 py-2.5 border border-[#0B1F3A] dark:border-zinc-100 rounded-md text-[#0B1F3A] dark:text-zinc-100 font-medium hover:bg-[#E63B00]/10 dark:hover:bg-zinc-800 transition-colors"
                       >
                         Checkout as guest
                       </button>
@@ -349,7 +352,7 @@ export default function CartPage() {
                    className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#0B1F3A]"
                  />
                </div>
-               <div>
+               <div className="md:col-span-2">
                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
                    Delivery notes (optional)
                  </label>
