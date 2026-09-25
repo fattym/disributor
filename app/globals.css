@@ -1,26 +1,71 @@
-@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Caveat:wght@600&family=DM+Sans:wght@400;500;700&display=swap");
 
+/* ==========================================================
+   Learning Pack – global palette + typography
+   Orange-red  #E63B00  header bar, headings, dark sections
+   Deep navy   #0B1F3A  main accent / buttons
+   White       #FFFFFF  main background
+   Light gray  #F4F5F7  cards / secondary sections
+   Charcoal    #202124  body text
+   ========================================================== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --orange: #E63B00;
+  --navy: #0B1F3A;
+  --white: #FFFFFF;
+  --gray: #F4F5F7;
+  --charcoal: #202124;
+  --rule: rgba(11, 31, 58, 0.13);
+  --radius: 14px;
+  --font-head: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --font-hand: "Caveat", "Segoe UI", cursive;
+  --wrap: 1180px;
+
+  --background: var(--white);
+  --foreground: var(--charcoal);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-navy: var(--navy);
+  --color-orange: var(--orange);
+  --font-sans: var(--font-body);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0B1F3A;
+    --foreground: #F4F5F7;
+    --gray: #1a253a;
+    --rule: rgba(230, 59, 0, 0.2);
   }
 }
+
+*, *::before, *::after { box-sizing: border-box; }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  margin: 0;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+a { color: inherit; text-decoration: none; }
+h1, h2, h3, h4 {
+  font-family: var(--font-head);
+  color: var(--navy);
+  line-height: 1.08;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+p { margin: 0; }
+ul { margin: 0; padding: 0; list-style: none; }
+
+:focus-visible {
+  outline: 3px solid var(--navy);
+  outline-offset: 3px;
+  border-radius: 4px;
 }

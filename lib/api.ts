@@ -68,4 +68,80 @@ export const distributorApi = {
 
   getDeliveries: () => api.get('/distributor/deliveries/').then((r) => r.data),
   updateDelivery: (id: string, data: unknown) => api.patch(`/distributor/deliveries/${id}/`, data).then((r) => r.data),
+
+  getWallet: () => api.get('/distributor/wallet/').then((r) => r.data),
+};
+
+export interface ShopProductVariant {
+  id: number;
+  label: string;
+  stock_quantity: number;
+  price_override: string | null;
+  effective_price: string;
+}
+
+export interface ShopProduct {
+  id: number;
+  name: string;
+  description: string;
+  price: string;
+  effective_price: string;
+  image: string | null;
+  image_url: string | null;
+  category: number;
+  category_name: string;
+  is_active: boolean;
+  variants: ShopProductVariant[];
+  linked_distributor_product: number | null;
+  linked_distributor_product_name: string | null;
+  distributor_name: string | null;
+  distributor_price: string | null;
+  commission_amount: string | null;
+  markup_type: string | null;
+  markup_value: string | null;
+  is_reseller_listing: boolean;
+  created_at: string;
+}
+
+export interface ShopCategory {
+  id: number;
+  name: string;
+  school: number;
+}
+
+export const shopApi = {
+  getCategories: () =>
+    api.get<ShopCategory[] | { results: ShopCategory[] }>('/shop/categories/').then((r) => r.data),
+  getProducts: (params?: Record<string, string | number>) =>
+    api.get<ShopProduct[] | { results: ShopProduct[] }>('/shop/products/', { params }).then((r) => r.data),
+  getProduct: (id: number | string) => api.get<ShopProduct>(`/shop/products/${id}/`).then((r) => r.data),
+
+  getPublicProducts: (params?: Record<string, string | number>) =>
+    api.get<ShopProduct[] | { results: ShopProduct[] }>('/shop/public/', { params }).then((r) => r.data),
+  getPublicProduct: (id: number | string) => api.get<ShopProduct>(`/shop/public/${id}/`).then((r) => r.data),
+
+  getLearners: () =>
+    api.get<Array<{ id: number; parent: number; learner: number; relationship: string }> | { results: Array<{ id: number; parent: number; learner: number; relationship: string }> }>('/auth/parent-learner-links/').then((r) => r.data),
+
+  createOrder: (data: { learner?: number; items: Array<{ variant?: number; product?: number; quantity: number }> }) =>
+    api.post('/shop/orders/', data).then((r) => r.data),
+  getOrder: (id: number | string) => api.get(`/shop/orders/${id}/`).then((r) => r.data),
+  getMyOrders: () => api.get<{ results: unknown[] } | unknown[]>('/shop/orders/my_orders/').then((r) => r.data),
+  payMpesa: (orderId: number | string, phone?: string) =>
+    api.post(`/shop/orders/${orderId}/pay_mpesa/`, { phone }).then((r) => r.data),
+  confirmPayment: (orderId: number | string) =>
+    api.post(`/shop/orders/${orderId}/confirm-payment/`).then((r) => r.data),
+
+  createGuestOrder: (data: {
+    delivery_name: string;
+    delivery_phone: string;
+    delivery_address: string;
+    delivery_county: string;
+    delivery_notes?: string;
+    items: Array<{ variant?: number; product?: number; quantity: number }>;
+  }) => api.post('/shop/guest-orders/', data).then((r) => r.data),
+  payGuestMpesa: (orderId: number | string, phone?: string) =>
+    api.post(`/shop/guest-orders/${orderId}/pay_mpesa/`, { phone }).then((r) => r.data),
+  confirmGuestPayment: (orderId: number | string, body?: { checkout_request_id?: string; force?: boolean }) =>
+    api.post(`/shop/guest-orders/${orderId}/confirm-payment/`, body || {}).then((r) => r.data),
 };

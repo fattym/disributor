@@ -20,20 +20,35 @@ interface Order {
   created_at: string;
 }
 
+interface Wallet {
+  id: number;
+  distributor: number;
+  distributor_name: string;
+  balance: string;
+  total_earned: string;
+  total_withdrawn: string;
+}
+
 export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [wallet, setWallet] = useState<Wallet | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productsData, ordersData] = await Promise.all([
+        const [productsData, ordersData, walletData] = await Promise.all([
           distributorApi.getProducts(),
           distributorApi.getOrders(),
+          distributorApi.getWallet(),
         ]);
-        setProducts(productsData.results || productsData);
-        setOrders(ordersData.results || ordersData);
+        const prodList = productsData.results || productsData;
+        const ordersList = ordersData.results || ordersData;
+        const walletList = walletData.results || walletData;
+        setProducts(Array.isArray(prodList) ? prodList : []);
+        setOrders(Array.isArray(ordersList) ? ordersList : []);
+        setWallet(Array.isArray(walletList) && walletList.length ? walletList[0] : null);
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
       } finally {
@@ -57,6 +72,7 @@ export default function DashboardPage() {
     { label: 'Active Products', value: activeProducts, href: '/products' },
     { label: 'Pending Orders', value: pendingOrders, href: '/orders' },
     { label: 'Total Revenue', value: `KSh ${totalRevenue.toLocaleString()}`, href: '/orders' },
+    { label: 'Wallet Balance', value: wallet ? `KSh ${parseFloat(wallet.balance).toLocaleString()}` : '—', href: '#' },
   ];
 
   return (

@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Caveat:wght@600&family=DM+Sans:wght@400;500;700&display=swap");
-
 /* ==========================================================
    Learning Pack – redesign
    Orange-red  #E63B00  header bar, headings, dark sections
@@ -7,22 +5,9 @@
    White       #FFFFFF  main background
    Light gray  #F4F5F7  cards / secondary sections
    Charcoal    #202124  body text
-   (To swap orange and navy, exchange the two values below.)
+   (Palette/CSS vars are defined globally in globals.css.)
    ========================================================== */
-:root {
-  --orange: #E63B00;
-  --navy: #0B1F3A;
-  --white: #FFFFFF;
-  --gray: #F4F5F7;
-  --charcoal: #202124;
-  --rule: rgba(11, 31, 58, .13);
-  --radius: 14px;
-  --font-head: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --font-body: "DM Sans", "Segoe UI", system-ui, sans-serif;
-  --font-hand: "Caveat", "Segoe Print", "Comic Sans MS", cursive;
-  --wrap: 1180px;
-}
-*, *::before, *::after { box-sizing: border-box; }
+
 .lp-home-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 .lp-home {
   margin: 0; background: var(--white); color: var(--charcoal);
@@ -240,3 +225,56 @@ section { padding-block: clamp(3.5rem, 7vw, 6rem); }
   .book li .tick svg { animation: none !important; }
   .cat img { transition: none; }
 }
+/* ---- Shop page ---- */
+.shop-hero { background: var(--gray); padding-block: clamp(2rem, 5vw, 3.2rem); }
+.shop-hero h1 { color: var(--orange); font-size: clamp(2rem, 4.5vw, 2.9rem); }
+.crumbs { font-size: .9rem; color: var(--charcoal); margin-bottom: .6rem; }
+.crumbs a { color: var(--navy); text-decoration: none; font-weight: 700; }
+.crumbs a:hover { text-decoration: underline; }
+.shop-hero p { margin-top: .5rem; max-width: 48ch; }
+
+.shop { padding-block: clamp(2.2rem, 5vw, 3.5rem); }
+.shop-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.6rem; }
+.pills { display: flex; flex-wrap: wrap; gap: .55rem; }
+.pill { border: 1.5px solid var(--navy); background: var(--white); color: var(--navy); border-radius: 999px; padding: .5rem 1.1rem; font: 700 .9375rem var(--font-body); cursor: pointer; }
+.pill:hover { background: var(--gray); }
+.pill.is-active { background: var(--navy); color: var(--white); }
+.sort { display: flex; align-items: center; gap: .6rem; font-weight: 700; color: var(--navy); font-size: .9375rem; }
+.sort select { border: 2px solid var(--navy); border-radius: 999px; padding: .5rem 1rem; font: 500 .9375rem var(--font-body); color: var(--charcoal); background: var(--white); }
+.count { font-size: .9375rem; color: var(--charcoal); margin-bottom: 1.2rem; }
+
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.6rem 1.3rem; }
+.product { display: flex; flex-direction: column; }
+.product__img { position: relative; display: block; border-radius: var(--radius); overflow: hidden; background: var(--gray); aspect-ratio: 1 / 1; }
+.product__img img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s; }
+.product:hover .product__img img { transform: scale(1.045); }
+.p-badge { position: absolute; top: .7rem; left: .7rem; z-index: 1; background: var(--orange); color: var(--white); font: 700 .78rem/1 var(--font-body); padding: .4rem .7rem; border-radius: 999px; }
+.product__cat { margin-top: .9rem; font-size: .8125rem; color: var(--charcoal); opacity: .7; text-transform: uppercase; letter-spacing: .04em; }
+.product__name { margin-top: .25rem; font: 700 1.0625rem/1.3 var(--font-body); color: var(--navy); }
+.product__name a { text-decoration: none; }
+.product__name a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.product__price { margin-top: .45rem; font-weight: 700; color: var(--orange); }
+.product__price span { font-size: 1.05rem; }
+.p-old { color: var(--charcoal); opacity: .55; font-weight: 500; }
+.product__add { margin-top: .8rem; min-height: 2.6rem; padding: .5rem 1rem; font-size: .9rem; align-self: flex-start; }
+.product[hidden] { display: none; }
+
+.empty { text-align: center; padding: 3rem 1rem; color: var(--charcoal); }
+.empty[hidden] { display: none; }
+
+.pagination { display: flex; justify-content: center; gap: .5rem; margin-top: 2.6rem; }
+.pagination a, .pagination span { min-width: 2.6rem; min-height: 2.6rem; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; border: 1.5px solid var(--rule); text-decoration: none; color: var(--navy); font-weight: 700; }
+.pagination a:hover { background: var(--gray); }
+.pagination .is-current { background: var(--navy); border-color: var(--navy); color: var(--white); }
+
+@media (max-width: 900px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 640px) {
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 1.1rem .8rem; }
+  .shop-bar { flex-direction: column; align-items: stretch; }
+  .pills { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: .4rem; max-width: 100%; }
+  .pill { flex: none; }
+  .sort { max-width: 100%; }
+  .sort select { max-width: 100%; }
+}
+
+.product__img-placeholder { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: var(--charcoal); opacity: .55; }

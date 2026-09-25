@@ -9,13 +9,14 @@ interface User {
   role: string;
   first_name: string;
   last_name: string;
+  phone: string;
   school: number | null;
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   logout: () => void;
   loading: boolean;
 }
@@ -54,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(data.access);
     const userData = await getCurrentUser();
     setUser(userData);
+    return userData;
   };
 
   const handleLogout = () => {

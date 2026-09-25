@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shop – Learning Pack</title>
+<meta name="description" content="Shop stationery, text books, desk accessories, electronics and ready-made student boxes at Learning Pack.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B1F3A'/%3E%3Crect x='18.5' width='3.2' height='64' fill='%23E63B00'/%3E%3Cpath d='M27.5 27.5l6 6L47.5 15' fill='none' stroke='%23fff' stroke-width='5.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Caveat:wght@600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+
+/* ==========================================================
+   Learning Pack – redesign
+   Orange-red  #E63B00  header bar, headings, dark sections
+   Deep navy   #0B1F3A  main accent / buttons
+   White       #FFFFFF  main background
+   Light gray  #F4F5F7  cards / secondary sections
+   Charcoal    #202124  body text
+   (To swap orange and navy, exchange the two values below.)
+   ========================================================== */
+:root {
+  --orange: #E63B00;
+  --navy: #0B1F3A;
+  --white: #FFFFFF;
+  --gray: #F4F5F7;
+  --charcoal: #202124;
+  --rule: rgba(11, 31, 58, .13);
+  --radius: 14px;
+  --font-head: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --font-hand: "Caveat", "Segoe Print", "Comic Sans MS", cursive;
+  --wrap: 1180px;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--white); color: var(--charcoal);
+  font: 400 1.0625rem/1.6 var(--font-body);
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+img { max-width: 100%; height: auto; display: block; }
+a { color: inherit; }
+h1, h2, h3 { font-family: var(--font-head); color: var(--orange); line-height: 1.08; margin: 0; letter-spacing: -.02em; }
+p { margin: 0; }
+ul { margin: 0; padding: 0; list-style: none; }
+:focus-visible { outline: 3px solid var(--navy); outline-offset: 3px; border-radius: 4px; }
+.wrap { width: min(100% - 2.5rem, var(--wrap)); margin-inline: auto; }
+.skip { position: absolute; left: -999px; top: 0; background: var(--navy); color: var(--white); padding: .6rem 1rem; z-index: 100; }
+.skip:focus { left: 0; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  min-height: 3rem; padding: .7rem 1.5rem; border-radius: 999px; border: 2px solid var(--navy);
+  background: var(--navy); color: var(--white); font: 700 1rem/1 var(--font-body); text-decoration: none; cursor: pointer;
+  transition: background-color .2s, color .2s, border-color .2s;
+}
+.btn:hover { background: var(--orange); border-color: var(--orange); }
+.btn--ghost { background: transparent; color: var(--navy); }
+.btn--ghost:hover { background: var(--navy); border-color: var(--navy); color: var(--white); }
+
+/* Top bar */
+.topbar { background: var(--orange); color: var(--white); font-size: .9375rem; font-weight: 500; }
+.topbar .wrap { display: flex; justify-content: space-between; gap: 1rem; padding-block: .55rem; flex-wrap: wrap; }
+.topbar ul { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+.topbar a { text-decoration: none; }
+.topbar a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.topbar :focus-visible { outline-color: var(--white); }
+
+/* Header: logo centered, nav row underneath */
+.header { background: var(--white); position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--rule); }
+.header__top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; padding-block: .9rem; }
+.header__left { display: flex; align-items: center; justify-self: start; }
+.header__right { display: flex; align-items: center; justify-self: end; }
+.logo { display: block; line-height: 0; justify-self: center; }
+.logo svg { height: 52px; width: auto; display: block; }
+.nav { border-top: 1px solid var(--rule); }
+.nav ul { display: flex; justify-content: center; gap: .25rem; padding-block: .35rem; }
+.nav a { display: block; white-space: nowrap; padding: .6rem 1rem; border-radius: 999px; text-decoration: none; font-weight: 700; color: var(--navy); }
+.nav a:hover { background: var(--gray); }
+.search { display: flex; border: 2px solid var(--navy); border-radius: 999px; overflow: hidden; }
+.search input { border: 0; padding: .55rem 1rem; font: inherit; width: 11rem; min-width: 0; background: var(--white); color: var(--charcoal); }
+.search input:focus-visible { outline-offset: -3px; }
+.search button { border: 0; background: var(--navy); color: var(--white); padding: 0 1rem; cursor: pointer; font-weight: 700; }
+.search button:hover { background: var(--orange); }
+.cart { display: inline-flex; align-items: center; gap: .4rem; font-weight: 700; color: var(--navy); text-decoration: none; padding: .5rem .25rem; }
+.cart:hover { color: var(--orange); }
+.menu-btn { display: none; background: var(--navy); color: var(--white); border: 0; border-radius: 999px; padding: .65rem 1.1rem; font: 700 1rem var(--font-body); cursor: pointer; }
+.footer-logo { display: inline-block; line-height: 0; margin-bottom: 1.2rem; }
+.footer-logo svg { height: 52px; width: auto; display: block; }
+
+/* Hero */
+.hero { padding: clamp(2.5rem, 6vw, 5rem) 0 clamp(4.5rem, 8vw, 6.5rem); }
+.hero .wrap { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
+.hero h1 { font-size: clamp(2.5rem, 6vw, 4.6rem); font-weight: 800; }
+.hero p.lead { margin-top: 1.25rem; font-size: 1.25rem; max-width: 34ch; }
+.hero .actions { margin-top: 2rem; display: flex; gap: .9rem; flex-wrap: wrap; }
+
+/* The exercise-book page (the one memorable element) */
+.book {
+  position: relative; background-color: var(--white); border-radius: 6px 12px 12px 6px; padding: 1.4rem 1.6rem 1.6rem 4.4rem;
+  transform: rotate(1.4deg); box-shadow: 0 1px 0 var(--rule), 0 18px 40px -18px rgba(11, 31, 58, .45), -6px 0 0 -2px var(--navy);
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 47px, var(--rule) 47px, var(--rule) 48px);
+  background-position: 0 3.75rem;
+}
+.book::before { content: ""; position: absolute; left: 3.3rem; top: 0; bottom: 0; width: 2px; background: var(--orange); }
+.book__title { font: 800 1.15rem/1.2 var(--font-head); color: var(--navy); height: 3.25rem; display: flex; align-items: center; letter-spacing: -.01em; }
+.book ul { margin-top: .5rem; }
+.book li { height: 48px; display: flex; align-items: center; gap: .9rem; font: 600 1.7rem/1 var(--font-hand); color: var(--navy); }
+.tick { flex: none; width: 26px; height: 26px; border: 2px solid var(--navy); border-radius: 6px; display: grid; place-items: center; }
+.tick svg { width: 20px; height: 20px; stroke: var(--orange); stroke-width: 3.5; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 26; stroke-dashoffset: 0; }
+.book li:nth-child(n) .tick svg { animation: draw .5s ease-out both; }
+.book li:nth-child(1) .tick svg { animation-delay: .5s; }
+.book li:nth-child(2) .tick svg { animation-delay: 1s; }
+.book li:nth-child(3) .tick svg { animation-delay: 1.5s; }
+.book li:nth-child(4) .tick svg { animation-delay: 2s; }
+.book li:nth-child(5) .tick svg { animation-delay: 2.5s; }
+.book li:nth-child(6) .tick svg { animation-delay: 3s; }
+@keyframes draw { from { stroke-dashoffset: 26; } to { stroke-dashoffset: 0; } }
+.book__note { margin-top: .6rem; font-size: .9375rem; color: var(--charcoal); }
+.book__note a { color: var(--navy); font-weight: 700; }
+
+/* Find my list band */
+.finder { margin-top: calc(-1 * clamp(2.6rem, 5vw, 3.6rem)); position: relative; z-index: 2; }
+.finder__card { background: var(--gray); border-radius: var(--radius); padding: clamp(1.25rem, 3vw, 2rem); display: grid; grid-template-columns: 1fr 1.5fr; gap: 1.5rem 2rem; align-items: center; border: 1px solid var(--rule); }
+.finder h2 { font-size: clamp(1.5rem, 3vw, 2rem); }
+.finder p { margin-top: .4rem; }
+.finder form { display: flex; gap: .8rem; flex-wrap: wrap; }
+.finder label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.finder select { flex: 1 1 15rem; min-height: 3rem; border: 2px solid var(--navy); border-radius: 999px; padding: .6rem 1.2rem; font: 500 1rem var(--font-body); background: var(--white); color: var(--charcoal); }
+
+/* Sections */
+section { padding-block: clamp(3.5rem, 7vw, 6rem); }
+.section-head { max-width: 40rem; margin-bottom: 2.2rem; }
+.section-head h2 { font-size: clamp(1.9rem, 4vw, 3rem); }
+.section-head p { margin-top: .7rem; font-size: 1.125rem; }
+
+/* Categories */
+.cats { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 210px; gap: 1rem; }
+.cat { position: relative; border-radius: var(--radius); overflow: hidden; background: var(--navy); color: var(--white); text-decoration: none; display: flex; align-items: flex-end; padding: 1.2rem; isolation: isolate; }
+.cat img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform .5s; }
+.cat::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(to top, rgba(11, 31, 58, .88), rgba(11, 31, 58, 0) 65%); }
+.cat:hover img { transform: scale(1.04); }
+.cat h3 { color: var(--white); font-size: 1.4rem; }
+.cat span { display: block; font-size: .95rem; margin-top: .25rem; opacity: .95; }
+.cat--big { grid-column: span 3; grid-row: span 2; }
+.cat--big h3 { font-size: clamp(1.8rem, 3vw, 2.4rem); }
+.cat--mid { grid-column: span 3; }
+.cat--small { grid-column: span 3; }
+.cat--tile { background: var(--navy); }
+.cat--tile::after { display: none; }
+.cat--tile svg { position: absolute; right: 1.2rem; top: 1.2rem; width: 54px; height: 54px; stroke: var(--white); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.cat:focus-visible { outline-color: var(--orange); }
+
+/* Signature pack (with Coding Clubs Kenya) */
+.signature { background: var(--gray); }
+.signature .wrap { display: grid; grid-template-columns: 1fr 1.05fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
+.signature h2 { font-size: clamp(2rem, 4.5vw, 3.3rem); }
+.signature .lead { margin-top: 1rem; font-size: 1.15rem; max-width: 40ch; }
+.signature .about { margin-top: .9rem; max-width: 46ch; }
+.tracks { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.4rem; }
+.tracks li { border: 1.5px solid var(--navy); color: var(--navy); background: var(--white); border-radius: 999px; padding: .35rem .95rem; font-weight: 500; font-size: .975rem; }
+.signature .actions { margin-top: 1.8rem; display: flex; gap: .9rem; flex-wrap: wrap; }
+.code { position: relative; background-color: var(--navy); color: var(--white); border-radius: var(--radius); padding: 2.4rem 1.5rem 1.6rem 4.4rem;
+  font: 500 1.02rem/2.1rem ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(2.1rem - 1px), rgba(255, 255, 255, .12) calc(2.1rem - 1px), rgba(255, 255, 255, .12) 2.1rem);
+  background-position: 0 2.4rem; box-shadow: 0 18px 40px -20px rgba(11, 31, 58, .55); overflow: hidden; }
+.code::before { content: ""; position: absolute; left: 3.3rem; top: 0; bottom: 0; width: 3px; background: var(--orange); }
+.code__badge { position: absolute; top: 0; left: 4.4rem; background: var(--orange); color: var(--white); font: 700 .9rem/1 var(--font-body); padding: .55rem 1rem; border-radius: 0 0 10px 10px; }
+.code pre { margin: 0; font: inherit; white-space: pre; overflow-x: auto; }
+.code .c { color: rgba(255, 255, 255, .6); }
+.code .k { color: var(--orange); font-weight: 700; }
+.code .s { color: var(--white); }
+
+/* Steps (a real sequence, so numbered) */
+.steps-band { background: var(--gray); }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; counter-reset: s; }
+.steps li { counter-increment: s; border-top: 3px solid var(--orange); padding-top: 1.1rem; }
+.steps li::before { content: counter(s); display: block; font: 800 3rem/1 var(--font-head); color: var(--orange); margin-bottom: .6rem; }
+.steps h3 { color: var(--navy); font-size: 1.35rem; }
+.steps p { margin-top: .5rem; max-width: 30ch; }
+
+/* Dark call-out */
+.callout { background: var(--orange); color: var(--white); }
+.callout .wrap { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
+.callout h2 { color: var(--white); font-size: clamp(2rem, 4.5vw, 3.4rem); }
+.callout p { margin-top: 1rem; font-size: 1.2rem; max-width: 36ch; font-weight: 500; }
+.callout .btn { margin-top: 1.8rem; }
+.callout .btn:hover { background: var(--white); color: var(--navy); border-color: var(--white); }
+.callout :focus-visible { outline-color: var(--white); }
+.callout img { border-radius: var(--radius); aspect-ratio: 4 / 3; object-fit: cover; width: 100%; }
+
+/* Schools */
+.schools ul { display: flex; flex-wrap: wrap; gap: .6rem; }
+.schools li { border: 1.5px solid var(--navy); color: var(--navy); border-radius: 999px; padding: .45rem 1.1rem; font-weight: 500; }
+
+/* Footer */
+.footer { background: var(--orange); color: var(--white); padding-block: 3.5rem 2rem; }
+.footer :focus-visible { outline-color: var(--white); }
+.footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 2.5rem; }
+.footer h2 { color: var(--white); font-size: 1.3rem; margin-bottom: 1rem; }
+.footer li + li { margin-top: .5rem; }
+.footer a { text-decoration: none; font-weight: 500; }
+.footer a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.footer .legal { margin-top: 2.5rem; padding-top: 1.4rem; border-top: 1px solid rgba(255, 255, 255, .45); display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-weight: 500; }
+.footer .legal ul { display: flex; gap: 1.25rem; }
+.footer .legal li + li { margin-top: 0; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .menu-btn { display: inline-flex; }
+  .search { display: none; }
+  .nav { display: none; padding: 0 1.25rem .8rem; }
+  .nav.is-open { display: block; }
+  .nav ul { flex-direction: column; align-items: stretch; }
+}
+@media (max-width: 900px) {
+  .hero .wrap, .callout .wrap, .signature .wrap { grid-template-columns: 1fr; }
+  .book { max-width: 30rem; }
+  .finder__card { grid-template-columns: 1fr; }
+  .steps { grid-template-columns: 1fr; }
+  .footer .cols { grid-template-columns: 1fr 1fr; }
+  .footer .cols > :first-child { grid-column: 1 / -1; }
+}
+@media (max-width: 640px) {
+  .header__top { gap: .5rem; }
+  .topbar { font-size: .85rem; }
+  .topbar ul { gap: .8rem; justify-content: center; }
+  .logo svg { height: 34px; }
+  .menu-btn { padding: .55rem .85rem; font-size: .9rem; }
+  .cart .cart-label { display: none; }
+  .footer-logo svg { height: 44px; }
+  .cats { grid-template-columns: 1fr 1fr; grid-auto-rows: 170px; }
+  .cat--big { grid-column: 1 / -1; grid-row: span 2; }
+  .cat--mid, .cat--small { grid-column: span 1; }
+  .cat h3 { font-size: 1.15rem; }
+  .cat span { display: none; }
+  .book { padding-left: 3.6rem; }
+  .code { padding-left: 3.6rem; font-size: .9rem; }
+  .code::before { left: 2.6rem; }
+  .code__badge { left: 3.6rem; }
+  .book::before { left: 2.6rem; }
+  .book li { font-size: 1.5rem; }
+  .footer .cols { grid-template-columns: 1fr; }
+  .topbar .wrap { justify-content: center; text-align: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .book li .tick svg { animation: none !important; }
+  .cat img { transition: none; }
+}
+
+/* ---- Shop page ---- */
+.shop-hero { background: var(--gray); padding-block: clamp(2rem, 5vw, 3.2rem); }
+.shop-hero h1 { color: var(--orange); font-size: clamp(2rem, 4.5vw, 2.9rem); }
+.crumbs { font-size: .9rem; color: var(--charcoal); margin-bottom: .6rem; }
+.crumbs a { color: var(--navy); text-decoration: none; font-weight: 700; }
+.crumbs a:hover { text-decoration: underline; }
+.shop-hero p { margin-top: .5rem; max-width: 48ch; }
+
+.shop { padding-block: clamp(2.2rem, 5vw, 3.5rem); }
+.shop-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.6rem; }
+.pills { display: flex; flex-wrap: wrap; gap: .55rem; }
+.pill { border: 1.5px solid var(--navy); background: var(--white); color: var(--navy); border-radius: 999px; padding: .5rem 1.1rem; font: 700 .9375rem var(--font-body); cursor: pointer; }
+.pill:hover { background: var(--gray); }
+.pill.is-active { background: var(--navy); color: var(--white); }
+.sort { display: flex; align-items: center; gap: .6rem; font-weight: 700; color: var(--navy); font-size: .9375rem; }
+.sort select { border: 2px solid var(--navy); border-radius: 999px; padding: .5rem 1rem; font: 500 .9375rem var(--font-body); color: var(--charcoal); background: var(--white); }
+.count { font-size: .9375rem; color: var(--charcoal); margin-bottom: 1.2rem; }
+
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.6rem 1.3rem; }
+.product { display: flex; flex-direction: column; }
+.product__img { position: relative; display: block; border-radius: var(--radius); overflow: hidden; background: var(--gray); aspect-ratio: 1 / 1; }
+.product__img img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s; }
+.product:hover .product__img img { transform: scale(1.045); }
+.p-badge { position: absolute; top: .7rem; left: .7rem; z-index: 1; background: var(--orange); color: var(--white); font: 700 .78rem/1 var(--font-body); padding: .4rem .7rem; border-radius: 999px; }
+.product__cat { margin-top: .9rem; font-size: .8125rem; color: var(--charcoal); opacity: .7; text-transform: uppercase; letter-spacing: .04em; }
+.product__name { margin-top: .25rem; font: 700 1.0625rem/1.3 var(--font-body); color: var(--navy); }
+.product__name a { text-decoration: none; }
+.product__name a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.product__price { margin-top: .45rem; font-weight: 700; color: var(--orange); }
+.product__price span { font-size: 1.05rem; }
+.p-old { color: var(--charcoal); opacity: .55; font-weight: 500; }
+.product__add { margin-top: .8rem; min-height: 2.6rem; padding: .5rem 1rem; font-size: .9rem; align-self: flex-start; }
+.product[hidden] { display: none; }
+
+.empty { text-align: center; padding: 3rem 1rem; color: var(--charcoal); }
+.empty[hidden] { display: none; }
+
+.pagination { display: flex; justify-content: center; gap: .5rem; margin-top: 2.6rem; }
+.pagination a, .pagination span { min-width: 2.6rem; min-height: 2.6rem; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; border: 1.5px solid var(--rule); text-decoration: none; color: var(--navy); font-weight: 700; }
+.pagination a:hover { background: var(--gray); }
+.pagination .is-current { background: var(--navy); border-color: var(--navy); color: var(--white); }
+
+@media (max-width: 900px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 640px) {
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 1.1rem .8rem; }
+  .shop-bar { flex-direction: column; align-items: stretch; }
+  .pills { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: .4rem; max-width: 100%; }
+  .pill { flex: none; }
+  .sort { max-width: 100%; }
+  .sort select { max-width: 100%; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="topbar">
+  <div class="wrap">
+    <p><a href="tel:+254110600141">(+254) 0110 600 141</a> &nbsp;Mon–Fri, 8am to 6pm</p>
+    <ul>
+      <li><a href="/track-your-order/">Track your order</a></li>
+      <li><a href="/supplier-portal">Supplier portal</a></li>
+      <li><a href="/contact/">Help</a></li>
+      <li><a href="/my-account/">Log in</a></li>
+    </ul>
+  </div>
+</div>
+
+<header class="header">
+  <div class="wrap header__top">
+    <div class="header__left">
+      <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="nav">Menu</button>
+      <form class="search" role="search" action="/" method="get">
+        <input type="search" name="s" placeholder="Search" aria-label="Search products">
+        <input type="hidden" name="post_type" value="product">
+        <button type="submit">Search</button>
+      </form>
+    </div>
+    <a class="logo" href="/" aria-label="Learning Pack home"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.1 64" role="img" aria-label="Learning Pack">
+  <title>Learning Pack</title>
+  <g transform="translate(0 0) scale(1.0)">
+    <clipPath id="ccolor00"><rect width="64" height="64" rx="14"/></clipPath>
+    <rect width="64" height="64" rx="14" fill="#0B1F3A"/>
+    <g clip-path="url(#ccolor00)">
+      <g stroke="#FFFFFF" stroke-opacity="0.22" stroke-width="1.6">
+        <path d="M0 22H64M0 34H64M0 46H64M0 58H64"/>
+      </g>
+      <rect x="18.5" y="0" width="3.2" height="64" fill="#E63B00"/>
+    </g>
+    <path d="M27.5 27.5l6 6L47.5 15" fill="none" stroke="#FFFFFF" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <path d="M82.12 45.2V18.8H88.56V45.2ZM83.24 45.2V39.72H98.92V45.2Z M111.03999999999999 45.760000000000005Q108.16 45.760000000000005 106.12 44.96000000000001Q104.08 44.160000000000004 102.74 42.72Q101.39999999999999 41.28 100.75999999999999 39.34Q100.12 37.400000000000006 100.12 35.08Q100.12 32.68000000000001 100.78 30.580000000000005Q101.44 28.480000000000004 102.74 26.900000000000006Q104.03999999999999 25.320000000000004 106.0 24.42Q107.96 23.520000000000003 110.6 23.520000000000003Q113.24 23.520000000000003 115.18 24.400000000000002Q117.12 25.28 118.34 26.94Q119.56 28.6 120.0 30.84Q120.44 33.08 120.12 35.800000000000004L104.24 36.0V32.56L115.72 32.36L114.24 34.2Q114.48 32.32 114.1 31.060000000000002Q113.72 29.800000000000004 112.82 29.160000000000004Q111.92 28.520000000000003 110.64 28.520000000000003Q109.2 28.520000000000003 108.24000000000001 29.28Q107.28 30.040000000000003 106.8 31.46Q106.32 32.88 106.32 34.84Q106.32 38.080000000000005 107.56 39.56Q108.8 41.040000000000006 111.03999999999999 41.040000000000006Q112.03999999999999 41.040000000000006 112.72 40.78Q113.4 40.52 113.82 40.06Q114.24 39.6 114.44 38.980000000000004Q114.64 38.36 114.67999999999999 37.64L120.48 38.36Q120.4 39.760000000000005 119.88 41.080000000000005Q119.36 42.400000000000006 118.25999999999999 43.440000000000005Q117.16 44.480000000000004 115.38 45.120000000000005Q113.6 45.760000000000005 111.03999999999999 45.760000000000005Z M128.64 45.760000000000005Q126.96 45.760000000000005 125.56 45.14Q124.16 44.52 123.3 43.22Q122.44 41.92 122.44 39.88Q122.44 38.0 123.18 36.8Q123.92 35.6 125.22 34.88Q126.52 34.160000000000004 128.2 33.74Q129.88 33.32 131.76 33.0Q133.44 32.68000000000001 134.38 32.480000000000004Q135.32 32.28 135.7 31.92Q136.07999999999998 31.560000000000002 136.07999999999998 30.92Q136.07999999999998 29.840000000000003 135.27999999999997 29.180000000000003Q134.48 28.520000000000003 133.0 28.520000000000003Q132.0 28.520000000000003 131.12 28.880000000000003Q130.24 29.240000000000002 129.64 30.020000000000003Q129.04 30.800000000000004 128.92 32.160000000000004L123.2 31.200000000000003Q123.39999999999999 29.040000000000003 124.28 27.560000000000002Q125.16 26.080000000000002 126.56 25.200000000000003Q127.96 24.320000000000004 129.68 23.92Q131.4 23.520000000000003 133.2 23.520000000000003Q136.4 23.520000000000003 138.42000000000002 24.64Q140.44 25.76 141.42000000000002 27.940000000000005Q142.4 30.120000000000005 142.4 33.36V36.88Q142.4 38.28 142.42000000000002 39.660000000000004Q142.44 41.040000000000006 142.5 42.42Q142.56 43.800000000000004 142.6 45.2H136.96Q136.92 44.0 136.83999999999997 42.6Q136.76 41.2 136.72 39.68H136.24Q135.92 41.36 134.88 42.74Q133.84 44.120000000000005 132.26 44.940000000000005Q130.68 45.760000000000005 128.64 45.760000000000005ZM131.4 41.120000000000005Q132.12 41.120000000000005 132.88 40.86Q133.64 40.6 134.32 40.06Q135.0 39.52 135.5 38.620000000000005Q136.0 37.72 136.12 36.480000000000004V34.56L137.07999999999998 34.6Q136.56 35.08 135.74 35.4Q134.92 35.72 134.0 35.88Q133.07999999999998 36.040000000000006 132.16 36.220000000000006Q131.24 36.400000000000006 130.48000000000002 36.7Q129.72 37.0 129.26 37.480000000000004Q128.8 37.96 128.8 38.84Q128.8 39.92 129.56 40.52Q130.32 41.120000000000005 131.4 41.120000000000005Z M145.99999999999997 45.2V34.440000000000005V24.080000000000002H151.44L151.48 31.92H152.04Q152.27999999999997 28.840000000000003 153.01999999999998 27.020000000000003Q153.76 25.200000000000003 154.98 24.400000000000002Q156.2 23.6 157.92 23.6Q158.44 23.6 159.06 23.720000000000002Q159.67999999999998 23.840000000000003 160.32 24.12L160.04 31.160000000000004Q159.27999999999997 30.760000000000005 158.47999999999996 30.560000000000002Q157.67999999999998 30.360000000000003 156.99999999999997 30.360000000000003Q155.6 30.360000000000003 154.6 31.040000000000003Q153.6 31.720000000000002 153.06 33.04Q152.51999999999998 34.36 152.44 36.32V45.2Z M162.79999999999998 45.2V32.92V24.080000000000002H168.12L168.16 31.64H168.72Q169.07999999999998 28.880000000000003 169.94 27.080000000000002Q170.79999999999998 25.28 172.27999999999997 24.400000000000002Q173.76 23.520000000000003 175.92 23.520000000000003Q179.48 23.520000000000003 181.3 25.940000000000005Q183.12 28.360000000000003 183.12 33.400000000000006V45.2H176.64V34.160000000000004Q176.64 31.520000000000003 175.85999999999999 30.260000000000005Q175.07999999999998 29.000000000000004 173.48 29.000000000000004Q172.16 29.000000000000004 171.2 29.880000000000003Q170.24 30.760000000000005 169.74 32.480000000000004Q169.24 34.2 169.24 36.800000000000004V45.2Z M186.72 45.2V24.080000000000002H193.16000000000003V45.2ZM189.92000000000002 21.92Q188.08 21.92 187.10000000000002 21.14Q186.12000000000003 20.360000000000003 186.12000000000003 18.880000000000003Q186.12000000000003 17.400000000000002 187.10000000000002 16.620000000000005Q188.08 15.840000000000003 189.92000000000002 15.840000000000003Q191.8 15.840000000000003 192.78000000000003 16.620000000000005Q193.76000000000002 17.400000000000002 193.76000000000002 18.880000000000003Q193.76000000000002 20.360000000000003 192.78000000000003 21.14Q191.8 21.92 189.92000000000002 21.92Z M196.99999999999997 45.2V32.92V24.080000000000002H202.32L202.35999999999999 31.64H202.92Q203.27999999999997 28.880000000000003 204.14 27.080000000000002Q204.99999999999997 25.28 206.47999999999996 24.400000000000002Q207.95999999999998 23.520000000000003 210.11999999999998 23.520000000000003Q213.67999999999998 23.520000000000003 215.5 25.940000000000005Q217.32 28.360000000000003 217.32 33.400000000000006V45.2H210.83999999999997V34.160000000000004Q210.83999999999997 31.520000000000003 210.05999999999997 30.260000000000005Q209.27999999999997 29.000000000000004 207.67999999999998 29.000000000000004Q206.35999999999999 29.000000000000004 205.39999999999998 29.880000000000003Q204.44 30.760000000000005 203.94 32.480000000000004Q203.44 34.2 203.44 36.800000000000004V45.2Z M229.32 52.0Q225.8 52.0 223.64 51.44Q221.48 50.88 220.51999999999998 49.88Q219.56 48.88 219.56 47.480000000000004Q219.56 45.68 220.98000000000002 44.58Q222.4 43.480000000000004 225.16 43.160000000000004V42.68Q223.04 42.68 221.88 42.1Q220.72 41.52 220.72 40.28Q220.72 39.160000000000004 221.82 38.24Q222.92 37.32 225.44 37.08V36.56Q223.16 36.2 221.82 34.74Q220.48 33.28 220.48 30.92Q220.48 28.92 221.56 27.36Q222.64 25.8 224.77999999999997 24.880000000000003Q226.92 23.96 230.0 23.96H240.72V28.880000000000003L233.72 27.96V28.560000000000002Q236.72 28.96 237.88 29.92Q239.04 30.880000000000003 239.04 32.400000000000006Q239.04 33.92 238.06 35.120000000000005Q237.08 36.32 235.14 37.0Q233.2 37.68 230.36 37.68Q229.68 37.68 228.92000000000002 37.620000000000005Q228.16 37.56 227.12 37.400000000000006Q226.44 37.800000000000004 226.07999999999998 38.120000000000005Q225.72 38.440000000000005 225.72 38.760000000000005Q225.72 39.0 225.88 39.120000000000005Q226.04 39.24 226.38 39.3Q226.72 39.36 227.16 39.36H233.56Q234.4 39.36 235.66000000000003 39.46Q236.92000000000002 39.56 238.2 40.06Q239.48 40.56 240.36 41.72Q241.24 42.88 241.24 45.040000000000006Q241.24 47.400000000000006 239.94 48.96000000000001Q238.64 50.52 236.01999999999998 51.260000000000005Q233.4 52.0 229.32 52.0ZM229.68 46.56Q232.2 46.56 233.48 46.36Q234.76 46.160000000000004 235.22 45.74Q235.68 45.32 235.68 44.760000000000005Q235.68 44.120000000000005 235.36 43.760000000000005Q235.04 43.400000000000006 234.57999999999998 43.260000000000005Q234.12 43.120000000000005 233.66 43.080000000000005Q233.2 43.040000000000006 232.92 43.040000000000006H227.6Q226.24 43.32 225.68 43.84Q225.12 44.36 225.12 45.040000000000006Q225.12 45.68 225.64 46.0Q226.16 46.32 227.18 46.44Q228.2 46.56 229.68 46.56ZM229.96 34.28Q231.44 34.28 232.2 33.44Q232.96 32.6 232.96 31.200000000000003Q232.96 29.720000000000002 232.18 28.82Q231.4 27.92 229.96 27.92Q228.52 27.92 227.7 28.82Q226.88 29.720000000000002 226.88 31.200000000000003Q226.88 32.120000000000005 227.24 32.82000000000001Q227.6 33.52 228.28 33.900000000000006Q228.96 34.28 229.96 34.28Z" fill="#0B1F3A"/>
+  <path d=" M257.36 37.84V32.72H262.68Q265.2 32.72 266.41999999999996 31.700000000000003Q267.64 30.680000000000003 267.64 28.28Q267.64 26.080000000000002 266.52 24.980000000000004Q265.4 23.880000000000003 263.0 23.880000000000003H257.36V18.8H263.28Q265.68 18.8 267.70000000000005 19.36Q269.72 19.92 271.18 21.1Q272.64 22.28 273.44 24.060000000000002Q274.24 25.840000000000003 274.24 28.320000000000004Q274.24 31.440000000000005 272.82 33.56Q271.4 35.68000000000001 268.67999999999995 36.760000000000005Q265.96 37.84 261.96 37.84ZM252.56 45.2V18.8H259.0V45.2Z M281.8 45.760000000000005Q280.12 45.760000000000005 278.72 45.14Q277.32000000000005 44.52 276.46000000000004 43.22Q275.6 41.92 275.6 39.88Q275.6 38.0 276.34000000000003 36.8Q277.08000000000004 35.6 278.38 34.88Q279.68 34.160000000000004 281.36 33.74Q283.04 33.32 284.92 33.0Q286.6 32.68000000000001 287.54 32.480000000000004Q288.48 32.28 288.86 31.92Q289.24 31.560000000000002 289.24 30.92Q289.24 29.840000000000003 288.44000000000005 29.180000000000003Q287.64000000000004 28.520000000000003 286.16 28.520000000000003Q285.16 28.520000000000003 284.28000000000003 28.880000000000003Q283.40000000000003 29.240000000000002 282.80000000000007 30.020000000000003Q282.20000000000005 30.800000000000004 282.08000000000004 32.160000000000004L276.36 31.200000000000003Q276.56 29.040000000000003 277.44000000000005 27.560000000000002Q278.32000000000005 26.080000000000002 279.72 25.200000000000003Q281.12 24.320000000000004 282.84000000000003 23.92Q284.56 23.520000000000003 286.36 23.520000000000003Q289.56 23.520000000000003 291.58000000000004 24.64Q293.6 25.76 294.58000000000004 27.940000000000005Q295.56 30.120000000000005 295.56 33.36V36.88Q295.56 38.28 295.58000000000004 39.660000000000004Q295.6 41.040000000000006 295.66 42.42Q295.72 43.800000000000004 295.76000000000005 45.2H290.12Q290.08000000000004 44.0 290.0 42.6Q289.92 41.2 289.88 39.68H289.40000000000003Q289.08000000000004 41.36 288.04 42.74Q287.0 44.120000000000005 285.42 44.940000000000005Q283.84000000000003 45.760000000000005 281.8 45.760000000000005ZM284.56 41.120000000000005Q285.28000000000003 41.120000000000005 286.04 40.86Q286.8 40.6 287.48 40.06Q288.16 39.52 288.66 38.620000000000005Q289.16 37.72 289.28000000000003 36.480000000000004V34.56L290.24 34.6Q289.72 35.08 288.90000000000003 35.4Q288.08000000000004 35.72 287.16 35.88Q286.24 36.040000000000006 285.32000000000005 36.220000000000006Q284.40000000000003 36.400000000000006 283.64 36.7Q282.88 37.0 282.42 37.480000000000004Q281.96000000000004 37.96 281.96000000000004 38.84Q281.96000000000004 39.92 282.72 40.52Q283.48 41.120000000000005 284.56 41.120000000000005Z M309.2 45.760000000000005Q306.40000000000003 45.760000000000005 304.34000000000003 44.940000000000005Q302.28000000000003 44.120000000000005 300.94000000000005 42.64Q299.6 41.160000000000004 298.94000000000005 39.18000000000001Q298.28000000000003 37.2 298.28000000000003 34.88Q298.28000000000003 32.52 298.94000000000005 30.480000000000004Q299.6 28.44 300.94000000000005 26.86Q302.28000000000003 25.28 304.3 24.400000000000002Q306.32 23.520000000000003 309.08 23.520000000000003Q312.12 23.520000000000003 314.12 24.6Q316.12 25.680000000000003 317.1 27.46Q318.08 29.240000000000002 318.08 31.440000000000005L312.36 32.56Q312.32 31.160000000000004 311.88 30.260000000000005Q311.44 29.360000000000003 310.65999999999997 28.940000000000005Q309.88 28.520000000000003 308.84000000000003 28.520000000000003Q307.88 28.520000000000003 307.12 28.900000000000002Q306.36 29.28 305.86 30.040000000000003Q305.36 30.800000000000004 305.08000000000004 31.94Q304.8 33.08 304.8 34.6Q304.8 36.64 305.3 38.08Q305.8 39.52 306.8 40.260000000000005Q307.8 41.0 309.28000000000003 41.0Q310.8 41.0 311.6 40.32Q312.40000000000003 39.64 312.72 38.6Q313.04 37.56 312.96000000000004 36.56L318.76 37.24Q318.84000000000003 38.88 318.34000000000003 40.42Q317.84000000000003 41.96 316.68 43.16Q315.52 44.36 313.65999999999997 45.06Q311.8 45.760000000000005 309.2 45.760000000000005Z M321.28000000000003 45.2V16.840000000000003H327.6V32.160000000000004Q328.84000000000003 31.360000000000003 329.84000000000003 30.42Q330.84000000000003 29.480000000000004 331.6 28.440000000000005Q332.36 27.400000000000002 332.9 26.300000000000004Q333.44 25.200000000000003 333.84000000000003 24.080000000000002H341.24Q340.76 25.680000000000003 339.9 27.180000000000003Q339.04 28.680000000000003 337.78000000000003 29.980000000000004Q336.52000000000004 31.28 334.84000000000003 32.28Q333.16 33.28 331.08000000000004 33.800000000000004V34.28Q333.76 33.84 335.46000000000004 34.24Q337.16 34.64 338.16 35.620000000000005Q339.16 36.6 339.70000000000005 38.0Q340.24 39.400000000000006 340.56 40.92L341.44 45.2H334.44L334.04 42.36Q333.76 40.760000000000005 333.38 39.52Q333.0 38.28 332.1 37.540000000000006Q331.2 36.800000000000004 329.44 36.800000000000004H327.6V45.2Z" fill="#E63B00"/>
+</svg></a>
+    <div class="header__right">
+      <a class="cart" href="/cart/">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.2a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L20.5 8H6"/></svg>
+        <span class="cart-label">Cart</span>
+      </a>
+    </div>
+  </div>
+  <nav class="nav" id="nav" aria-label="Main">
+    <div class="wrap">
+      <ul>
+        <li><a href="/shop/" aria-current="page">Shop</a></li>
+        <li><a href="/find-my-school-list/">Find my school list</a></li>
+        <li><a href="/upload-my-list/">Upload my list</a></li>
+        <li><a href="#signature">Signature pack</a></li>
+        <li><a href="/track-your-order/">Track your order</a></li>
+        <li><a href="/contact/">Contact us</a></li>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <div class="shop-hero">
+    <div class="wrap">
+      <p class="crumbs"><a href="/">Home</a> / Shop</p>
+      <h1>Shop all products</h1>
+      <p>Stationery, text books, desk accessories, electronics and ready-made student boxes — everything on the list, in one place.</p>
+    </div>
+  </div>
+
+  <section class="shop">
+    <div class="wrap">
+      <div class="shop-bar">
+        <ul class="pills" role="group" aria-label="Filter by category">
+        <li><button class="pill is-active" data-filter="All" type="button">All</button></li>
+        <li><button class="pill" data-filter="Student boxes" type="button">Student boxes</button></li>
+        <li><button class="pill" data-filter="Stationery" type="button">Stationery</button></li>
+        <li><button class="pill" data-filter="Text books" type="button">Text books</button></li>
+        <li><button class="pill" data-filter="Desk accessories" type="button">Desk accessories</button></li>
+        <li><button class="pill" data-filter="Electronics and computers" type="button">Electronics and computers</button></li>
+        </ul>
+        <div class="sort">
+          <label for="sort">Sort by</label>
+          <select id="sort">
+            <option value="default">Featured</option>
+            <option value="price-asc">Price: low to high</option>
+            <option value="price-desc">Price: high to low</option>
+            <option value="name-asc">Name: A–Z</option>
+          </select>
+        </div>
+      </div>
+
+      <p class="count" id="count">12 products</p>
+
+      <div class="grid" id="grid">
+      <article class="product" data-cat="Stationery">
+        <a class="product__img" href="/product/" aria-label="Exercise Book – 96 Page (5 pack)">
+          
+          <img src="https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?auto=format&fit=crop&q=75&w=600&h=600" srcset="https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?auto=format&fit=crop&q=75&w=400&h=400 400w, https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?auto=format&fit=crop&q=75&w=600&h=600 600w, https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?auto=format&fit=crop&q=75&w=900&h=900 900w" sizes="(max-width: 640px) 44vw, 260px" alt="" loading="lazy" width="600" height="600">
+        </a>
+        <p class="product__cat">Stationery</p>
+        <h3 class="product__name"><a href="/product/">Exercise Book – 96 Page (5 pack)</a></h3>
+        <p class="product__price"><span>KSh 450</span></p>
+        <button class="btn product__add" type="button">Add to cart</button>
+      </article>
+      <article class="product" data-cat="Stationery">
+        <a class="product__img" href="/product/" aria-label="HB Pencils (12 pack)">
+          <span class="p-badge">Sale</span>
+          <img src="https://images.unsplash.com/photo-1583485088034-697b5bd54333?auto=format&fit=crop&q=75&w=600&h=600" srcset="https://images.unsplash.com/photo-1583485088034-697b5bd54333?auto=format&fit=crop&q=75&w=400&h=400 400w, https://images.unsplash.com/photo-1583485088034-697b5bd54333?auto=format&fit=crop&q=75&w=600&h=600 600w, https://images.unsplash.com/photo-1583485088034-697b5bd54333?auto=format&fit=crop&q=75&w=900&h=900 900w" sizes="(max-width: 640px) 44vw, 260px" alt="" loading="lazy" width="600" height="600">
+        </a>
+        <p class="product__cat">Stationery</p>
+        <h3 class="product__name"><a href="/product/">HB Pencils (12 pack)</a></h3>
+        <p class="product__price"><s class="p-old">KSh 300</s> <span>KSh 250</span></p>
+        <button class="btn product__add" type="button">Add to cart</button>
+      </article>
+      <article class="product" data-cat="Desk accessories">
+        <a class="product__img" href="/product/" aria-label="Geometry Set">
+          <span class="p-badge">New</span>
+          <img src="https://images.unsplash.com/photo-1596496181848-3091d4878b24?auto=format&fit=crop&q=75&w=600&h=600" srcset="https://images.unsplash.com/photo-1596496181848-3091d4878b24?auto=format&fit=crop&q=75&w=400&h=400 400w, https://images.unsplash.com/photo-1596496181848-3091d4878b24?auto=format&fit=crop&q=75&w=600&h=600 600w, https://images.unsplash.com/photo-1596496181848-3091d4878b24?auto=format&fit=crop&q=75&w=900&h=900 900w" sizes="(max-width: 640px) 44vw, 260px" alt="" loading="lazy" width="600" height="600">
+        </a>
+        <p class="product__cat">Desk accessories</p>
+        <h3 class="product__name"><a href="/product/">Geometry Set</a></h3>
+        <p class="product__price"><span>KSh 380</span></p>
+        <button class="btn product__add" type="button">Add to cart</button>
+      </article>
+      <article class="product" data-cat="Stationery">
+        <a class="product__img" href="/product/" aria-label="30cm Ruler">
+          
+          <img src="https://images.unsplash.com/photo-1522204523234-8529aa6ea3f5?auto=format&fit=crop&q=75&w=600&h=600" srcset="https://images.unsplash.com/photo-1522204523234-8529aa6ea3f5?auto=format&fit=crop&q=75&w=400&h=400 400w, https://images.unsplash.com/photo-1522204523234-8529aa6ea3f5?auto=format&fit=crop&q=75&w=600&h=600 600w, https://images.unsplash.com/photo-1522204523234-8529aa6ea3f5?auto=format&fit=crop&q=75&w=900&h=900 900w" sizes="(max-width: 640px) 44vw, 260px" alt="" loading="lazy" width="600" height="600">
+        </a>
+        <p class="product__cat">Stationery</p>
+        <h3 class="product__name"><a href="/product/">30cm Ruler</a></h3>
+        <p class="product__price"><span>KSh 80</span></p>
+        <button class="btn product__add" type="button">Add to cart</button>
+      </article>
+      <article class="product" data-cat="Stationery">
+        <a class="product__img" href="/product/" aria-label="Coloured Pencils (24 pack)">
+          
+          <img src="https://images.unsplash.com/photo-1499892477393-f675706cbe6e?auto=format&fit=crop&q=75&w=600&h=600" srcset="https://images.unsplash.com/photo-1499892477393-f675706cbe6e?auto=format&fit=crop&q=75&w=400&h=400 400w, https://images.unsplash.com/photo-1499892477393-f675706cbe6e?auto=format&fit=crop&q=75&w=600&h=600 600w, https://images.unsplash.com/photo-1499892477393-f675706cbe6e?auto=format&fit=crop&q=75&w=900&h=900 900w" sizes="(max-width: 640px) 44vw, 260px" alt="" loading="lazy" width="600" height="600">
+        </a>
+        <p class="product__cat">Stationery</p>
+        <h3 class="product__name"><a href="/product/">Coloured Pencils (24 pack)</a></h3>
+        <p class="product__price"><span>KSh 620</span></p>
+        <button class="btn product__add" type="button">Add to cart</button>
+      </article>
+      <article class="product" data-cat="Electronics and computers">
+        <a class="product__img" href="/product/" aria-label="Scientific Calculator">
+          <span class="p-badge">Sale</span>
+          <img src="https://images.unsplash.com/photo-1587145820266-a5951ee6f620?auto=format&fit=crop&q=75&w=600&h=600" srcset="https://images.unsplash.com/photo-1587145820266-a5951ee6f620?auto=format&fit=crop&q=75&w=400&h=400 400w, https://images.unsplash.com/photo-1587145820266-a5951ee6f620?auto=format&fit=crop&q=75&w=600&h=600 600w, https://images.unsplash.com/photo-1587145820266-a5951ee6f620?auto=format&fit=crop&q=75&w=900&h=900 900w" sizes="(max-width: 640px) 44vw, 260px" alt="" loading="lazy" width="600" height="600">
+        </a>
+        <p class="product__cat">Electronics and computers</p>
+        <h3 class="product__name"><a href="/product/">Scientific Calculator</a></h3>
+        <p class="product__price"><s class="p-old">KSh 1,650</s> <span>KSh 1,450</span></p>
+        <button class="btn product__add" type="button">Add to cart</button>
+      </article>
+      <article class="product" data-cat="Desk accessories">
+        <a class="product__img" href="/product/" aria-label="School Backpack">
+          
+          <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=75&w=600&h=600" srcset="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=75&w=400&h=400 400w, https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=75&w=600&h=600 600w, https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=75&w=900&h=900 900w" sizes="(max-width: 640px) 44vw, 260px" alt="" loading="lazy" width="600" height="600">
+        </a>
+        <p class="product__cat">Desk accessories</p>
+        <h3 class="product__name"><a href="/product/">School Backpack</a></h3>
+        <p class="product__price"><span>KSh 2,200</span></p>
+        <button class="btn product__add" type="button">Add to cart</button>
+      </article>
+      <article class="product" data-cat="Stationery">
+        <a class="product__img" href="/product/" aria-label="A4 Ruled Notebook (3 pack)">
+          
+          <img src="https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&q=75&w=600&h=600" srcset="https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&q=75&w=400&h=400 400w, https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&q=75&w=600&h=600 600w, https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&q=75&w=900&h=900 900w" sizes="(max-width: 640px) 44vw, 260px" alt="" loading="lazy" width="600" height="600">
+        </a>
+        <p class="product__cat">Stationery</p>
+        <h3 class="product__name"><a href="/product/">A4 Ruled Notebook (3 pack)</a></h3>
+        <p class="product__price"><span>KSh 390</span></p>
+        <button class="btn product__add" type="button">Add to cart</button>
+      </article>
+      <article class="product" data-cat="Stationery">
+        <a class="product__img" href="/product/" aria-label="Water Colour Paint Set">
+          
+          <img src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=75&w=600&h=600" srcset="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=75&w=400&h=400 400w, https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=75&w=600&h=600 600w, https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=75&w=900&h=900 900w" sizes="(max-width: 640px) 44vw, 260px" alt="" loading="lazy" width="600" height="600">
+        </a>
+        <p class="product__cat">Stationery</p>
+        <h3 class="product__name"><a href="/product/">Water Colour Paint Set</a></h3>
+        <p class="product__price"><span>KSh 540</span></p>
+        <button class="btn product__add" type="button">Add to cart</button>
+      </article>
+      <article class="product" data-cat="Student boxes">
+        <a class="product__img" href="/product/" aria-label="Grade 4 Student Box">
+          <span class="p-badge">Popular</span>
+          <img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&q=75&w=600&h=600" srcset="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&q=75&w=400&h=400 400w, https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&q=75&w=600&h=600 600w, https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&q=75&w=900&h=900 900w" sizes="(max-width: 640px) 44vw, 260px" alt="" loading="lazy" width="600" height="600">
+        </a>
+        <p class="product__cat">Student boxes</p>
+        <h3 class="product__name"><a href="/product/">Grade 4 Student Box</a></h3>
+        <p class="product__price"><span>KSh 5,200</span></p>
+        <button class="btn product__add" type="button">Add to cart</button>
+      </article>
+      <article class="product" data-cat="Desk accessories">
+        <a class="product__img" href="/product/" aria-label="Stapler & Pins Set">
+          
+          <img src="https://images.unsplash.com/photo-1585336261022-680e295ce3fe?auto=format&fit=crop&q=75&w=600&h=600" srcset="https://images.unsplash.com/photo-1585336261022-680e295ce3fe?auto=format&fit=crop&q=75&w=400&h=400 400w, https://images.unsplash.com/photo-1585336261022-680e295ce3fe?auto=format&fit=crop&q=75&w=600&h=600 600w, https://images.unsplash.com/photo-1585336261022-680e295ce3fe?auto=format&fit=crop&q=75&w=900&h=900 900w" sizes="(max-width: 640px) 44vw, 260px" alt="" loading="lazy" width="600" height="600">
+        </a>
+        <p class="product__cat">Desk accessories</p>
+        <h3 class="product__name"><a href="/product/">Stapler & Pins Set</a></h3>
+        <p class="product__price"><span>KSh 320</span></p>
+        <button class="btn product__add" type="button">Add to cart</button>
+      </article>
+      <article class="product" data-cat="Text books">
+        <a class="product__img" href="/product/" aria-label="Maths Text Book – Grade 6">
+          
+          <img src="https://images.unsplash.com/photo-1509266272358-7701da638078?auto=format&fit=crop&q=75&w=600&h=600" srcset="https://images.unsplash.com/photo-1509266272358-7701da638078?auto=format&fit=crop&q=75&w=400&h=400 400w, https://images.unsplash.com/photo-1509266272358-7701da638078?auto=format&fit=crop&q=75&w=600&h=600 600w, https://images.unsplash.com/photo-1509266272358-7701da638078?auto=format&fit=crop&q=75&w=900&h=900 900w" sizes="(max-width: 640px) 44vw, 260px" alt="" loading="lazy" width="600" height="600">
+        </a>
+        <p class="product__cat">Text books</p>
+        <h3 class="product__name"><a href="/product/">Maths Text Book – Grade 6</a></h3>
+        <p class="product__price"><span>KSh 980</span></p>
+        <button class="btn product__add" type="button">Add to cart</button>
+      </article>
+      </div>
+      <p class="empty" id="empty" hidden>No products in this category yet.</p>
+
+      <nav class="pagination" aria-label="Shop pagination">
+        <span class="is-current">1</span>
+        <a href="#">2</a>
+        <a href="#">3</a>
+        <a href="#" aria-label="Next page">Next</a>
+      </nav>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <a class="footer-logo" href="/" aria-label="Learning Pack home"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.1 64" role="img" aria-label="Learning Pack">
+  <title>Learning Pack</title>
+  <g transform="translate(0 0) scale(1.0)">
+    <clipPath id="creverse00"><rect width="64" height="64" rx="14"/></clipPath>
+    <rect width="64" height="64" rx="14" fill="#FFFFFF"/>
+    <g clip-path="url(#creverse00)">
+      <g stroke="#0B1F3A" stroke-opacity="0.16" stroke-width="1.6">
+        <path d="M0 22H64M0 34H64M0 46H64M0 58H64"/>
+      </g>
+      <rect x="18.5" y="0" width="3.2" height="64" fill="#E63B00"/>
+    </g>
+    <path d="M27.5 27.5l6 6L47.5 15" fill="none" stroke="#E63B00" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <path d="M82.12 45.2V18.8H88.56V45.2ZM83.24 45.2V39.72H98.92V45.2Z M111.03999999999999 45.760000000000005Q108.16 45.760000000000005 106.12 44.96000000000001Q104.08 44.160000000000004 102.74 42.72Q101.39999999999999 41.28 100.75999999999999 39.34Q100.12 37.400000000000006 100.12 35.08Q100.12 32.68000000000001 100.78 30.580000000000005Q101.44 28.480000000000004 102.74 26.900000000000006Q104.03999999999999 25.320000000000004 106.0 24.42Q107.96 23.520000000000003 110.6 23.520000000000003Q113.24 23.520000000000003 115.18 24.400000000000002Q117.12 25.28 118.34 26.94Q119.56 28.6 120.0 30.84Q120.44 33.08 120.12 35.800000000000004L104.24 36.0V32.56L115.72 32.36L114.24 34.2Q114.48 32.32 114.1 31.060000000000002Q113.72 29.800000000000004 112.82 29.160000000000004Q111.92 28.520000000000003 110.64 28.520000000000003Q109.2 28.520000000000003 108.24000000000001 29.28Q107.28 30.040000000000003 106.8 31.46Q106.32 32.88 106.32 34.84Q106.32 38.080000000000005 107.56 39.56Q108.8 41.040000000000006 111.03999999999999 41.040000000000006Q112.03999999999999 41.040000000000006 112.72 40.78Q113.4 40.52 113.82 40.06Q114.24 39.6 114.44 38.980000000000004Q114.64 38.36 114.67999999999999 37.64L120.48 38.36Q120.4 39.760000000000005 119.88 41.080000000000005Q119.36 42.400000000000006 118.25999999999999 43.440000000000005Q117.16 44.480000000000004 115.38 45.120000000000005Q113.6 45.760000000000005 111.03999999999999 45.760000000000005Z M128.64 45.760000000000005Q126.96 45.760000000000005 125.56 45.14Q124.16 44.52 123.3 43.22Q122.44 41.92 122.44 39.88Q122.44 38.0 123.18 36.8Q123.92 35.6 125.22 34.88Q126.52 34.160000000000004 128.2 33.74Q129.88 33.32 131.76 33.0Q133.44 32.68000000000001 134.38 32.480000000000004Q135.32 32.28 135.7 31.92Q136.07999999999998 31.560000000000002 136.07999999999998 30.92Q136.07999999999998 29.840000000000003 135.27999999999997 29.180000000000003Q134.48 28.520000000000003 133.0 28.520000000000003Q132.0 28.520000000000003 131.12 28.880000000000003Q130.24 29.240000000000002 129.64 30.020000000000003Q129.04 30.800000000000004 128.92 32.160000000000004L123.2 31.200000000000003Q123.39999999999999 29.040000000000003 124.28 27.560000000000002Q125.16 26.080000000000002 126.56 25.200000000000003Q127.96 24.320000000000004 129.68 23.92Q131.4 23.520000000000003 133.2 23.520000000000003Q136.4 23.520000000000003 138.42000000000002 24.64Q140.44 25.76 141.42000000000002 27.940000000000005Q142.4 30.120000000000005 142.4 33.36V36.88Q142.4 38.28 142.42000000000002 39.660000000000004Q142.44 41.040000000000006 142.5 42.42Q142.56 43.800000000000004 142.6 45.2H136.96Q136.92 44.0 136.83999999999997 42.6Q136.76 41.2 136.72 39.68H136.24Q135.92 41.36 134.88 42.74Q133.84 44.120000000000005 132.26 44.940000000000005Q130.68 45.760000000000005 128.64 45.760000000000005ZM131.4 41.120000000000005Q132.12 41.120000000000005 132.88 40.86Q133.64 40.6 134.32 40.06Q135.0 39.52 135.5 38.620000000000005Q136.0 37.72 136.12 36.480000000000004V34.56L137.07999999999998 34.6Q136.56 35.08 135.74 35.4Q134.92 35.72 134.0 35.88Q133.07999999999998 36.040000000000006 132.16 36.220000000000006Q131.24 36.400000000000006 130.48000000000002 36.7Q129.72 37.0 129.26 37.480000000000004Q128.8 37.96 128.8 38.84Q128.8 39.92 129.56 40.52Q130.32 41.120000000000005 131.4 41.120000000000005Z M145.99999999999997 45.2V34.440000000000005V24.080000000000002H151.44L151.48 31.92H152.04Q152.27999999999997 28.840000000000003 153.01999999999998 27.020000000000003Q153.76 25.200000000000003 154.98 24.400000000000002Q156.2 23.6 157.92 23.6Q158.44 23.6 159.06 23.720000000000002Q159.67999999999998 23.840000000000003 160.32 24.12L160.04 31.160000000000004Q159.27999999999997 30.760000000000005 158.47999999999996 30.560000000000002Q157.67999999999998 30.360000000000003 156.99999999999997 30.360000000000003Q155.6 30.360000000000003 154.6 31.040000000000003Q153.6 31.720000000000002 153.06 33.04Q152.51999999999998 34.36 152.44 36.32V45.2Z M162.79999999999998 45.2V32.92V24.080000000000002H168.12L168.16 31.64H168.72Q169.07999999999998 28.880000000000003 169.94 27.080000000000002Q170.79999999999998 25.28 172.27999999999997 24.400000000000002Q173.76 23.520000000000003 175.92 23.520000000000003Q179.48 23.520000000000003 181.3 25.940000000000005Q183.12 28.360000000000003 183.12 33.400000000000006V45.2H176.64V34.160000000000004Q176.64 31.520000000000003 175.85999999999999 30.260000000000005Q175.07999999999998 29.000000000000004 173.48 29.000000000000004Q172.16 29.000000000000004 171.2 29.880000000000003Q170.24 30.760000000000005 169.74 32.480000000000004Q169.24 34.2 169.24 36.800000000000004V45.2Z M186.72 45.2V24.080000000000002H193.16000000000003V45.2ZM189.92000000000002 21.92Q188.08 21.92 187.10000000000002 21.14Q186.12000000000003 20.360000000000003 186.12000000000003 18.880000000000003Q186.12000000000003 17.400000000000002 187.10000000000002 16.620000000000005Q188.08 15.840000000000003 189.92000000000002 15.840000000000003Q191.8 15.840000000000003 192.78000000000003 16.620000000000005Q193.76000000000002 17.400000000000002 193.76000000000002 18.880000000000003Q193.76000000000002 20.360000000000003 192.78000000000003 21.14Q191.8 21.92 189.92000000000002 21.92Z M196.99999999999997 45.2V32.92V24.080000000000002H202.32L202.35999999999999 31.64H202.92Q203.27999999999997 28.880000000000003 204.14 27.080000000000002Q204.99999999999997 25.28 206.47999999999996 24.400000000000002Q207.95999999999998 23.520000000000003 210.11999999999998 23.520000000000003Q213.67999999999998 23.520000000000003 215.5 25.940000000000005Q217.32 28.360000000000003 217.32 33.400000000000006V45.2H210.83999999999997V34.160000000000004Q210.83999999999997 31.520000000000003 210.05999999999997 30.260000000000005Q209.27999999999997 29.000000000000004 207.67999999999998 29.000000000000004Q206.35999999999999 29.000000000000004 205.39999999999998 29.880000000000003Q204.44 30.760000000000005 203.94 32.480000000000004Q203.44 34.2 203.44 36.800000000000004V45.2Z M229.32 52.0Q225.8 52.0 223.64 51.44Q221.48 50.88 220.51999999999998 49.88Q219.56 48.88 219.56 47.480000000000004Q219.56 45.68 220.98000000000002 44.58Q222.4 43.480000000000004 225.16 43.160000000000004V42.68Q223.04 42.68 221.88 42.1Q220.72 41.52 220.72 40.28Q220.72 39.160000000000004 221.82 38.24Q222.92 37.32 225.44 37.08V36.56Q223.16 36.2 221.82 34.74Q220.48 33.28 220.48 30.92Q220.48 28.92 221.56 27.36Q222.64 25.8 224.77999999999997 24.880000000000003Q226.92 23.96 230.0 23.96H240.72V28.880000000000003L233.72 27.96V28.560000000000002Q236.72 28.96 237.88 29.92Q239.04 30.880000000000003 239.04 32.400000000000006Q239.04 33.92 238.06 35.120000000000005Q237.08 36.32 235.14 37.0Q233.2 37.68 230.36 37.68Q229.68 37.68 228.92000000000002 37.620000000000005Q228.16 37.56 227.12 37.400000000000006Q226.44 37.800000000000004 226.07999999999998 38.120000000000005Q225.72 38.440000000000005 225.72 38.760000000000005Q225.72 39.0 225.88 39.120000000000005Q226.04 39.24 226.38 39.3Q226.72 39.36 227.16 39.36H233.56Q234.4 39.36 235.66000000000003 39.46Q236.92000000000002 39.56 238.2 40.06Q239.48 40.56 240.36 41.72Q241.24 42.88 241.24 45.040000000000006Q241.24 47.400000000000006 239.94 48.96000000000001Q238.64 50.52 236.01999999999998 51.260000000000005Q233.4 52.0 229.32 52.0ZM229.68 46.56Q232.2 46.56 233.48 46.36Q234.76 46.160000000000004 235.22 45.74Q235.68 45.32 235.68 44.760000000000005Q235.68 44.120000000000005 235.36 43.760000000000005Q235.04 43.400000000000006 234.57999999999998 43.260000000000005Q234.12 43.120000000000005 233.66 43.080000000000005Q233.2 43.040000000000006 232.92 43.040000000000006H227.6Q226.24 43.32 225.68 43.84Q225.12 44.36 225.12 45.040000000000006Q225.12 45.68 225.64 46.0Q226.16 46.32 227.18 46.44Q228.2 46.56 229.68 46.56ZM229.96 34.28Q231.44 34.28 232.2 33.44Q232.96 32.6 232.96 31.200000000000003Q232.96 29.720000000000002 232.18 28.82Q231.4 27.92 229.96 27.92Q228.52 27.92 227.7 28.82Q226.88 29.720000000000002 226.88 31.200000000000003Q226.88 32.120000000000005 227.24 32.82000000000001Q227.6 33.52 228.28 33.900000000000006Q228.96 34.28 229.96 34.28Z" fill="#FFFFFF"/>
+  <path d=" M257.36 37.84V32.72H262.68Q265.2 32.72 266.41999999999996 31.700000000000003Q267.64 30.680000000000003 267.64 28.28Q267.64 26.080000000000002 266.52 24.980000000000004Q265.4 23.880000000000003 263.0 23.880000000000003H257.36V18.8H263.28Q265.68 18.8 267.70000000000005 19.36Q269.72 19.92 271.18 21.1Q272.64 22.28 273.44 24.060000000000002Q274.24 25.840000000000003 274.24 28.320000000000004Q274.24 31.440000000000005 272.82 33.56Q271.4 35.68000000000001 268.67999999999995 36.760000000000005Q265.96 37.84 261.96 37.84ZM252.56 45.2V18.8H259.0V45.2Z M281.8 45.760000000000005Q280.12 45.760000000000005 278.72 45.14Q277.32000000000005 44.52 276.46000000000004 43.22Q275.6 41.92 275.6 39.88Q275.6 38.0 276.34000000000003 36.8Q277.08000000000004 35.6 278.38 34.88Q279.68 34.160000000000004 281.36 33.74Q283.04 33.32 284.92 33.0Q286.6 32.68000000000001 287.54 32.480000000000004Q288.48 32.28 288.86 31.92Q289.24 31.560000000000002 289.24 30.92Q289.24 29.840000000000003 288.44000000000005 29.180000000000003Q287.64000000000004 28.520000000000003 286.16 28.520000000000003Q285.16 28.520000000000003 284.28000000000003 28.880000000000003Q283.40000000000003 29.240000000000002 282.80000000000007 30.020000000000003Q282.20000000000005 30.800000000000004 282.08000000000004 32.160000000000004L276.36 31.200000000000003Q276.56 29.040000000000003 277.44000000000005 27.560000000000002Q278.32000000000005 26.080000000000002 279.72 25.200000000000003Q281.12 24.320000000000004 282.84000000000003 23.92Q284.56 23.520000000000003 286.36 23.520000000000003Q289.56 23.520000000000003 291.58000000000004 24.64Q293.6 25.76 294.58000000000004 27.940000000000005Q295.56 30.120000000000005 295.56 33.36V36.88Q295.56 38.28 295.58000000000004 39.660000000000004Q295.6 41.040000000000006 295.66 42.42Q295.72 43.800000000000004 295.76000000000005 45.2H290.12Q290.08000000000004 44.0 290.0 42.6Q289.92 41.2 289.88 39.68H289.40000000000003Q289.08000000000004 41.36 288.04 42.74Q287.0 44.120000000000005 285.42 44.940000000000005Q283.84000000000003 45.760000000000005 281.8 45.760000000000005ZM284.56 41.120000000000005Q285.28000000000003 41.120000000000005 286.04 40.86Q286.8 40.6 287.48 40.06Q288.16 39.52 288.66 38.620000000000005Q289.16 37.72 289.28000000000003 36.480000000000004V34.56L290.24 34.6Q289.72 35.08 288.90000000000003 35.4Q288.08000000000004 35.72 287.16 35.88Q286.24 36.040000000000006 285.32000000000005 36.220000000000006Q284.40000000000003 36.400000000000006 283.64 36.7Q282.88 37.0 282.42 37.480000000000004Q281.96000000000004 37.96 281.96000000000004 38.84Q281.96000000000004 39.92 282.72 40.52Q283.48 41.120000000000005 284.56 41.120000000000005Z M309.2 45.760000000000005Q306.40000000000003 45.760000000000005 304.34000000000003 44.940000000000005Q302.28000000000003 44.120000000000005 300.94000000000005 42.64Q299.6 41.160000000000004 298.94000000000005 39.18000000000001Q298.28000000000003 37.2 298.28000000000003 34.88Q298.28000000000003 32.52 298.94000000000005 30.480000000000004Q299.6 28.44 300.94000000000005 26.86Q302.28000000000003 25.28 304.3 24.400000000000002Q306.32 23.520000000000003 309.08 23.520000000000003Q312.12 23.520000000000003 314.12 24.6Q316.12 25.680000000000003 317.1 27.46Q318.08 29.240000000000002 318.08 31.440000000000005L312.36 32.56Q312.32 31.160000000000004 311.88 30.260000000000005Q311.44 29.360000000000003 310.65999999999997 28.940000000000005Q309.88 28.520000000000003 308.84000000000003 28.520000000000003Q307.88 28.520000000000003 307.12 28.900000000000002Q306.36 29.28 305.86 30.040000000000003Q305.36 30.800000000000004 305.08000000000004 31.94Q304.8 33.08 304.8 34.6Q304.8 36.64 305.3 38.08Q305.8 39.52 306.8 40.260000000000005Q307.8 41.0 309.28000000000003 41.0Q310.8 41.0 311.6 40.32Q312.40000000000003 39.64 312.72 38.6Q313.04 37.56 312.96000000000004 36.56L318.76 37.24Q318.84000000000003 38.88 318.34000000000003 40.42Q317.84000000000003 41.96 316.68 43.16Q315.52 44.36 313.65999999999997 45.06Q311.8 45.760000000000005 309.2 45.760000000000005Z M321.28000000000003 45.2V16.840000000000003H327.6V32.160000000000004Q328.84000000000003 31.360000000000003 329.84000000000003 30.42Q330.84000000000003 29.480000000000004 331.6 28.440000000000005Q332.36 27.400000000000002 332.9 26.300000000000004Q333.44 25.200000000000003 333.84000000000003 24.080000000000002H341.24Q340.76 25.680000000000003 339.9 27.180000000000003Q339.04 28.680000000000003 337.78000000000003 29.980000000000004Q336.52000000000004 31.28 334.84000000000003 32.28Q333.16 33.28 331.08000000000004 33.800000000000004V34.28Q333.76 33.84 335.46000000000004 34.24Q337.16 34.64 338.16 35.620000000000005Q339.16 36.6 339.70000000000005 38.0Q340.24 39.400000000000006 340.56 40.92L341.44 45.2H334.44L334.04 42.36Q333.76 40.760000000000005 333.38 39.52Q333.0 38.28 332.1 37.540000000000006Q331.2 36.800000000000004 329.44 36.800000000000004H327.6V45.2Z" fill="#FFFFFF"/>
+</svg></a>
+        <ul>
+          <li>Online retail store, open 24 hours</li>
+          <li><a href="mailto:info@theschoolbox.co.ke">info@theschoolbox.co.ke</a></li>
+          <li><a href="tel:+254110600141">(+254) 0110 600 141</a></li>
+          <li><a href="tel:+254702371767">(+254) 0702 371 767</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Popular categories</h2>
+        <ul>
+          <li><a href="/product-category/student-boxes/">Student boxes</a></li>
+          <li><a href="/product-category/stationery/">Stationery</a></li>
+          <li><a href="/product-category/desk-accessories/">Desk accessories</a></li>
+          <li><a href="/product-category/textbooks/">Text books</a></li>
+          <li><a href="/product-category/electronics-and-computers/">Electronics and computers</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Useful links</h2>
+        <ul>
+          <li><a href="/my-account/">My account</a></li>
+          <li><a href="/find-my-school-list/">Find my school list</a></li>
+          <li><a href="/upload-my-list/">Upload my list</a></li>
+          <li><a href="/cart/">My cart</a></li>
+          <li><a href="/checkout/">Check out</a></li>
+          <li><a href="/wishlist-page/">My wishlist</a></li>
+          <li><a href="/faqs/">FAQs</a></li>
+          <li><a href="/track-your-order/">Track my order</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="legal">
+      <p>Copyright ©<span id="year">2026</span> Learning Pack. All rights reserved.</p>
+      <ul>
+        <li><a href="/privacy-policy/">Privacy policy</a></li>
+        <li><a href="/terms-conditions/">Terms &amp; conditions</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var btn = document.getElementById('menuBtn');
+  var nav = document.getElementById('nav');
+  btn.addEventListener('click', function () {
+    var open = nav.classList.toggle('is-open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && nav.classList.contains('is-open')) {
+      nav.classList.remove('is-open'); btn.setAttribute('aria-expanded', 'false'); btn.focus();
+    }
+  });
+  var y = document.getElementById('year');
+  if (y) { y.textContent = new Date().getFullYear(); }
+})();
+
+(function () {
+  var grid = document.getElementById('grid');
+  var cards = Array.prototype.slice.call(grid.children);
+  var pills = document.querySelectorAll('.pill');
+  var sort = document.getElementById('sort');
+  var count = document.getElementById('count');
+  var empty = document.getElementById('empty');
+  var active = 'All';
+
+  function priceOf(card) {
+    var t = card.querySelector('.product__price span').textContent.replace(/[^0-9]/g, '');
+    return parseInt(t, 10) || 0;
+  }
+  function nameOf(card) { return card.querySelector('.product__name').textContent.trim(); }
+
+  function apply() {
+    var visible = 0;
+    cards.forEach(function (c) {
+      var show = active === 'All' || c.dataset.cat === active;
+      c.hidden = !show;
+      if (show) visible++;
+    });
+    var sorted = cards.filter(function (c) { return !c.hidden; });
+    var mode = sort.value;
+    if (mode === 'price-asc') sorted.sort(function (a, b) { return priceOf(a) - priceOf(b); });
+    if (mode === 'price-desc') sorted.sort(function (a, b) { return priceOf(b) - priceOf(a); });
+    if (mode === 'name-asc') sorted.sort(function (a, b) { return nameOf(a).localeCompare(nameOf(b)); });
+    sorted.forEach(function (c) { grid.appendChild(c); });
+    count.textContent = visible + (visible === 1 ? ' product' : ' products');
+    empty.hidden = visible !== 0;
+  }
+
+  pills.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      pills.forEach(function (b) { b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      active = btn.dataset.filter;
+      apply();
+    });
+  });
+  sort.addEventListener('change', apply);
+
+  document.querySelectorAll('.product__add').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var original = btn.textContent;
+      btn.textContent = 'Added ✓';
+      btn.disabled = true;
+      setTimeout(function () { btn.textContent = original; btn.disabled = false; }, 1400);
+    });
+  });
+})();
+</script>
+</body>
+</html>
