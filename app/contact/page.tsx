@@ -4,25 +4,35 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
+import { shopApi } from "@/lib/api";
 import "./contact.css";
 
 export default function ContactPage() {
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const subject = `Learning Pack enquiry from ${data.get("name")}`;
-    const body = [
-      `Name: ${data.get("name")}`,
-      `Email: ${data.get("email")}`,
-      `Phone: ${data.get("phone") || "Not provided"}`,
-      "",
-      String(data.get("message")),
-    ].join("\n");
+    setLoading(true);
+    setError("");
 
-    setSent(true);
-    window.location.href = `mailto:info@theschoolbox.co.ke?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const data = new FormData(event.currentTarget);
+    const formData = {
+      name: String(data.get("name")),
+      email: String(data.get("email")),
+      phone: String(data.get("phone") || ""),
+      message: String(data.get("message")),
+    };
+
+    try {
+      await shopApi.submitForm({ form_type: "contact", data: formData });
+      setSent(true);
+    } catch (err) {
+      setError("Failed to send your message. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,8 +51,8 @@ export default function ContactPage() {
               order? Send us a message and our team will get back to you.
             </p>
             <div className="contact-details">
-              <a href="mailto:info@theschoolbox.co.ke">
-                info@theschoolbox.co.ke
+              <a href="mailto:admin@codingclubs.co.ke">
+                admin@codingclubs.co.ke
               </a>
               <a href="tel:0798734442">0798 734 442</a>
               <a href="tel:0716815025">0716 815 025</a>
@@ -71,12 +81,13 @@ export default function ContactPage() {
               placeholder="How can we help?"
             />
 
-            <button className="btn" type="submit">
-              Send message
+            {error && <p className="contact-error" role="alert">{error}</p>}
+            <button className="btn" type="submit" disabled={loading}>
+              {loading ? "Sending..." : "Send message"}
             </button>
             {sent && (
               <p className="contact-confirmation" role="status">
-                Your email app should open with your message ready to send.
+                Your message has been sent. We&apos;ll get back to you soon.
               </p>
             )}
           </form>

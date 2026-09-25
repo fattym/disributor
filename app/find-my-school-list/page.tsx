@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
+import { shopApi } from "@/lib/api";
 import "./school-list.css";
 
 const schools = [
@@ -88,19 +89,35 @@ export default function FindMySchoolListPage() {
     className: string;
     subject: string;
   } | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [level, setLevel] = useState<EducationLevel | "">("");
   const [className, setClassName] = useState("");
   const [subject, setSubject] = useState("");
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setLoading(true);
+    setError("");
+
     const data = new FormData(event.currentTarget);
-    setSelection({
+    const formData = {
       school: String(data.get("school")),
       level: String(data.get("level")),
-      className: String(data.get("className")),
-      subject: String(data.get("subject")),
-    });
+      className: String(data.get("className") || ""),
+      subject: String(data.get("subject") || ""),
+    };
+
+    try {
+      await shopApi.submitForm({ form_type: "find_school_list", data: formData });
+      setSelection(formData);
+      setSubmitted(true);
+    } catch (err) {
+      setError("Failed to submit your selection. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const selectedLevel = level ? levelOptions[level] : null;
@@ -207,9 +224,14 @@ export default function FindMySchoolListPage() {
                 </>
               )}
 
-              <button className="btn" type="submit">
-                Show my list
+              <button className="btn" type="submit" disabled={loading}>
+                {loading ? "Saving..." : "Show my list"}
               </button>
+              {error && (
+                <p className="school-list-error" role="alert">
+                  {error}
+                </p>
+              )}
             </form>
 
             {selection && (

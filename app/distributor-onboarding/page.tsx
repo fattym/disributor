@@ -4,28 +4,38 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
+import { shopApi } from "@/lib/api";
 import "./onboarding.css";
 
 export default function DistributorOnboardingPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const subject = "Distributor onboarding request";
-    const body = [
-      `Contact name: ${form.get("contactName")}`,
-      `Business name: ${form.get("businessName")}`,
-      `Email: ${form.get("email")}`,
-      `Phone: ${form.get("phone")}`,
-      `Location: ${form.get("location")}`,
-      `Products supplied: ${form.get("products")}`,
-      "",
-      `Additional information:\n${form.get("message") || "None provided"}`,
-    ].join("\n");
+    setLoading(true);
+    setError("");
 
-    setSubmitted(true);
-    window.location.href = `mailto:info@theschoolbox.co.ke?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const form = new FormData(event.currentTarget);
+    const formData = {
+      contactName: String(form.get("contactName")),
+      businessName: String(form.get("businessName")),
+      email: String(form.get("email")),
+      phone: String(form.get("phone")),
+      location: String(form.get("location")),
+      products: String(form.get("products")),
+      message: String(form.get("message") || ""),
+    };
+
+    try {
+      await shopApi.submitForm({ form_type: "onboarding", data: formData });
+      setSubmitted(true);
+    } catch (err) {
+      setError("Failed to submit your request. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -90,13 +100,14 @@ export default function DistributorOnboardingPage() {
                 placeholder="Anything we should know about your business?"
               />
             </label>
-            <button className="onboarding-submit" type="submit">
-              Send onboarding request
+            {error && <p className="onboarding-error" role="alert">{error}</p>}
+            <button className="onboarding-submit" type="submit" disabled={loading}>
+              {loading ? "Sending..." : "Send onboarding request"}
             </button>
             {submitted && (
               <p className="onboarding-confirmation">
-                Your email app should open with the request details ready to
-                send.
+                Your onboarding request has been received. Our team will review
+                your details and contact you within 2 business days.
               </p>
             )}
           </form>

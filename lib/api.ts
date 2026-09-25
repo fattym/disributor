@@ -144,4 +144,17 @@ export const shopApi = {
     api.post(`/shop/guest-orders/${orderId}/pay_mpesa/`, { phone }).then((r) => r.data),
   confirmGuestPayment: (orderId: number | string, body?: { checkout_request_id?: string; force?: boolean }) =>
     api.post(`/shop/guest-orders/${orderId}/confirm-payment/`, body || {}).then((r) => r.data),
+
+  submitForm: (data: { form_type: string; data: Record<string, unknown>; file?: File | null }) => {
+    if (data.file) {
+      const form = new FormData();
+      form.append('form_type', data.form_type);
+      form.append('data', JSON.stringify(data.data));
+      form.append('file', data.file);
+      return api.post('/shop/form-submissions/', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }).then((r) => r.data);
+    }
+    return api.post('/shop/form-submissions/', { form_type: data.form_type, data: data.data }).then((r) => r.data);
+  },
 };
