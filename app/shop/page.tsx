@@ -1,28 +1,32 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
-import GlobalHeader from '@/components/GlobalHeader';
-import GlobalFooter from '@/components/GlobalFooter';
-import { shopApi, ShopProduct } from '@/lib/api';
-import { useCart } from '@/lib/cart';
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import GlobalHeader from "@/components/GlobalHeader";
+import GlobalFooter from "@/components/GlobalFooter";
+import { shopApi, ShopProduct } from "@/lib/api";
+import { useCart } from "@/lib/cart";
 
 export default function ShopPage() {
   const { addItem } = useCart();
   const [products, setProducts] = useState<ShopProduct[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeCat, setActiveCat] = useState<string>('All');
-  const [sort, setSort] = useState<string>('default');
+  const [activeCat, setActiveCat] = useState<string>("All");
+  const [query, setQuery] = useState("");
+  const [educationLevel, setEducationLevel] = useState("All levels");
+  const [sort, setSort] = useState<string>("default");
   const [addedIds, setAddedIds] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const prodData = await shopApi.getPublicProducts({}).catch(() => []);
-        const prodList = Array.isArray(prodData) ? prodData : prodData.results || [];
+        const prodList = Array.isArray(prodData)
+          ? prodData
+          : prodData.results || [];
         setProducts(prodList);
       } catch (err) {
-        console.error('Failed to load shop:', err);
+        console.error("Failed to load shop:", err);
       } finally {
         setLoading(false);
       }
@@ -36,24 +40,36 @@ export default function ShopPage() {
 
   const filtered = useMemo(() => {
     let list = products;
-    if (activeCat !== 'All') {
+    if (activeCat !== "All") {
       list = list.filter((p) => p.category_name === activeCat);
     }
+    if (query.trim()) {
+      const searchTerm = query.trim().toLowerCase();
+      list = list.filter((p) =>
+        `${p.name} ${p.category_name} ${p.description}`
+          .toLowerCase()
+          .includes(searchTerm),
+      );
+    }
     return list;
-  }, [products, activeCat]);
+  }, [products, activeCat, query]);
 
   const sorted = useMemo(() => {
     const arr = [...filtered];
-    const price = (p: ShopProduct) => parseFloat(p.effective_price || p.price || '0');
-    if (sort === 'price-asc') arr.sort((a, b) => price(a) - price(b));
-    else if (sort === 'price-desc') arr.sort((a, b) => price(b) - price(a));
-    else if (sort === 'name-asc') arr.sort((a, b) => a.name.localeCompare(b.name));
+    const price = (p: ShopProduct) =>
+      parseFloat(p.effective_price || p.price || "0");
+    if (sort === "price-asc") arr.sort((a, b) => price(a) - price(b));
+    else if (sort === "price-desc") arr.sort((a, b) => price(b) - price(a));
+    else if (sort === "name-asc")
+      arr.sort((a, b) => a.name.localeCompare(b.name));
     return arr;
   }, [filtered, sort]);
 
   const handleAdd = (product: ShopProduct) => {
     const variant =
-      product.variants && product.variants.length > 0 ? product.variants[0] : null;
+      product.variants && product.variants.length > 0
+        ? product.variants[0]
+        : null;
     if (variant) {
       addItem({
         product_id: product.id,
@@ -70,9 +86,9 @@ export default function ShopPage() {
         product_id: product.id,
         product_name: product.name,
         variant_id: 0,
-        variant_label: 'Default',
+        variant_label: "Default",
         quantity: 1,
-        unit_price: parseFloat(product.effective_price || product.price || '0'),
+        unit_price: parseFloat(product.effective_price || product.price || "0"),
         image_url: product.image_url,
         stock_quantity: 0,
       });
@@ -85,7 +101,7 @@ export default function ShopPage() {
   };
 
   const formatPrice = (value: string | null | undefined) =>
-    `KSh ${parseInt(value || '0', 10).toLocaleString('en-KE')}`;
+    `KSh ${parseInt(value || "0", 10).toLocaleString("en-KE")}`;
 
   return (
     <>
@@ -97,23 +113,51 @@ export default function ShopPage() {
               <Link href="/">Home</Link> / Shop
             </p>
             <h1>Shop all products</h1>
-            <p>
-              Stationery, text books, desk accessories, electronics and
-              ready-made student boxes — everything on the list, in one place.
-            </p>
+            <p>Find school supplies by name or choose a category below.</p>
           </div>
         </div>
 
         <section className="shop">
           <div className="wrap">
+            <div className="shop-discovery">
+              <label className="shop-search" htmlFor="product-search">
+                <span>What are you looking for?</span>
+                <input
+                  id="product-search"
+                  type="search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search books, pencils, calculators..."
+                />
+              </label>
+              <label className="education-filter" htmlFor="education-level">
+                <span>Education level</span>
+                <select
+                  id="education-level"
+                  value={educationLevel}
+                  onChange={(event) => setEducationLevel(event.target.value)}
+                >
+                  <option>All levels</option>
+                  <option>Pre-primary</option>
+                  <option>Primary</option>
+                  <option>Junior secondary</option>
+                  <option>Senior secondary</option>
+                  <option>University</option>
+                </select>
+              </label>
+            </div>
             <div className="shop-bar">
-              <ul className="pills" role="group" aria-label="Filter by category">
+              <ul
+                className="pills"
+                role="group"
+                aria-label="Filter by category"
+              >
                 <li>
                   <button
-                    className={`pill ${activeCat === 'All' ? 'is-active' : ''}`}
+                    className={`pill ${activeCat === "All" ? "is-active" : ""}`}
                     data-filter="All"
                     type="button"
-                    onClick={() => setActiveCat('All')}
+                    onClick={() => setActiveCat("All")}
                   >
                     All
                   </button>
@@ -121,7 +165,7 @@ export default function ShopPage() {
                 {categoryNames.map((name) => (
                   <li key={name}>
                     <button
-                      className={`pill ${activeCat === name ? 'is-active' : ''}`}
+                      className={`pill ${activeCat === name ? "is-active" : ""}`}
                       data-filter={name}
                       type="button"
                       onClick={() => setActiveCat(name)}
@@ -148,7 +192,9 @@ export default function ShopPage() {
             </div>
 
             <p className="count" id="count">
-              {loading ? 'Loading…' : `${sorted.length} products`}
+              {loading
+                ? "Loading…"
+                : `${sorted.length} products${educationLevel !== "All levels" ? ` for ${educationLevel}` : ""}`}
             </p>
 
             {loading ? (
@@ -188,7 +234,9 @@ export default function ShopPage() {
                             height={600}
                           />
                         ) : (
-                          <div className="product__img-placeholder">No image</div>
+                          <div className="product__img-placeholder">
+                            No image
+                          </div>
                         )}
                       </Link>
                       <p className="product__cat">{product.category_name}</p>
@@ -203,17 +251,13 @@ export default function ShopPage() {
                         type="button"
                         onClick={() => handleAdd(product)}
                       >
-                        {isAdded ? 'Added ✓' : 'Add to cart'}
+                        {isAdded ? "Added ✓" : "Add to cart"}
                       </button>
                     </article>
                   );
                 })}
               </div>
             )}
-
-            <p className="empty" id="empty" hidden={sorted.length !== 0}>
-              No products in this category yet.
-            </p>
 
             <nav className="pagination" aria-label="Shop pagination">
               <span className="is-current">1</span>
