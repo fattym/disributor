@@ -1,31 +1,41 @@
 "use client";
 
-import { startTransition, useEffect, useState } from "react";
+import { useEffect, useState, startTransition } from "react";
 
-const getSavedTheme = () => {
-  if (typeof window === "undefined") return null;
-  return window.localStorage.getItem("theme");
+const THEME_KEY = "theme";
+
+const systemPrefersDark = () =>
+  typeof window !== "undefined" &&
+  !!window.matchMedia &&
+  window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+const applyTheme = (dark: boolean) => {
+  const html = document.documentElement;
+  html.classList.toggle("dark", dark);
+  html.classList.toggle("dark-mode", dark);
+  html.classList.toggle("light-mode", !dark);
+};
+
+const initTheme = () => {
+  if (typeof window === "undefined") return false;
+  const saved = window.localStorage.getItem(THEME_KEY);
+  const dark = saved === "dark" ? true : saved === "light" ? false : systemPrefersDark();
+  applyTheme(dark);
+  return dark;
 };
 
 export default function ThemeToggle() {
   const [isLight, setIsLight] = useState(false);
 
   useEffect(() => {
-    const savedTheme = getSavedTheme();
-    const light = savedTheme === "light";
-    document.documentElement.classList.toggle("light-mode", light);
-    document.documentElement.classList.toggle(
-      "dark-mode",
-      savedTheme === "dark",
-    );
-    startTransition(() => setIsLight(light));
+    const dark = initTheme();
+    startTransition(() => setIsLight(!dark));
   }, []);
 
   const toggleTheme = () => {
     const nextIsLight = !isLight;
-    document.documentElement.classList.toggle("light-mode", nextIsLight);
-    document.documentElement.classList.toggle("dark-mode", !nextIsLight);
-    window.localStorage.setItem("theme", nextIsLight ? "light" : "dark");
+    applyTheme(!nextIsLight);
+    window.localStorage.setItem(THEME_KEY, nextIsLight ? "light" : "dark");
     setIsLight(nextIsLight);
   };
 
@@ -35,7 +45,7 @@ export default function ThemeToggle() {
       type="button"
       onClick={toggleTheme}
       aria-label={isLight ? "Switch to dark mode" : "Switch to light mode"}
-      aria-pressed={isLight}
+      aria-pressed={!isLight}
     >
       {isLight ? "Dark mode" : "Light mode"}
     </button>
