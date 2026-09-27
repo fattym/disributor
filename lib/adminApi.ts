@@ -47,6 +47,12 @@ export interface AdminProduct {
   featured?: boolean;
   created_at: string;
   category: string;
+  sku?: string;
+  brand?: string;
+  product_type?: 'physical' | 'digital' | 'service';
+  cost_price?: string;
+  tags?: string[];
+  variants?: Array<{ label: string; size?: string; color?: string; stock_quantity?: number }>;
 }
 
 export interface AdminCourse {
@@ -1127,10 +1133,16 @@ const mapPendingSeller = (p: BackendProfile): Omit<AdminSeller, 'products' | 'or
 };
 
 interface BackendVariant {
+  id?: number;
+  label?: string;
+  size?: string;
+  color?: string;
   stock_quantity?: number;
+  price_override?: string | null;
+  effective_price?: string | number;
 }
 
-interface BackendProduct {
+export interface BackendProduct {
   id: number;
   name?: string;
   distributor_name?: string;
@@ -1138,11 +1150,29 @@ interface BackendProduct {
   linked_distributor_product_name?: string | null;
   effective_price?: string | number;
   price?: string | number;
-  variants?: BackendVariant[];
+  category?: number;
+  category_name?: string;
+  description?: string;
+  image?: string | null;
+  image_url?: string | null;
   is_active?: boolean;
   is_reseller_listing?: boolean;
   created_at?: string;
-  category_name?: string;
+  variants?: BackendVariant[];
+  images?: BackendProductImage[];
+  tags?: BackendTag[];
+  applicable_levels?: number[];
+  learning_areas?: number[];
+  sku?: string;
+  brand?: string;
+  product_type?: string;
+  cost_price?: string | number | null;
+  low_stock_threshold?: number;
+  backorders?: boolean;
+  shipping_weight?: string | number | null;
+  shipping_length?: string | number | null;
+  shipping_width?: string | number | null;
+  shipping_height?: string | number | null;
 }
 
 interface BackendPayment {
@@ -1186,13 +1216,77 @@ interface BackendCategory {
   parent?: number | null;
 }
 
+export interface BackendGrade {
+  id: number;
+  name: string;
+  stage: 'pre_primary' | 'primary' | 'junior_secondary' | 'senior_secondary';
+  order: number;
+}
+
+export interface BackendLearningArea {
+  id: number;
+  name: string;
+  code?: string;
+  grade?: number;
+  pathway?: number | null;
+  school?: number;
+}
+
+export interface BackendPathway {
+  id: number;
+  name: string;
+  code?: string;
+}
+
+export interface BackendTag {
+  id: number;
+  name: string;
+}
+
+export interface BackendProductImage {
+  id: number;
+  image_url?: string | null;
+  alt?: string;
+  is_primary?: boolean;
+}
+
+export interface CreateProductData {
+  name: string;
+  category: number;
+  price: string | number;
+  description?: string;
+  is_active?: boolean;
+  sku?: string;
+  brand?: string;
+  product_type?: 'physical' | 'digital' | 'service';
+  cost_price?: string;
+  low_stock_threshold?: number;
+  backorders?: boolean;
+  shipping_weight?: string;
+  shipping_length?: string;
+  shipping_width?: string;
+  shipping_height?: string;
+  applicable_levels?: number[];
+  learning_areas?: number[];
+  institution_categories?: string[];
+  tags?: string[];
+  variants?: Array<{
+    label: string;
+    size?: string;
+    color?: string;
+    stock_quantity?: number;
+    price_override?: string | null;
+  }>;
+  images?: File[];
+}
+
 const mapProduct = (p: BackendProduct): AdminProduct => {
   const stock = Array.isArray(p.variants)
     ? p.variants.reduce((sum: number, v) => sum + (v.stock_quantity || 0), 0)
     : 0;
   const price = p.effective_price ?? p.price ?? 0;
   let status: AdminProduct['status'];
-  if (!p.is_active) status = 'DELETED';
+  if (!p.is_active) status = 'DRAFT';
   else if (stock === 0) status = 'OUT_OF_STOCK';
   else status = 'PUBLISHED';
   return {
@@ -1405,12 +1499,12 @@ export const adminApi = {
 
   getUsers: (params?: Record<string, string>) =>
     safe(
-      api.get('/api/auth/users/', { params }).then((r) => asArray<BackendUser>(r.data).map(mapUser)),
+      api.get('/auth/users/', { params }).then((r) => asArray<BackendUser>(r.data).map(mapUser)),
       filterByParams(mockUsers, params),
     ),
   getUser: (id: string) =>
     safe(
-      api.get(`/api/auth/users/${id}/`).then((r) => mapUser(r.data)),
+      api.get(`/auth/users/${id}/`).then((r) => mapUser(r.data)),
       mockUsers.find((u) => u.id === Number(id)) ?? null,
     ),
   updateUser: (id: string, data: Partial<AdminUser>) => {
@@ -1423,16 +1517,16 @@ export const adminApi = {
       if (rest.length) patch.last_name = rest.join(' ');
     }
     if (data.phone) patch.phone = data.phone;
-    return api.patch(`/api/auth/users/${id}/`, patch).then((r) => mapUser(r.data));
+    return api.patch(`/auth/users/${id}/`, patch).then((r) => mapUser(r.data));
   },
-  deleteUser: (id: string) => api.delete(`/api/auth/users/${id}/`).then((r) => r.data),
+  deleteUser: (id: string) => api.delete(`/auth/users/${id}/`).then((r) => r.data),
 
   getSellers: () =>
     safe(
       (async () => {
         const [profiles, wallets] = await Promise.all([
-          api.get('/api/distributor/profiles/').then((r) => asArray<BackendProfile>(r.data)),
-          api.get('/api/distributor/wallet/').then((r) =>
+          api.get('/distributor/profiles/').then((r) => asArray<BackendProfile>(r.data)),
+          api.get('/distributor/wallet/').then((r) =>
             asArray<{ distributor: number; transactions?: Array<{ order_total?: string | number; amount?: string | number }> }>(r.data),
           ),
         ]);
@@ -1451,40 +1545,40 @@ export const adminApi = {
     ),
   getSeller: (id: string) =>
     safe(
-      api.get(`/api/distributor/profiles/${id}/`).then((r) => mapSeller(r.data)),
+      api.get(`/distributor/profiles/${id}/`).then((r) => mapSeller(r.data)),
       mockSellers.find((s) => s.id === Number(id)) ?? null,
     ),
   updateSeller: (id: string, data: Partial<AdminSeller>) => {
     if (data.status === 'SUSPENDED') {
-      return api.post(`/api/distributor/profiles/${id}/suspend/`).then((r) =>
+      return api.post(`/distributor/profiles/${id}/suspend/`).then((r) =>
         mapSeller(r.data.profile ?? r.data),
       );
     }
     if (data.status === 'ACTIVE') {
-      return api.post(`/api/distributor/profiles/${id}/unsuspend/`).then((r) =>
+      return api.post(`/distributor/profiles/${id}/unsuspend/`).then((r) =>
         mapSeller(r.data.profile ?? r.data),
       );
     }
-    return api.patch(`/api/distributor/profiles/${id}/`, data).then((r) => mapSeller(r.data));
+    return api.patch(`/distributor/profiles/${id}/`, data).then((r) => mapSeller(r.data));
   },
   getPendingSellers: () =>
     safe(
-      api.get('/api/distributor/profiles/pending/').then((r) => asArray<BackendProfile>(r.data).map(mapPendingSeller)),
+      api.get('/distributor/profiles/pending/').then((r) => asArray<BackendProfile>(r.data).map(mapPendingSeller)),
       mockPendingSellers,
     ),
-  approveSeller: (id: string) => api.post(`/api/distributor/profiles/${id}/approve/`).then((r) => r.data),
-  rejectSeller: (id: string) => api.post(`/api/distributor/profiles/${id}/suspend/`).then((r) => r.data),
+  approveSeller: (id: string) => api.post(`/distributor/profiles/${id}/approve/`).then((r) => r.data),
+  rejectSeller: (id: string) => api.post(`/distributor/profiles/${id}/suspend/`).then((r) => r.data),
 
   getProducts: (params?: Record<string, string>) =>
     safe(
       api
-        .get('/api/shop/products/', { params })
+        .get('/shop/products/', { params })
         .then((r) => filterByParams(asArray<BackendProduct>(r.data).map(mapProduct), params)),
       filterByParams(mockProducts, params),
     ),
   getProduct: (id: string) =>
     safe(
-      api.get(`/api/shop/products/${id}/`).then((r) => mapProduct(r.data)),
+      api.get(`/shop/products/${id}/`).then((r) => mapProduct(r.data)),
       mockProducts.find((p) => p.id === Number(id)) ?? null,
     ),
   updateProduct: (id: string, data: Partial<AdminProduct>) => {
@@ -1493,75 +1587,96 @@ export const adminApi = {
       patch.is_active =
         data.status === 'PUBLISHED' || data.status === 'OUT_OF_STOCK' || data.status === 'PENDING_APPROVAL';
     }
-    return api.patch(`/api/shop/products/${id}/`, patch).then((r) => mapProduct(r.data));
+    return api.patch(`/shop/products/${id}/`, patch).then((r) => mapProduct(r.data));
   },
-  deleteProduct: (id: string) => api.delete(`/api/shop/products/${id}/`).then((r) => r.data),
-  createProduct: (data: {
-    name: string;
-    category: number;
-    price: string;
-    description?: string;
-    image?: File | null;
-  }) => {
-    const fallback: AdminProduct = mapProduct({
+  deleteProduct: (id: string) => api.delete(`/shop/products/${id}/`).then((r) => r.data),
+  createProduct: (data: CreateProductData) => {
+    const fallback: BackendProduct = {
       id: Date.now(),
       name: data.name,
       price: data.price,
-      is_active: true,
-    });
-    const append = (form: FormData) => {
-      form.append('name', data.name);
-      form.append('category', String(data.category));
-      form.append('price', data.price);
-      form.append('description', data.description || '');
-      form.append('is_active', 'true');
-      if (data.image) form.append('image', data.image);
+      is_active: data.is_active !== false,
     };
-    if (data.image) {
-      const form = new FormData();
-      append(form);
-      return safe(
-        api
-          .post('/api/shop/products/', form, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-          })
-          .then((r) => mapProduct(r.data)),
-        fallback,
-      );
-    }
-    return safe(
-      api
-        .post('/api/shop/products/', {
-          name: data.name,
-          category: data.category,
-          price: data.price,
-          description: data.description || '',
-          is_active: true,
-        })
-        .then((r) => mapProduct(r.data)),
+    const payload: Record<string, unknown> = {
+      name: data.name,
+      category: data.category,
+      price: data.price,
+      description: data.description ?? '',
+      is_active: data.is_active !== false,
+      low_stock_threshold: data.low_stock_threshold ?? 0,
+      backorders: !!data.backorders,
+      applicable_levels: data.applicable_levels ?? [],
+      learning_areas: data.learning_areas ?? [],
+      tags_data: data.tags ?? [],
+      variants_data: data.variants ?? [],
+    };
+    if (data.sku) payload.sku = data.sku;
+    if (data.brand) payload.brand = data.brand;
+    if (data.product_type) payload.product_type = data.product_type;
+    if (data.cost_price) payload.cost_price = data.cost_price;
+    if (data.shipping_weight) payload.shipping_weight = data.shipping_weight;
+    if (data.shipping_length) payload.shipping_length = data.shipping_length;
+    if (data.shipping_width) payload.shipping_width = data.shipping_width;
+    if (data.shipping_height) payload.shipping_height = data.shipping_height;
+    if (data.institution_categories && data.institution_categories.length)
+      payload.institution_categories = data.institution_categories;
+    const base = safe(
+      api.post('/shop/products/', payload).then((r) => r.data),
       fallback,
     );
+    return base.then(async (product: BackendProduct) => {
+      if (data.images && data.images.length > 0 && product.id) {
+        const form = new FormData();
+        data.images.forEach((f) => form.append('files', f));
+        try {
+          await api.post(`/shop/products/${product.id}/upload_images/`, form, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+        } catch {
+          /* image upload best-effort */
+        }
+      }
+      return product;
+    });
+  },
+  uploadProductImages: (id: number, files: File[]) => {
+    const form = new FormData();
+    files.forEach((f) => form.append('files', f));
+    return api
+      .post(`/shop/products/${id}/upload_images/`, form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((r) => asArray<BackendProductImage>(r.data));
+  },
+  importProducts: (file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return api
+      .post('/shop/products/import_products/', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((r) => r.data as { created: number; failed: number; errors: unknown[] });
   },
 
   getCourses: (params?: Record<string, string>) =>
     safe(
       api
-        .get('/api/courses/courses/', { params })
+        .get('/courses/courses/', { params })
         .then((r) => filterByParams(asArray<BackendCourse>(r.data).map(mapCourse), params)),
       filterByParams(mockCourses, params),
     ),
   getCourse: (id: string) =>
     safe(
-      api.get(`/api/courses/courses/${id}/`).then((r) => mapCourse(r.data)),
+      api.get(`/courses/courses/${id}/`).then((r) => mapCourse(r.data)),
       mockCourses.find((c) => c.id === Number(id)) ?? null,
     ),
   updateCourse: (id: string, data: Partial<AdminCourse>) =>
-    api.patch(`/api/courses/courses/${id}/`, data).then((r) => mapCourse(r.data)),
+    api.patch(`/courses/courses/${id}/`, data).then((r) => mapCourse(r.data)),
 
   getOrders: (params?: Record<string, string>) =>
     safe(
       api
-        .get('/api/shop/orders/', { params })
+        .get('/shop/orders/', { params })
         .then((r) => filterByParams(asArray<BackendOrder>(r.data).map(mapOrder), params)),
       filterByParams(mockOrders, params),
     ),
@@ -1579,12 +1694,12 @@ export const adminApi = {
       };
       patch.status = map[data.status] || 'pending_payment';
     }
-    return api.patch(`/api/shop/orders/${id}/`, patch).then((r) => mapOrder(r.data));
+    return api.patch(`/shop/orders/${id}/`, patch).then((r) => mapOrder(r.data));
   },
 
   getPayments: (params?: Record<string, string>) =>
     safe(
-      api.get('/api/shop/orders/').then((r) =>
+      api.get('/shop/orders/').then((r) =>
         filterByParams(
           asArray<BackendOrder>(r.data).map((o, i) => mapPayment(o, i)),
           params,
@@ -1594,7 +1709,7 @@ export const adminApi = {
     ),
   getTransactions: () =>
     safe(
-      api.get('/api/shop/orders/').then((r) => asArray<BackendOrder>(r.data).map((o, i) => mapPayment(o, i))),
+      api.get('/shop/orders/').then((r) => asArray<BackendOrder>(r.data).map((o, i) => mapPayment(o, i))),
       mockPayments,
     ),
 
@@ -1606,11 +1721,11 @@ export const adminApi = {
       mockHeldFunds,
     ),
   releaseFunds: (id: string) =>
-    api.post(`/api/shop/orders/${id}/release_funds/`, {}).then((r) => r.data),
+    api.post(`/shop/orders/${id}/release_funds/`, {}).then((r) => r.data),
   confirmDelivery: (id: string) =>
-    api.post(`/api/shop/orders/${id}/confirm_delivery/`, {}).then((r) => r.data),
+    api.post(`/shop/orders/${id}/confirm_delivery/`, {}).then((r) => r.data),
   disputeOrder: (id: string, reason: string) =>
-    api.post(`/api/shop/orders/${id}/dispute/`, { reason }).then((r) => r.data),
+    api.post(`/shop/orders/${id}/dispute/`, { reason }).then((r) => r.data),
 
   getWithdrawals: (params?: Record<string, string>) =>
     safe(
@@ -1622,11 +1737,27 @@ export const adminApi = {
 
   getCategories: () =>
     safe(
-      api.get('/api/shop/categories/').then((r) => mapCategoryTree(asArray<BackendCategory>(r.data))),
+      api.get('/shop/categories/').then((r) => mapCategoryTree(asArray<BackendCategory>(r.data))),
       mockCategories,
     ),
-  createCategory: (data: unknown) => api.post('/api/shop/categories/', data).then((r) => r.data),
-  updateCategory: (id: string, data: unknown) => api.patch(`/api/shop/categories/${id}/`, data).then((r) => r.data),
+  createCategory: (data: unknown) => api.post('/shop/categories/', data).then((r) => r.data),
+  updateCategory: (id: string, data: unknown) => api.patch(`/shop/categories/${id}/`, data).then((r) => r.data),
+
+  getGrades: () =>
+    safe(
+      api.get('/academics/grades/').then((r) => asArray<BackendGrade>(r.data)),
+      [],
+    ),
+  getLearningAreas: () =>
+    safe(
+      api.get('/academics/learning-areas/').then((r) => asArray<BackendLearningArea>(r.data)),
+      [],
+    ),
+  getPathways: () =>
+    safe(
+      api.get('/academics/pathways/').then((r) => asArray<BackendPathway>(r.data)),
+      [],
+    ),
 
   getReviews: (params?: Record<string, string>) =>
     safe(
