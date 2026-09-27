@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import React from 'react';
 import { adminApi } from '@/lib/adminApi';
 import type { CategoryNode } from '@/lib/adminApi';
 
@@ -33,27 +34,29 @@ export default function CategoriesPage() {
     const isExpanded = expanded[node.id] ?? (depth === 0 ? true : false);
     const paddingLeft = depth * 1.5 + 0.75;
     return (
-      <div key={node.id}>
-        <div
-          className={`flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800 ${depth === 0 ? 'font-medium' : ''}`}
-          style={{ paddingLeft: `${paddingLeft}rem` }}
-        >
-          <div className="flex items-center gap-2">
-            {hasChildren && (
-              <button
-                type="button"
-                onClick={() => toggle(node.id)}
-                className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
-              >
-                {isExpanded ? '▼' : '▶'}
-              </button>
-            )}
-            <span className="text-zinc-900 dark:text-zinc-100">{node.name}</span>
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">({node.slug})</span>
-          </div>
-          <div className="flex items-center gap-3 text-xs text-zinc-600 dark:text-zinc-400">
-            <span>{node.product_count} products</span>
-            <span>{node.course_count} courses</span>
+      <React.Fragment key={node.id}>
+        <tr className="border-b border-zinc-100 dark:border-zinc-800">
+          <td
+            className={`py-2 px-4 ${depth === 0 ? 'font-medium' : ''}`}
+            style={{ paddingLeft: `${paddingLeft}rem` }}
+          >
+            <div className="flex items-center gap-2">
+              {hasChildren && (
+                <button
+                  type="button"
+                  onClick={() => toggle(node.id)}
+                  className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                >
+                  {isExpanded ? '▼' : '▶'}
+                </button>
+              )}
+              <span className="text-zinc-900 dark:text-zinc-100">{node.name}</span>
+              <span className="text-xs text-zinc-500 dark:text-zinc-400">({node.slug})</span>
+            </div>
+          </td>
+          <td className="py-2 px-4 text-zinc-600 dark:text-zinc-400">{node.product_count} products</td>
+          <td className="py-2 px-4 text-zinc-600 dark:text-zinc-400">{node.course_count} courses</td>
+          <td className="py-2 px-4 text-right">
             <button
               type="button"
               onClick={() => {
@@ -61,16 +64,15 @@ export default function CategoriesPage() {
                 setMessage(`"${node.name}" updated`);
                 setTimeout(() => setMessage(''), 3000);
               }}
-              className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 px-2 py-0.5 rounded"
+              className="text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 px-2 py-0.5 rounded"
             >
               Edit
             </button>
-          </div>
-        </div>
-        {hasChildren && isExpanded && (
-          <div>{node.children.map((child) => renderNode(child, depth + 1))}</div>
-        )}
-      </div>
+          </td>
+        </tr>
+        {hasChildren && isExpanded &&
+          node.children.map((child) => renderNode(child, depth + 1))}
+      </React.Fragment>
     );
   };
 
