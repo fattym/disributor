@@ -206,7 +206,7 @@ export default function MyOrdersPage() {
                       type="button"
                       onClick={() => confirmDelivery(order.id)}
                       disabled={actionLoading === order.id}
-                      className="px-4 py-2 text-sm font-medium text-white bg-navy rounded-md hover:opacity-90 disabled:opacity-60"
+                      className="px-4 py-2 text-sm font-medium text-white bg-navy dark:bg-zinc-100 dark:text-zinc-900 rounded-md hover:opacity-90 disabled:opacity-60"
                     >
                       {actionLoading === order.id ? 'Confirming…' : 'Confirm Delivery'}
                     </button>
@@ -247,7 +247,7 @@ export default function MyOrdersPage() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => setImage(e.target.files?.[0] || null)}
-                  className="mt-1 file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:bg-navy file:text-white"
+                  className="mt-1 file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:bg-navy dark:file:bg-zinc-100 file:text-white dark:file:text-zinc-900"
                 />
               </label>
               <div className="mt-6 flex justify-end gap-3">
@@ -266,7 +266,7 @@ export default function MyOrdersPage() {
                   type="button"
                   onClick={dispute}
                   disabled={actionLoading === disputeOpen.id}
-                  className="px-4 py-2 text-sm font-medium text-white bg-navy rounded-md hover:opacity-90 disabled:opacity-60"
+                  className="px-4 py-2 text-sm font-medium text-white bg-navy dark:bg-zinc-100 dark:text-zinc-900 rounded-md hover:opacity-90 disabled:opacity-60"
                 >
                   {actionLoading === disputeOpen.id ? 'Submitting…' : 'Submit'}
                 </button>

@@ -97,7 +97,7 @@ export default function ProductsPage() {
         </div>
         <Link
           href="/admin/products/new"
-          className="px-4 py-2 text-sm font-medium text-white bg-navy rounded-md hover:opacity-90"
+          className="px-4 py-2 text-sm font-medium text-white bg-navy dark:bg-zinc-100 dark:text-zinc-900 rounded-md hover:opacity-90"
         >
           Add Product
         </Link>

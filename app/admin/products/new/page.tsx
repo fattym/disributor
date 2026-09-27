@@ -107,7 +107,7 @@ export default function NewProductPage() {
           <div className="flex justify-center gap-3">
             <Link
               href="/admin/products"
-              className="px-4 py-2 text-sm font-medium text-white bg-navy rounded-md hover:opacity-90"
+              className="px-4 py-2 text-sm font-medium text-white bg-navy dark:bg-zinc-100 dark:text-zinc-900 rounded-md hover:opacity-90"
             >
               Back to Products
             </Link>
@@ -214,7 +214,7 @@ export default function NewProductPage() {
           <button
             type="submit"
             disabled={saving}
-            className="px-5 py-2 text-sm font-medium text-white bg-navy rounded-md hover:opacity-90 disabled:opacity-60"
+            className="px-5 py-2 text-sm font-medium text-white bg-navy dark:bg-zinc-100 dark:text-zinc-900 rounded-md hover:opacity-90 disabled:opacity-60"
           >
             {saving ? 'Saving…' : 'Create Product'}
           </button>

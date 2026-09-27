@@ -161,7 +161,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950">
       <aside
-        className={`flex flex-col bg-navy text-zinc-100 transition-all duration-300 ${
+        className={`flex flex-col bg-navy dark:bg-zinc-900 text-zinc-100 transition-all duration-300 ${
           isCollapsed ? 'w-16' : 'w-64'
         }`}
       >
