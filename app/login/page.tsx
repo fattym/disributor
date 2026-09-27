@@ -32,11 +32,13 @@ export default function LoginPage() {
     try {
       const userData = await login(email, password);
       const destination =
-        userData.role === "DISTRIBUTOR"
-          ? "/dashboard"
-          : userData.role === "PARENT"
-            ? "/shop"
-            : "/";
+        userData.role === "ADMIN" || userData.role === "SUPER_ADMIN"
+          ? "/admin"
+          : userData.role === "DISTRIBUTOR"
+            ? "/dashboard"
+            : userData.role === "PARENT"
+              ? "/shop"
+              : "/";
       router.push(destination);
     } catch {
       setError("Invalid email or password");

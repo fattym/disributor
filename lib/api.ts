@@ -157,4 +157,19 @@ export const shopApi = {
     }
     return api.post('/shop/form-submissions/', { form_type: data.form_type, data: data.data }).then((r) => r.data);
   },
+  confirmDelivery: (id: number | string) =>
+    api.post(`/shop/orders/${id}/confirm_delivery/`).then((r) => r.data),
+  disputeOrder: (id: number | string, reason: string, image?: File | null) => {
+    if (image) {
+      const form = new FormData();
+      form.append('reason', reason);
+      form.append('image', image);
+      return api
+        .post(`/shop/orders/${id}/dispute/`, form, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+        .then((r) => r.data);
+    }
+    return api.post(`/shop/orders/${id}/dispute/`, { reason }).then((r) => r.data);
+  },
 };
