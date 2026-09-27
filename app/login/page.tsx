@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import ThemeToggle from "@/components/ThemeToggle";
 import "./login.css";
 
 export default function LoginPage() {
@@ -49,6 +50,9 @@ export default function LoginPage() {
 
   return (
     <div className="login-page-container">
+      <div className="fixed top-4 right-4 z-20">
+        <ThemeToggle />
+      </div>
       <div className="card-container">
         {/* Left Side with Image Banner & Logo */}
         <div className="banner-side">
