@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { adminApi } from '@/lib/adminApi';
 import { formatCurrency } from '@/lib/utils';
 import type { AdminProduct } from '@/lib/adminApi';
@@ -94,12 +95,12 @@ export default function ProductsPage() {
             Manage and moderate marketplace products ({products.length} total)
           </p>
         </div>
-        <button
-          type="button"
-          className="px-4 py-2 text-sm font-medium text-white bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 rounded-md hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
+        <Link
+          href="/admin/products/new"
+          className="px-4 py-2 text-sm font-medium text-white bg-navy rounded-md hover:opacity-90"
         >
           Add Product
-        </button>
+        </Link>
       </div>
 
       {pendingCount > 0 && (

@@ -1496,6 +1496,52 @@ export const adminApi = {
     return api.patch(`/api/shop/products/${id}/`, patch).then((r) => mapProduct(r.data));
   },
   deleteProduct: (id: string) => api.delete(`/api/shop/products/${id}/`).then((r) => r.data),
+  createProduct: (data: {
+    name: string;
+    category: number;
+    price: string;
+    description?: string;
+    image?: File | null;
+  }) => {
+    const fallback: AdminProduct = mapProduct({
+      id: Date.now(),
+      name: data.name,
+      price: data.price,
+      is_active: true,
+    });
+    const append = (form: FormData) => {
+      form.append('name', data.name);
+      form.append('category', String(data.category));
+      form.append('price', data.price);
+      form.append('description', data.description || '');
+      form.append('is_active', 'true');
+      if (data.image) form.append('image', data.image);
+    };
+    if (data.image) {
+      const form = new FormData();
+      append(form);
+      return safe(
+        api
+          .post('/api/shop/products/', form, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          })
+          .then((r) => mapProduct(r.data)),
+        fallback,
+      );
+    }
+    return safe(
+      api
+        .post('/api/shop/products/', {
+          name: data.name,
+          category: data.category,
+          price: data.price,
+          description: data.description || '',
+          is_active: true,
+        })
+        .then((r) => mapProduct(r.data)),
+      fallback,
+    );
+  },
 
   getCourses: (params?: Record<string, string>) =>
     safe(
