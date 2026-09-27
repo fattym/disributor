@@ -89,8 +89,8 @@ function SidebarItem({ item, isCollapsed }: { item: NavItem; isCollapsed: boolea
           onClick={() => setOpen(!open)}
           className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left ${
             isParentActive
-              ? 'bg-zinc-800 text-white'
-              : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+              ? 'bg-orange-600 text-white'
+              : 'text-zinc-300 hover:text-white hover:bg-white/10'
           }`}
         >
           <span>{item.icon}</span>
@@ -98,7 +98,7 @@ function SidebarItem({ item, isCollapsed }: { item: NavItem; isCollapsed: boolea
           {!isCollapsed && <span className="ml-auto transition-transform">{open ? '▼' : '▶'}</span>}
         </button>
         {!isCollapsed && open && (
-          <div className="ml-6 mt-1 space-y-1">
+          <div className="ml-5 border-l-2 border-orange-600/20 pl-2 mt-1 space-y-1">
             {item.children!.map((child) => {
               const active = pathname === child.href || pathname.startsWith(child.href + '/');
               return (
@@ -107,8 +107,8 @@ function SidebarItem({ item, isCollapsed }: { item: NavItem; isCollapsed: boolea
                   href={child.href}
                   className={`flex items-center gap-3 px-3 py-1.5 text-sm rounded-md transition-colors ${
                     active
-                      ? 'bg-zinc-800 text-white'
-                      : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                      ? 'bg-orange-600 text-white'
+                      : 'text-zinc-300 hover:text-white hover:bg-white/10'
                   }`}
                 >
                   <span>{child.icon}</span>
@@ -130,8 +130,8 @@ function SidebarItem({ item, isCollapsed }: { item: NavItem; isCollapsed: boolea
       href={item.href}
       className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
         active
-          ? 'bg-zinc-800 text-white'
-          : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+          ? 'bg-orange-600 text-white'
+          : 'text-zinc-300 hover:text-white hover:bg-white/10'
       }`}
     >
       <span>{item.icon}</span>
@@ -161,21 +161,21 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950">
       <aside
-        className={`flex flex-col bg-zinc-900 text-white transition-all duration-300 ${
+        className={`flex flex-col bg-navy text-zinc-100 transition-all duration-300 ${
           isCollapsed ? 'w-16' : 'w-64'
         }`}
       >
-        <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
+        <div className="p-4 border-b border-white/10 flex items-center justify-between">
           {!isCollapsed && (
             <div>
               <h1 className="text-xl font-bold text-white">Learning Pack</h1>
-              <p className="text-xs text-zinc-500">Super Admin</p>
+              <p className="text-xs text-orange-400">Super Admin</p>
             </div>
           )}
           <button
             type="button"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            className="p-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-white/10 transition-colors"
             aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {isCollapsed ? '→' : '←'}
@@ -186,11 +186,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <SidebarItem key={item.label} item={item} isCollapsed={isCollapsed} />
           ))}
         </nav>
-        <div className="p-4 border-t border-zinc-800">
+        <div className="p-4 border-t border-white/10">
           <button
             type="button"
             onClick={logout}
-            className="w-full px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-md transition-colors"
+            className="w-full px-3 py-2 text-sm text-zinc-300 hover:text-white hover:bg-white/10 rounded-md transition-colors"
           >
             Sign Out
           </button>
@@ -199,7 +199,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 px-6 py-3 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Learning Pack Admin</h2>
+          <h2 className="text-xl font-bold text-navy dark:text-zinc-100">Learning Pack Admin</h2>
           <div className="flex items-center gap-4">
             <button
               type="button"
