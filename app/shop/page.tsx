@@ -43,6 +43,14 @@ export default function ShopPage() {
     if (activeCat !== "All") {
       list = list.filter((p) => p.category_name === activeCat);
     }
+    if (educationLevel !== "All levels") {
+      const edLevel = educationLevel.toLowerCase();
+      list = list.filter((p) =>
+        (p.category_name || "").toLowerCase().includes(edLevel) ||
+        (p.description || "").toLowerCase().includes(edLevel) ||
+        (p.name || "").toLowerCase().includes(edLevel),
+      );
+    }
     if (query.trim()) {
       const searchTerm = query.trim().toLowerCase();
       list = list.filter((p) =>
@@ -52,7 +60,7 @@ export default function ShopPage() {
       );
     }
     return list;
-  }, [products, activeCat, query]);
+  }, [products, activeCat, query, educationLevel]);
 
   const sorted = useMemo(() => {
     const arr = [...filtered];
@@ -101,7 +109,7 @@ export default function ShopPage() {
   };
 
   const formatPrice = (value: string | null | undefined) =>
-    `KSh ${parseInt(value || "0", 10).toLocaleString("en-KE")}`;
+    `KSh ${parseFloat(value || "0").toLocaleString("en-KE")}`;
 
   return (
     <>

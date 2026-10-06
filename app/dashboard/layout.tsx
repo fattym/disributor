@@ -14,9 +14,9 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: '🏠' },
-  { href: '/products', label: 'Products', icon: '📦' },
-  { href: '/orders', label: 'Orders', icon: '📋' },
-  { href: '/deliveries', label: 'Deliveries', icon: '🚚' },
+  { href: '/dashboard/products', label: 'Products', icon: '📦' },
+  { href: '/dashboard/orders', label: 'Orders', icon: '📋' },
+  { href: '/dashboard/deliveries', label: 'Deliveries', icon: '🚚' },
 ];
 
 function SidebarNav({ isMobile = false, onItemClick }: { isMobile?: boolean; onItemClick?: () => void }) {

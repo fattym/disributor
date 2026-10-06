@@ -69,9 +69,9 @@ export default function DashboardPage() {
     .reduce((sum, o) => sum + parseFloat(o.total_amount), 0);
 
   const stats = [
-    { label: 'Active Products', value: activeProducts, href: '/products' },
-    { label: 'Pending Orders', value: pendingOrders, href: '/orders' },
-    { label: 'Total Revenue', value: `KSh ${totalRevenue.toLocaleString()}`, href: '/orders' },
+    { label: 'Active Products', value: activeProducts, href: '/dashboard/products' },
+    { label: 'Pending Orders', value: pendingOrders, href: '/dashboard/orders' },
+    { label: 'Total Revenue', value: `KSh ${totalRevenue.toLocaleString()}`, href: '/dashboard/orders' },
     { label: 'Wallet Balance', value: wallet ? `KSh ${parseFloat(wallet.balance).toLocaleString()}` : '—', href: '#' },
   ];
 
