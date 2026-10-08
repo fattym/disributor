@@ -12,6 +12,7 @@ export default function ShopPage() {
   const [products, setProducts] = useState<ShopProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCat, setActiveCat] = useState<string>("All");
+  const [activePublisher, setActivePublisher] = useState<string>("All");
   const [query, setQuery] = useState("");
   const [educationLevel, setEducationLevel] = useState("All levels");
   const [sort, setSort] = useState<string>("default");
@@ -38,10 +39,21 @@ export default function ShopPage() {
     new Set(products.map((p) => p.category_name).filter(Boolean)),
   );
 
+  const publisherNames = Array.from(
+    new Set(
+      products
+        .map((p) => p.distributor_name)
+        .filter((n): n is string => Boolean(n)),
+    ),
+  );
+
   const filtered = useMemo(() => {
     let list = products;
     if (activeCat !== "All") {
       list = list.filter((p) => p.category_name === activeCat);
+    }
+    if (activePublisher !== "All") {
+      list = list.filter((p) => p.distributor_name === activePublisher);
     }
     if (educationLevel !== "All levels") {
       const edLevel = educationLevel.toLowerCase();
@@ -60,7 +72,7 @@ export default function ShopPage() {
       );
     }
     return list;
-  }, [products, activeCat, query, educationLevel]);
+  }, [products, activeCat, activePublisher, query, educationLevel]);
 
   const sorted = useMemo(() => {
     const arr = [...filtered];
@@ -183,6 +195,38 @@ export default function ShopPage() {
                   </li>
                 ))}
               </ul>
+
+              <div className="publishers-bar">
+                <span className="publishers-label">Publishers</span>
+                <ul
+                  className="pills"
+                  role="group"
+                  aria-label="Filter by publisher"
+                >
+                  <li>
+                    <button
+                      className={`pill ${activePublisher === "All" ? "is-active" : ""}`}
+                      data-filter="All"
+                      type="button"
+                      onClick={() => setActivePublisher("All")}
+                    >
+                      All
+                    </button>
+                  </li>
+                  {publisherNames.map((name) => (
+                    <li key={name}>
+                      <button
+                        className={`pill ${activePublisher === name ? "is-active" : ""}`}
+                        data-filter={name}
+                        type="button"
+                        onClick={() => setActivePublisher(name)}
+                      >
+                        {name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
               <div className="sort">
                 <label htmlFor="sort">Sort by</label>

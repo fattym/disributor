@@ -1131,6 +1131,17 @@ section {
   gap: 1rem;
   margin-bottom: 1.6rem;
 }
+.publishers-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.publishers-label {
+  font: 700 0.875rem var(--font-body);
+  color: var(--navy);
+}
 .pills {
   display: flex;
   flex-wrap: wrap;

@@ -59,9 +59,18 @@ export const getCurrentUser = async () => {
 export const distributorApi = {
   getProducts: (params?: { category?: string; tags?: string; min_price?: number; max_price?: number }) =>
     api.get('/distributor/products/', { params }).then((r) => r.data),
-  createProduct: (data: unknown) => api.post('/distributor/products/', data).then((r) => r.data),
-  updateProduct: (id: string, data: unknown) => api.patch(`/distributor/products/${id}/`, data).then((r) => r.data),
-  deleteProduct: (id: string) => api.delete(`/distributor/products/${id}/`).then((r) => r.data),
+   createProduct: (data: unknown) => api.post('/distributor/products/', data).then((r) => r.data),
+   updateProduct: (id: string, data: unknown) => api.patch(`/distributor/products/${id}/`, data).then((r) => r.data),
+   deleteProduct: (id: string) => api.delete(`/distributor/products/${id}/`).then((r) => r.data),
+   uploadProductImages: (id: number, files: File[]) => {
+     const form = new FormData();
+     files.forEach((f) => form.append('files', f));
+     return api
+       .post(`/distributor/products/${id}/upload_images/`, form, {
+         headers: { 'Content-Type': 'multipart/form-data' },
+       })
+       .then((r) => r.data);
+   },
 
   getOrders: () => api.get('/distributor/orders/').then((r) => r.data),
   updateOrderStatus: (id: string, status: string) => api.patch(`/distributor/orders/${id}/`, { status }).then((r) => r.data),
@@ -69,7 +78,16 @@ export const distributorApi = {
   getDeliveries: () => api.get('/distributor/deliveries/').then((r) => r.data),
   updateDelivery: (id: string, data: unknown) => api.patch(`/distributor/deliveries/${id}/`, data).then((r) => r.data),
 
-  getWallet: () => api.get('/distributor/wallet/').then((r) => r.data),
+   getWallet: () => api.get('/distributor/wallet/').then((r) => r.data),
+
+   getCategories: () =>
+     api.get('/shop/categories/').then((r) => r.data),
+   getGrades: () =>
+     api.get('/academics/grades/').then((r) => r.data),
+   getLearningAreas: () =>
+     api.get('/academics/learning-areas/').then((r) => r.data),
+   getPathways: () =>
+     api.get('/academics/pathways/').then((r) => r.data),
 };
 
 export interface ShopProductVariant {
