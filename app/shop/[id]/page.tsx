@@ -1,8 +1,8 @@
 import ProductDetailClient from './ProductDetailClient';
 
-export async function generateStaticParams() {
-  return [];
-}
+  export async function generateStaticParams() {
+    return [{ id: 'placeholder' }];
+  }
 
 export const metadata = {
   title: 'Product Details | Learning Pack',
