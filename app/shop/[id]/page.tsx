@@ -7,9 +7,13 @@ import GlobalHeader from '@/components/GlobalHeader';
 import GlobalFooter from '@/components/GlobalFooter';
 import { shopApi, ShopProduct } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { useCart } from '@/lib/cart';
+  import { useCart } from '@/lib/cart';
 
-export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  export async function generateStaticParams() {
+    return [];
+  }
+
+  export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { user } = useAuth();
   const { addItem, getItemCount } = useCart();
   const router = useRouter();
