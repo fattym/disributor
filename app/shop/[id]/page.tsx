@@ -9,10 +9,6 @@ import { shopApi, ShopProduct } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
   import { useCart } from '@/lib/cart';
 
-  export async function generateStaticParams() {
-    return [];
-  }
-
   export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { user } = useAuth();
   const { addItem, getItemCount } = useCart();
