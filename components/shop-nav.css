@@ -1,0 +1,379 @@
+/* ==========================================================
+   Shop Nav Bar – CBC curriculum hierarchical dropdowns
+   Primary Navy Dark  #0F172A  background + active indicators
+   Coral Red          #E53900  active underline / accent
+   Soft Blue          #93C5FD  hover state 1
+   Warm Gold          #FBBF24  hover state 2
+   ========================================================== */
+
+.shop-nav {
+  background: linear-gradient(180deg, #0d2444 0%, #0b1f3a 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px -18px rgba(11, 31, 58, 0.7);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.shop-nav__wrap {
+  /* inherits width/centering from .wrap */
+}
+
+.shop-nav__top {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-block: 0.35rem;
+  flex-wrap: nowrap;
+  overflow: visible;
+}
+
+.shop-nav__item {
+  position: static;
+  list-style: none;
+}
+
+.shop-nav__trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.85rem 1.1rem;
+  border: none;
+  background: transparent;
+  color: var(--white);
+  font: 700 0.9rem/1 var(--font-body);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  border-radius: 0.55rem 0.55rem 0 0;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+  border-bottom: 3px solid transparent;
+}
+
+.shop-nav__trigger:hover,
+.shop-nav__trigger:focus-visible {
+  color: var(--shop-soft-blue, #93c5fd);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.shop-nav__item.is-open > .shop-nav__trigger {
+  color: var(--shop-warm-gold, #fbbf24);
+  border-bottom-color: var(--shop-coral, #e53900);
+}
+
+.shop-nav__item.is-open > .shop-nav__trigger:hover,
+.shop-nav__item.is-open > .shop-nav__trigger:focus-visible {
+  color: var(--shop-coral, #e53900);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.shop-nav__chevron {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.shop-nav__item.is-open .shop-nav__chevron {
+  transform: rotate(225deg);
+}
+
+/* Dropdown panel */
+.shop-nav__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  width: min(100% - 2.5rem, var(--wrap, 1180px));
+  max-width: var(--wrap, 1180px);
+  margin-inline: auto;
+  background: var(--white);
+  border: 1px solid var(--shop-border, rgba(15, 23, 42, 0.1));
+  border-top: none;
+  border-radius: 0 0 1.25rem 1.25rem;
+  box-shadow:
+    0 24px 48px -20px rgba(11, 31, 58, 0.32),
+    0 10px 24px -14px rgba(11, 31, 58, 0.2);
+  padding: 1.75rem 2.25rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  z-index: 50;
+  color: var(--charcoal);
+  transform-origin: top center;
+  animation: shop-nav-drop 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@keyframes shop-nav-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-nav__dropdown {
+    animation: none;
+  }
+}
+
+/* Panel header (mobile only) */
+.shop-nav__dropdown-head {
+  display: none;
+}
+
+.shop-nav__dropdown-title {
+  font: 700 1.05rem/1.2 var(--font-head);
+  color: var(--shop-navy, #0b1f3a);
+  letter-spacing: -0.01em;
+}
+
+.shop-nav__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid rgba(11, 31, 58, 0.12);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--shop-navy, #0b1f3a);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.shop-nav__close:hover {
+  background: rgba(229, 57, 0, 0.08);
+  border-color: var(--shop-coral, #e53900);
+  color: var(--shop-coral, #e53900);
+}
+
+.shop-nav__columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem 2rem;
+}
+
+.shop-nav__group-title {
+  color: var(--shop-navy, #0f172a);
+  font: 700 0.72rem/1.2 var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.shop-nav__group-title::before {
+  content: "";
+  display: block;
+  width: 4px;
+  height: 0.9rem;
+  background: var(--shop-coral, #e53900);
+  border-radius: 2px;
+  flex: none;
+}
+
+.shop-nav__sublist {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.shop-nav__sublist a {
+  display: block;
+  padding: 0.5rem 0.65rem;
+  color: var(--shop-navy, #0f172a);
+  text-decoration: none;
+  font: 500 0.88rem/1.4 var(--font-body);
+  border-radius: 0.5rem;
+  transition:
+    color 0.18s ease,
+    background-color 0.18s ease,
+    padding-left 0.18s ease;
+  position: relative;
+}
+
+.shop-nav__sublist a::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.7rem;
+  width: 0;
+  height: 0.55rem;
+  border: 3px solid transparent;
+  border-left-color: var(--shop-coral, #e53900);
+  border-top: 0;
+  border-bottom: 0;
+  opacity: 0;
+  transition: opacity 0.18s ease, width 0.18s ease;
+}
+
+.shop-nav__sublist a:hover,
+.shop-nav__sublist a:focus-visible {
+  color: var(--shop-coral, #e53900);
+  background: rgba(229, 57, 0, 0.06);
+  padding-left: 0.95rem;
+}
+
+.shop-nav__sublist a:hover::before,
+.shop-nav__sublist a:focus-visible::before {
+  opacity: 1;
+  width: 6px;
+  border-left-width: 5px;
+}
+
+.shop-nav__sublist a:active {
+  color: var(--shop-coral, #e53900);
+}
+
+.shop-nav__active-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--shop-coral, #e53900);
+  border-radius: 2px 2px 0 0;
+}
+
+/* Dark mode adaptation */
+html.dark .shop-nav__dropdown {
+  background: var(--shop-navy-dark, #0b1224);
+  border-color: var(--shop-border-dark, rgba(255, 255, 255, 0.12));
+  color: var(--foreground);
+}
+
+html.dark .shop-nav__sublist a {
+  color: var(--foreground);
+}
+
+html.dark .shop-nav__group-title {
+  color: var(--shop-warm-gold, #fBBF24);
+}
+
+/* Mobile styles */
+@media (max-width: 900px) {
+  .shop-nav {
+    position: static;
+    z-index: auto;
+  }
+
+  .shop-nav__top {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-block: 0.5rem;
+    gap: 0.4rem;
+  }
+
+  .shop-nav__top::-webkit-scrollbar {
+    display: none;
+  }
+
+  .shop-nav__trigger {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+    border-radius: 0.45rem;
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .shop-nav__trigger:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .shop-nav__dropdown {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: auto;
+    width: 100vw;
+    max-width: none;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    margin: 0;
+    border-radius: 0;
+    border: none;
+    padding: 0 1.25rem 2.5rem;
+    display: block;
+    z-index: 1000;
+    box-shadow: none;
+    background: var(--white);
+  }
+
+  .shop-nav__dropdown-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    margin: 0 -1.25rem 1.5rem;
+    padding: 0.9rem 1.25rem;
+    background: var(--white);
+    border-bottom: 1px solid rgba(11, 31, 58, 0.1);
+  }
+
+  .shop-nav__columns {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .shop-nav__group-title {
+    font-size: 0.8rem;
+  }
+
+  .shop-nav__sublist {
+    gap: 0.15rem;
+  }
+
+  .shop-nav__sublist a {
+    padding: 0.7rem 0.6rem;
+    font-size: 0.95rem;
+  }
+
+  html.dark .shop-nav__dropdown {
+    background: var(--shop-navy-dark, #0b1224);
+  }
+
+  html.dark .shop-nav__dropdown-head {
+    background: var(--shop-navy-dark, #0b1224);
+    border-bottom-color: rgba(255, 255, 255, 0.12);
+  }
+
+  html.dark .shop-nav__close {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: #f4f5f7;
+  }
+}
+
+@media (max-width: 640px) {
+  .shop-nav__top {
+    gap: 0.3rem;
+  }
+
+  .shop-nav__trigger {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.8rem;
+  }
+}

@@ -27,6 +27,13 @@
   --font-hand: "Caveat", "Segoe UI", cursive;
   --wrap: 1180px;
 
+  --coral: #e53900;
+  --soft-blue: #93c5fd;
+  --warm-gold: #fbbf24;
+  --whatsapp-green: #25d366;
+  --page-bg: #f8fafc;
+  --card-border: #e2e8f0;
+
   --background: var(--white);
   --foreground: var(--charcoal);
 }

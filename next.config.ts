@@ -1,9 +1,6 @@
 import type { NextConfig } from "next";
 
- const nextConfig: NextConfig = {
-  output: "export",
-  basePath: "/learningpack",
-  assetPrefix: "/learningpack",
+const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },

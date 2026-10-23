@@ -83,11 +83,16 @@ export default function GlobalHeader() {
         >
           <div className="wrap">
             <ul>
-              <li>
-                <Link href="/shop" aria-current="page">
-                  Shop
-                </Link>
-              </li>
+                <li>
+                  <Link href="/shop" aria-current="page">
+                    Shop
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/discovery" aria-current="page">
+                    Discovery
+                  </Link>
+                </li>
               {showMyOrders && (
                 <li>
                   <Link href="/orders" aria-current="page">

@@ -1,6 +1,11 @@
 import Link from "next/link";
+import Image from "next/image";
 import Script from "next/script";
 import ThemeToggle from "@/components/ThemeToggle";
+import prePrimaryImage from "@/assets/image/pre-primary.jpeg";
+import primaryImage from "@/assets/image/cbc primary.jpeg";
+import juniorSecondaryImage from "@/assets/image/cbc junior secondary.jpeg";
+import seniorSecondaryImage from "@/assets/image/cbc senior secondary.jpeg";
 
 export default function HomePage() {
   return (
@@ -143,87 +148,116 @@ export default function HomePage() {
         </header>
 
         <main id="main">
-          <section
-            className="hero"
-            style={{ paddingBottom: "clamp(4.5rem, 8vw, 6.5rem)" }}
-          >
+          <section className="hero hero--cbc">
             <div className="wrap">
-              <div>
-                <h1>Find your school list. We’ll pack it.</h1>
+              <div className="hero__copy">
+                <p className="hero__badge">
+                  <span aria-hidden="true">★</span> Kenya&apos;s CBC Learning Store
+                </p>
+                <h1>
+                  Every book and supply your learner needs, for every CBC grade
+                </h1>
                 <p className="lead">
-                  Pick your child’s school, see exactly what they need, and
-                  order everything in one go.
+                  CBC approved textbooks, set books, stationery and learning
+                  materials — ordered online and delivered to schools, shops and
+                  homes across Kenya.
                 </p>
                 <div className="actions">
-                  <Link className="btn" href="/shop">
-                    Shop school supplies
+                  <Link className="btn hero__cta-primary" href="/shop">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M5 4.75A2.75 2.75 0 0 1 7.75 2H20v17H7.75A2.75 2.75 0 0 0 5 21.75v-17Z" />
+                      <path d="M5 5v16.5M8.5 6h8M8.5 9h8" />
+                    </svg>
+                    Shop CBC Books
                   </Link>
-                  <a className="btn btn--ghost" href="/upload-my-list/">
-                    Upload my list
-                  </a>
+                  <Link
+                    className="btn btn--ghost hero__cta-secondary"
+                    href="#hero-grades"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 6h16M4 12h16M4 18h16" />
+                      <circle cx="2.5" cy="6" r=".5" />
+                      <circle cx="2.5" cy="12" r=".5" />
+                      <circle cx="2.5" cy="18" r=".5" />
+                    </svg>
+                    Browse by Grade
+                  </Link>
                 </div>
+                <nav className="hero__grades" id="hero-grades" aria-label="Shop by grade">
+                  <span className="hero__grades-label">Shop by grade</span>
+                  <Link href="/shop?level=pre-primary">Pre-Primary</Link>
+                  <Link href="/shop?level=primary">Grade 1–6</Link>
+                  <Link href="/shop?level=junior-secondary">Grade 7–9</Link>
+                  <Link href="/shop?level=senior-secondary&grades=10-12">
+                    Grade 10–12
+                  </Link>
+                  <Link href="/shop?level=senior-secondary&form=1-4">
+                    Form 1–4
+                  </Link>
+                </nav>
               </div>
 
-              <div
-                className="book"
-                role="img"
-                aria-label="Example school list with items ticked off: exercise books, pencils, geometry set, ruler, eraser and scissors"
-              >
-                <p className="book__title">Example school list</p>
-                <ul aria-hidden="true">
-                  <li>
-                    <span className="tick">
-                      <svg viewBox="0 0 24 24">
-                        <path d="M4 12.5l5 5L20 6.5" />
-                      </svg>
-                    </span>
-                    Exercise books
-                  </li>
-                  <li>
-                    <span className="tick">
-                      <svg viewBox="0 0 24 24">
-                        <path d="M4 12.5l5 5L20 6.5" />
-                      </svg>
-                    </span>
-                    HB pencils
-                  </li>
-                  <li>
-                    <span className="tick">
-                      <svg viewBox="0 0 24 24">
-                        <path d="M4 12.5l5 5L20 6.5" />
-                      </svg>
-                    </span>
-                    Geometry set
-                  </li>
-                  <li>
-                    <span className="tick">
-                      <svg viewBox="0 0 24 24">
-                        <path d="M4 12.5l5 5L20 6.5" />
-                      </svg>
-                    </span>
-                    Ruler and eraser
-                  </li>
-                  <li>
-                    <span className="tick">
-                      <svg viewBox="0 0 24 24">
-                        <path d="M4 12.5l5 5L20 6.5" />
-                      </svg>
-                    </span>
-                    Scissors and glue
-                  </li>
-                  <li>
-                    <span className="tick">
-                      <svg viewBox="0 0 24 24">
-                        <path d="M4 12.5l5 5L20 6.5" />
-                      </svg>
-                    </span>
-                    Colouring pencils
-                  </li>
-                </ul>
-                <p className="book__note">
-                  Your real list appears when you{" "}
-                  <a href="/find-my-school-list/">pick your school</a>.
-                </p>
+              <div className="hero__visual">
+                <div
+                  className="book"
+                  role="img"
+                  aria-label="Example school list with items ticked off: exercise books, pencils, geometry set, ruler, eraser and scissors"
+                >
+                  <p className="book__title">Your school list, all in one place</p>
+                  <ul aria-hidden="true">
+                    <li>
+                      <span className="tick">
+                        <svg viewBox="0 0 24 24">
+                          <path d="M4 12.5l5 5L20 6.5" />
+                        </svg>
+                      </span>
+                      Exercise books
+                    </li>
+                    <li>
+                      <span className="tick">
+                        <svg viewBox="0 0 24 24">
+                          <path d="M4 12.5l5 5L20 6.5" />
+                        </svg>
+                      </span>
+                      HB pencils
+                    </li>
+                    <li>
+                      <span className="tick">
+                        <svg viewBox="0 0 24 24">
+                          <path d="M4 12.5l5 5L20 6.5" />
+                        </svg>
+                      </span>
+                      Geometry set
+                    </li>
+                    <li>
+                      <span className="tick">
+                        <svg viewBox="0 0 24 24">
+                          <path d="M4 12.5l5 5L20 6.5" />
+                        </svg>
+                      </span>
+                      Ruler and eraser
+                    </li>
+                    <li>
+                      <span className="tick">
+                        <svg viewBox="0 0 24 24">
+                          <path d="M4 12.5l5 5L20 6.5" />
+                        </svg>
+                      </span>
+                      Scissors and glue
+                    </li>
+                    <li>
+                      <span className="tick">
+                        <svg viewBox="0 0 24 24">
+                          <path d="M4 12.5l5 5L20 6.5" />
+                        </svg>
+                      </span>
+                      Colouring pencils
+                    </li>
+                  </ul>
+                  <p className="book__note">
+                    Choose a school and we’ll take it from here.
+                  </p>
+                </div>
               </div>
             </div>
           </section>
@@ -269,175 +303,123 @@ export default function HomePage() {
             </div>
           </div>
 
-          <section>
+          <section className="home-shortcuts" aria-labelledby="shop-level-heading">
             <div className="wrap">
-              <div className="section-head">
-                <h2>Shop by category</h2>
-                <p>Whatever is missing from the list, start here.</p>
-              </div>
-              <div className="cats">
-                <a
-                  className="cat cat--big"
-                  href="/product-category/student-boxes/"
-                >
-                  <img
-                    src="https://images.unsplash.com/photo-1726726192148-af52008ff663?auto=format&fit=crop&q=75&w=1000&h=800"
-                    alt=""
-                    loading="lazy"
-                  />
+              <div className="home-levels">
+                <div className="home-levels__heading">
                   <div>
-                    <h3>Student boxes</h3>
-                    <span>Ready-made packs for each school and grade</span>
+                    <p className="home-section-label">Shop by level</p>
+                    <h2 id="shop-level-heading">Find books for every stage</h2>
                   </div>
-                </a>
-                <a
-                  className="cat cat--mid"
-                  href="/product-category/stationery/"
-                >
-                  <img
-                    src="https://images.unsplash.com/photo-1629652487043-fb2825838f8c?auto=format&fit=crop&q=75&w=900&h=500"
-                    alt=""
-                    loading="lazy"
-                  />
-                  <div>
-                    <h3>Stationery</h3>
-                    <span>Pens, pencils, paper and more</span>
-                  </div>
-                </a>
-                <a
-                  className="cat cat--small"
-                  href="/product-category/textbooks/"
-                >
-                  <img
-                    src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=75&w=900&h=500"
-                    alt=""
-                    loading="lazy"
-                  />
-                  <div>
-                    <h3>Text books</h3>
-                    <span>Course books for every level</span>
-                  </div>
-                </a>
-                <a
-                  className="cat cat--mid"
-                  href="/product-category/desk-accessories/"
-                >
-                  <img
-                    src="https://images.unsplash.com/photo-1654931800100-2ecf6eee7c64?auto=format&fit=crop&q=75&w=900&h=500"
-                    alt=""
-                    loading="lazy"
-                  />
-                  <div>
-                    <h3>Desk accessories</h3>
-                    <span>Staplers, organisers and tools</span>
-                  </div>
-                </a>
-                <a
-                  className="cat cat--small cat--tile"
-                  href="/product-category/electronics-and-computers/"
-                >
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <rect x="3" y="4" width="18" height="12" rx="1.5" />
-                    <path d="M2 20h20" />
-                  </svg>
-                  <div>
-                    <h3>Electronics and computers</h3>
-                    <span>Laptops, calculators and accessories</span>
-                  </div>
-                </a>
-              </div>
-            </div>
-          </section>
-
-          <section className="signature" id="signature">
-            <div className="wrap">
-              <div>
-                <h2>A better way to prepare for school</h2>
-                <p className="lead">
-                  Add a practical coding pack to your order, created with Coding
-                  Clubs Kenya for young learners.
-                </p>
-                <div className="actions">
-                  <a className="btn" href="/contact/">
-                    Ask about the pack
-                  </a>
-                  <a
-                    className="btn btn--ghost"
-                    href="https://www.codingclubskenya.com/"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    Visit Coding Clubs Kenya
-                  </a>
+                  <Link href="/shop" className="home-levels__all">
+                    Browse all
+                    <span aria-hidden="true">→</span>
+                  </Link>
                 </div>
+                <nav className="home-levels__grid" aria-label="Shop by school level">
+                  <Link href="/shop?level=pre-primary">
+                    <Image
+                      className="home-levels__image"
+                      src={prePrimaryImage}
+                      alt=""
+                      sizes="(max-width: 640px) 50vw, (max-width: 1000px) 50vw, 25vw"
+                    />
+                    <span className="home-levels__title">Pre-Primary</span>
+                    <small>Playgroup · PP1 · PP2</small>
+                  </Link>
+                  <Link href="/shop?level=primary">
+                    <Image
+                      className="home-levels__image"
+                      src={primaryImage}
+                      alt=""
+                      sizes="(max-width: 640px) 50vw, (max-width: 1000px) 50vw, 25vw"
+                    />
+                    <span className="home-levels__title">Primary</span>
+                    <small>Grades 1–6</small>
+                  </Link>
+                  <Link href="/shop?level=junior-secondary">
+                    <Image
+                      className="home-levels__image"
+                      src={juniorSecondaryImage}
+                      alt=""
+                      sizes="(max-width: 640px) 50vw, (max-width: 1000px) 50vw, 25vw"
+                    />
+                    <span className="home-levels__title">Junior Secondary</span>
+                    <small>Grades 7–9</small>
+                  </Link>
+                  <Link href="/shop?level=senior-secondary">
+                    <Image
+                      className="home-levels__image"
+                      src={seniorSecondaryImage}
+                      alt=""
+                      sizes="(max-width: 640px) 50vw, (max-width: 1000px) 50vw, 25vw"
+                    />
+                    <span className="home-levels__title">Senior Secondary</span>
+                    <small>Grades 10–12 · KCSE</small>
+                  </Link>
+                </nav>
               </div>
-              <div className="code" aria-hidden="true">
-                <span className="code__badge">Signature pack</span>
-                <pre>
-                  <span className="c"># lesson_01.py</span>
-                  <span className="s">name = &quot;Amina&quot;</span>
-                  <span className="s">print(&quot;Hello,&quot;, name)</span>
-                  <span className="k">for</span>{" "}
-                  <span className="s">level</span>{" "}
-                  <span className="k">in range</span>
-                  <span className="s">(3):</span>
-                  <span className="s">print(&quot;Level&quot;, level + 1)</span>
-                </pre>
-              </div>
+
+              <aside className="home-bulk">
+                <div className="home-bulk__content">
+                  <p className="home-bulk__badge">
+                    <span aria-hidden="true">🏫</span> Schools &amp; Teachers
+                  </p>
+                  <h2>Bulk school orders, made simple</h2>
+                  <p className="home-bulk__description">
+                    Send us your school booklist and we&apos;ll prepare a quote,
+                    source every title and deliver on schedule — term after term.
+                  </p>
+                  <div className="home-bulk__actions">
+                    <a
+                      className="home-bulk__whatsapp"
+                      href="https://wa.me/254716815025?text=Hello%2C%20I%27d%20like%20a%20bulk%20school%20order%20quote."
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Request a Quote on WhatsApp
+                    </a>
+                    <a
+                      className="home-bulk__phone"
+                      href="tel:+254716815025"
+                    >
+                      +254 716 815 025
+                    </a>
+                  </div>
+                </div>
+                <dl className="home-bulk__stats">
+                  <div>
+                    <dt>Titles stocked</dt>
+                    <dd>10,000+</dd>
+                  </div>
+                  <div>
+                    <dt>Nairobi delivery</dt>
+                    <dd>48hrs</dd>
+                  </div>
+                  <div>
+                    <dt>Schools served</dt>
+                    <dd>300+</dd>
+                  </div>
+                </dl>
+              </aside>
             </div>
           </section>
 
-          <section className="steps-band">
-            <div className="wrap">
-              <div className="section-head">
-                <h2>From list to doorstep in three steps</h2>
-              </div>
-              <ol
-                className="steps"
-                style={{ listStyle: "none", margin: "0", padding: "0" }}
-              >
-                <li>
-                  <h3>Find or upload your list</h3>
-                  <p>
-                    Choose your school and grade, or send us the list your
-                    school gave you.
-                  </p>
-                </li>
-                <li>
-                  <h3>Check your pack</h3>
-                  <p>
-                    Review every item, then add anything extra to your cart.
-                  </p>
-                </li>
-                <li>
-                  <h3>Order and track it</h3>
-                  <p>
-                    Check out online and follow your order until it arrives.
-                  </p>
-                </li>
-              </ol>
-            </div>
-          </section>
-
-          <section className="callout">
-            <div className="wrap">
-              <div>
-                <h2>Can’t find your school?</h2>
-                <p>View our recommended school packs now.</p>
-                <a className="btn" href="/product-category/student-boxes/">
-                  View all packs
-                </a>
-              </div>
-              <img
-                src="https://images.unsplash.com/photo-1456735190827-d1262f71b8a3?auto=format&fit=crop&q=75&w=900&h=675"
-                alt="Pens and coloured papers in an organiser case"
-                loading="lazy"
-                width="900"
-                height="675"
-              />
-            </div>
-          </section>
         </main>
+
+        <a
+          className="home-whatsapp"
+          href="https://wa.me/254716815025"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Chat with us on WhatsApp"
+        >
+          <svg viewBox="0 0 32 32" aria-hidden="true">
+            <path d="M16.02 3.2a12.5 12.5 0 0 0-10.7 18.96L3.7 28.8l6.8-1.78A12.5 12.5 0 1 0 16.02 3.2Z" />
+            <path d="M12.18 9.7c-.38-.84-.78-.85-1.15-.87h-.98c-.34 0-.9.13-1.38.66-.48.53-1.82 1.78-1.82 4.34s1.86 5.03 2.12 5.38c.27.35 3.6 5.77 8.9 7.86 4.4 1.73 5.3 1.39 6.25 1.3.96-.09 3.1-1.26 3.54-2.47.43-1.22.43-2.27.3-2.49-.13-.22-.48-.35-1-.62-.53-.26-3.1-1.53-3.58-1.7-.48-.18-.83-.27-1.18.26-.35.52-1.35 1.7-1.66 2.05-.3.35-.61.4-1.13.13-.53-.26-2.22-.82-4.24-2.62-1.57-1.4-2.63-3.13-2.94-3.66-.3-.52-.03-.81.23-1.07.23-.23.53-.61.79-.92.26-.31.35-.53.53-.88.17-.35.08-.66-.05-.92-.13-.27-1.15-2.84-1.55-3.87Z" />
+          </svg>
+          <span className="home-whatsapp__badge" aria-hidden="true" />
+        </a>
 
         <footer className="footer">
           <div className="wrap">

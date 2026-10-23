@@ -243,6 +243,15 @@ export default function CartPage() {
                   </span>
                 </div>
 
+                <a
+                  href={`https://wa.me/254716815025?text=${encodeURIComponent('Hello, I would like to order:\n' + items.map(i => `${i.product_name} (${i.variant_label}) x${i.quantity} - KSh ${(i.unit_price * i.quantity).toLocaleString()}`).join('\n') + '\nTotal: KSh ' + total.toLocaleString())}`}
+                  target="_blank"
+                  rel="noopener"
+                  className="block w-full text-center px-5 py-3 bg-[#25D366] text-white rounded-md font-medium hover:opacity-90 transition-opacity"
+                >
+                  Order via WhatsApp
+                </a>
+
                 {!user ? (
                   <div className="pt-2 space-y-3">
                     <p className="text-sm text-zinc-600 dark:text-zinc-400">

@@ -6,6 +6,12 @@ import { useAuth } from "@/lib/auth";
 import ThemeToggle from "@/components/ThemeToggle";
 import "./login.css";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const GOOGLE_AUTH_URL =
+  typeof window !== 'undefined'
+    ? `${API_BASE_URL.replace('/api', '')}/accounts/google/login/?next=${encodeURIComponent(window.location.origin + '/learningpack')}`
+    : `${API_BASE_URL.replace('/api', '')}/accounts/google/login/?next=http://localhost:3000/learningpack`;
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,6 +31,10 @@ export default function LoginPage() {
       document.head.appendChild(link);
     }
   }, []);
+
+  const handleGoogleLogin = () => {
+    window.location.href = GOOGLE_AUTH_URL;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,7 +127,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          <button type="button" className="google-btn">
+          <button type="button" className="google-btn" onClick={handleGoogleLogin}>
             <span>Log in with Google</span>
             <svg width="16" height="16" viewBox="0 0 24 24">
               <path

@@ -119,12 +119,26 @@ export interface ShopProduct {
   markup_value: string | null;
   is_reseller_listing: boolean;
   created_at: string;
+  brand?: string;
+  tags?: Array<{ id: number; name: string }>;
+  applicable_levels?: number[];
+  learning_areas?: number[];
+  institution_categories?: string[];
+  sku?: string;
+  product_type?: string;
 }
 
 export interface ShopCategory {
   id: number;
   name: string;
   school: number;
+}
+
+export interface Grade {
+  id: number;
+  name: string;
+  stage: string;
+  order: number;
 }
 
 export const shopApi = {
@@ -137,6 +151,8 @@ export const shopApi = {
   getPublicProducts: (params?: Record<string, string | number>) =>
     api.get<ShopProduct[] | { results: ShopProduct[] }>('/shop/public/', { params }).then((r) => r.data),
   getPublicProduct: (id: number | string) => api.get<ShopProduct>(`/shop/public/${id}/`).then((r) => r.data),
+  getPublicGrades: () =>
+    api.get<Grade[] | { results: Grade[] }>('/academics/grades/').then((r) => r.data),
 
   getLearners: () =>
     api.get<Array<{ id: number; parent: number; learner: number; relationship: string }> | { results: Array<{ id: number; parent: number; learner: number; relationship: string }> }>('/auth/parent-learner-links/').then((r) => r.data),
