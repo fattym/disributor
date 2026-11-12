@@ -64,8 +64,8 @@ export const storefrontApi = {
     api.post('/shop/orders/', data).then((r) => r.data),
   payMpesa: (orderId: number | string, phone?: string) =>
     api.post(`/shop/orders/${orderId}/pay_mpesa/`, { phone }).then((r) => r.data),
-  confirmPayment: (orderId: number | string, body?: Record<string, unknown>) =>
-    api.post(`/shop/orders/${orderId}/confirm-payment/`, body || {}).then((r) => r.data),
+  getPaymentStatus: (orderId: number | string) =>
+    api.get(`/shop/orders/${orderId}/payment-status/`).then((r) => r.data),
   getOrders: () =>
     api.get('/shop/orders/my_orders/').then((r) => r.data),
 };

@@ -32,8 +32,8 @@ export default function CartPage() {
   const [selectedLearner, setSelectedLearner] = useState<number | ''>('');
   const phoneRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<'cart' | 'delivery' | 'checkout' | 'payment' | 'success'>('cart');
-  const [order, setOrder] = useState<{ id: number; total_amount: string; status: string } | null>(null);
-  const [checkoutRequestId, setCheckoutRequestId] = useState<string | null>(null);
+  const [order, setOrder] = useState<{ id: number; total_amount: string; status: string; public_token?: string } | null>(null);
+  const [pollCount, setPollCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [guestMode, setGuestMode] = useState(false);
@@ -130,12 +130,12 @@ export default function CartPage() {
     setLoading(true);
     setMessage('');
     try {
-      const response: any = guestMode
-        ? await shopApi.payGuestMpesa(order.id, phone)
+      const response: { detail?: string } = guestMode
+        ? await shopApi.payGuestMpesa(order.public_token as string, phone)
         : await shopApi.payMpesa(order.id, phone);
       setStep('payment');
-      setMessage('STK push sent. Check your phone to complete the payment.');
-      setCheckoutRequestId(response?.checkout_request_id);
+      setPollCount(0);
+      setMessage(response?.detail || 'STK push sent. Enter your M-Pesa PIN on your phone.');
     } catch (error) {
       setMessage(errorDetail(error, 'Failed to initiate payment.'));
     } finally {
@@ -143,27 +143,42 @@ export default function CartPage() {
     }
   };
 
-  const handleConfirm = async () => {
+  // Payment is confirmed by M-Pesa (server-side), never by this page.
+  // Poll the read-only status endpoint until it is confirmed or failed.
+  const checkStatus = async (manual = false) => {
     if (!order) return;
-    setLoading(true);
-    setMessage('');
+    if (manual) setLoading(true);
     try {
-      const data = guestMode
-        ? await shopApi.confirmGuestPayment(order.id, {
-            checkout_request_id: checkoutRequestId || undefined,
-            force: !checkoutRequestId,
-          })
-        : await shopApi.confirmPayment(order.id);
-      setOrder({ ...order, status: data.order_status });
-      setStep('success');
-      clearCart();
-      setMessage('Payment confirmed. The commission has been credited to the distributor.');
+      const data = guestMode && order.public_token
+        ? await shopApi.getGuestPaymentStatus(order.public_token)
+        : await shopApi.getPaymentStatus(order.id);
+      if (data.payment_status === 'confirmed') {
+        setOrder({ ...order, status: data.order_status });
+        setStep('success');
+        clearCart();
+        setMessage(`Payment received${data.mpesa_receipt_number ? ` (M-Pesa ref ${data.mpesa_receipt_number})` : ''}. Thank you!`);
+      } else if (data.payment_status === 'failed') {
+        setStep('checkout');
+        setMessage(`Payment was not completed${data.result_desc ? `: ${data.result_desc}` : ''}. You can try again.`);
+      } else if (manual) {
+        setMessage('Still waiting for M-Pesa to confirm. This can take up to a minute.');
+      }
     } catch (error) {
-      setMessage(errorDetail(error, 'Failed to confirm payment.'));
+      if (manual) setMessage(errorDetail(error, 'Could not check payment status.'));
     } finally {
-      setLoading(false);
+      if (manual) setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (step !== 'payment' || pollCount >= 30) return;
+    const timer = setTimeout(() => {
+      setPollCount((n) => n + 1);
+      void checkStatus();
+    }, 4000);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, pollCount]);
 
   if (authLoading) {
     return (
@@ -441,22 +456,22 @@ export default function CartPage() {
         {step === 'payment' && order && (
           <div className="space-y-4">
             <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-              Confirm payment — order #{order.id}
+              Waiting for M-Pesa — order #{order.id}
             </h2>
             <p className="text-zinc-700 dark:text-zinc-300">
               An M-Pesa STK push has been sent for KSh {parseFloat(order.total_amount).toLocaleString()}.
             </p>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Complete the prompt on your phone, then click below (simulates the Daraja callback that
-              marks the payment confirmed and credits the distributor&apos;s commission balance).
+            <p className="text-sm text-zinc-600 dark:text-zinc-400" aria-live="polite">
+              Enter your M-Pesa PIN on your phone. This page updates automatically once M-Pesa confirms
+              the payment{pollCount >= 30 ? ' — automatic checking has stopped, use the button below' : ''}.
             </p>
             <div className="flex gap-3">
               <button
-                onClick={handleConfirm}
+                onClick={() => checkStatus(true)}
                 disabled={loading}
                 className="px-5 py-2.5 bg-green-600 text-white rounded-md font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
               >
-                {loading ? 'Confirming...' : 'Confirm payment'}
+                {loading ? 'Checking...' : 'Check payment status'}
               </button>
               <button
                 onClick={() => setStep('checkout')}

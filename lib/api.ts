@@ -21,6 +21,16 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    // Account holds a temporary password: the API refuses everything until it is changed.
+    if (
+      error.response?.status === 403 &&
+      error.response?.data?.code === 'password_change_required' &&
+      typeof window !== 'undefined' &&
+      !window.location.pathname.startsWith('/account/change-password')
+    ) {
+      window.location.href = '/account/change-password';
+      return Promise.reject(error);
+    }
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null;
@@ -48,6 +58,11 @@ api.interceptors.response.use(
 
 export const login = async (email: string, password: string) => {
   const response = await api.post('/auth/login/', { email, password });
+  return response.data;
+};
+
+export const changePassword = async (current_password: string, new_password: string) => {
+  const response = await api.post('/auth/change-password/', { current_password, new_password });
   return response.data;
 };
 
@@ -239,6 +254,13 @@ export const booklistApi = {
     api.delete(`/booklists/${id}/`).then((r) => r.data),
 };
 
+export interface PaymentStatus {
+  order_status: string;
+  payment_status: 'initiated' | 'confirmed' | 'failed' | null;
+  result_desc?: string;
+  mpesa_receipt_number?: string;
+}
+
 export const shopApi = {
   getCategories: () =>
     api.get<ShopCategory[] | { results: ShopCategory[] }>('/shop/categories/').then((r) => r.data),
@@ -284,8 +306,9 @@ export const shopApi = {
   getMyOrders: () => api.get<{ results: unknown[] } | unknown[]>('/shop/orders/my_orders/').then((r) => r.data),
   payMpesa: (orderId: number | string, phone?: string) =>
     api.post(`/shop/orders/${orderId}/pay_mpesa/`, { phone }).then((r) => r.data),
-  confirmPayment: (orderId: number | string) =>
-    api.post(`/shop/orders/${orderId}/confirm-payment/`).then((r) => r.data),
+  /** Read-only: the backend re-checks with M-Pesa. Orders are never confirmed by the client. */
+  getPaymentStatus: (orderId: number | string) =>
+    api.get<PaymentStatus>(`/shop/orders/${orderId}/payment-status/`).then((r) => r.data),
 
   createGuestOrder: (data: {
     delivery_name: string;
@@ -295,10 +318,11 @@ export const shopApi = {
     delivery_notes?: string;
     items: Array<{ variant?: number; product?: number; quantity: number }>;
   }) => api.post('/shop/guest-orders/', data).then((r) => r.data),
-  payGuestMpesa: (orderId: number | string, phone?: string) =>
-    api.post(`/shop/guest-orders/${orderId}/pay_mpesa/`, { phone }).then((r) => r.data),
-  confirmGuestPayment: (orderId: number | string, body?: { checkout_request_id?: string; force?: boolean }) =>
-    api.post(`/shop/guest-orders/${orderId}/confirm-payment/`, body || {}).then((r) => r.data),
+  /** Guest orders are addressed by their unguessable public_token, never the numeric id. */
+  payGuestMpesa: (publicToken: string, phone?: string) =>
+    api.post(`/shop/guest-orders/${publicToken}/pay_mpesa/`, { phone }).then((r) => r.data),
+  getGuestPaymentStatus: (publicToken: string) =>
+    api.get<PaymentStatus>(`/shop/guest-orders/${publicToken}/payment-status/`).then((r) => r.data),
 
   submitForm: (data: { form_type: string; data: Record<string, unknown>; file?: File | null }) => {
     if (data.file) {

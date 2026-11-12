@@ -43,6 +43,10 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const userData = await login(email, password);
+      if (userData.must_change_password) {
+        router.push("/account/change-password");
+        return;
+      }
       const destination =
         userData.role === "ADMIN" || userData.role === "SUPER_ADMIN"
           ? "/admin"

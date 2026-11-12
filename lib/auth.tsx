@@ -7,6 +7,7 @@ interface User {
   id: number;
   email: string;
   role: string;
+  must_change_password?: boolean;
   first_name: string;
   last_name: string;
   phone: string;

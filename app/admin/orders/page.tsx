@@ -38,7 +38,8 @@ export default function AdminOrdersPage() {
   const getNextStatus = (order: AdminOrder): OrderStatus | null => {
     if (order.status === 'CANCELLED' || order.status === 'REFUNDED' || order.status === 'DELIVERED') return null;
     const flow: Record<OrderStatus, OrderStatus | undefined> = {
-      PENDING: 'PAID',
+      // Orders become PAID only when M-Pesa confirms (or finance reconciles with a receipt).
+      PENDING: undefined,
       PAID: order.is_digital ? undefined : 'PROCESSING',
       PROCESSING: 'SHIPPED',
       SHIPPED: 'DELIVERED',
@@ -50,10 +51,18 @@ export default function AdminOrdersPage() {
   };
 
   const advanceStatus = async (order: AdminOrder, next: OrderStatus) => {
+    const previous = orders;
     setOrders(orders.map((o) => (o.id === order.id ? { ...o, status: next } : o)));
-    adminApi.updateOrder(order.id.toString(), { status: next }).catch(() => {});
-    setMessage(`Order ${order.order_number} moved to ${next}`);
-    setTimeout(() => setMessage(''), 3000);
+    try {
+      await adminApi.updateOrder(order.id.toString(), { status: next });
+      setMessage(`Order ${order.order_number} moved to ${next}`);
+    } catch (err: unknown) {
+      setOrders(previous);
+      const detail = (err as { response?: { data?: { status?: string[] | string; detail?: string } } })?.response?.data;
+      const reason = Array.isArray(detail?.status) ? detail?.status[0] : detail?.status || detail?.detail;
+      setMessage(`Could not update order ${order.order_number}${reason ? `: ${reason}` : ''}`);
+    }
+    setTimeout(() => setMessage(''), 4000);
   };
 
   const filtered = filter === 'all' ? orders : orders.filter((o) => o.status === filter);
