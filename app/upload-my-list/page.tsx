@@ -60,7 +60,7 @@ export default function UploadMyListPage() {
               into a simple order.
             </p>
             <p className="upload-note">
-              Accepted files: PDF, JPG, PNG or DOCX.
+              Accepted files: PDF, photo (JPG, PNG, WEBP), Word (DOCX), Excel (XLSX) or CSV — up to 15 MB.
             </p>
           </div>
 
@@ -81,7 +81,7 @@ export default function UploadMyListPage() {
               id="schoolList"
               name="schoolList"
               type="file"
-              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+              accept=".pdf,.jpg,.jpeg,.png,.webp,.docx,.xlsx,.csv,.txt"
               onChange={handleFileChange}
               required
               ref={fileInputRef}
