@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# nested 3D app build/deps and local artefacts
+components/learning-pack-3d/node_modules/
+components/learning-pack-3d/dist/
+*.sqlite3
+.kilo/

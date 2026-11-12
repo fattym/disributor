@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import {useShop} from "../store/useShop.js";import {CATEGORIES} from "../data/catalogue.js";import {UNIT_X} from "../data/layout.js";
+import {useShop,cartItems} from "../store/useShop.js";import {CATEGORIES} from "../data/catalogue.js";import {UNIT_X} from "../data/layout.js";
 const Box=({a,p,color="#eeeae2",...r})=><mesh position={p} castShadow receiveShadow {...r}><boxGeometry args={a}/><meshStandardMaterial color={color} roughness={.8}/></mesh>;
 const signCache=new Map();
 function signMap(text,w,h,bg){const key=bg+"|"+w+"|"+h+"|"+text;if(signCache.has(key))return signCache.get(key);
@@ -26,4 +26,4 @@ export default function Store(){const setPanel=useShop(s=>s.setPanel);return(<gr
  <Sign p={[0,3.6,15.8]} w={6} h={1.6} bg="#0B1F3A" text="Learning Pack · Karibu" size={.42}/>
  {UNIT_X.map((x,u)=><Sign key={x} p={[x,3.7,2.4]} w={2.8} h={.9} size={.2} text={`Aisle ${u*2+1}: ${CATEGORIES[u*2].name}\nAisle ${u*2+2}: ${CATEGORIES[u*2+1].name}`}/>)}
  <Box a={[6,1,1.2]} p={[-12,.5,11]} color="#0B1F3A"/><Box a={[6.1,.06,1.3]} p={[-12,1.03,11]} color="#ffffff"/>
- <Sign p={[-12,3,11]} w={4.2} h={.8} size={.3} text="PROCEED TO CHECKOUT" onClick={e=>{e.stopPropagation();if(e.delta>6)return;const s=useShop.getState();if(!Object.keys(s.cart).length){s.say("Add something to your trolley first");return}setPanel("checkout")}} onPointerOver={()=>document.body.style.cursor="pointer"} onPointerOut={()=>document.body.style.cursor=""}/></group>)}
+ <Sign p={[-12,3,11]} w={4.2} h={.8} size={.3} text="PROCEED TO CHECKOUT" onClick={e=>{e.stopPropagation();if(e.delta>6)return;const s=useShop.getState();if(!cartItems().length){s.say("Add something to your trolley first");return}setPanel("checkout")}} onPointerOver={()=>document.body.style.cursor="pointer"} onPointerOut={()=>document.body.style.cursor=""}/></group>)}

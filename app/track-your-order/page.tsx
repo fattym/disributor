@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
@@ -18,48 +19,59 @@ type OrderResult = {
 
 export default function TrackYourOrderPage() {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const trackingParam = searchParams.get("tracking");
   const [order, setOrder] = useState<OrderResult | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [orderNumber, setOrderNumber] = useState("");
+  const [orderNumber, setOrderNumber] = useState(trackingParam || "");
+
+  const trackOrder = async (number: string) => {
+    setLoading(true);
+    setError("");
+    setOrder(null);
+    try {
+      if (user) {
+        const result = await shopApi.getOrder(number);
+        setOrder(result as OrderResult);
+      } else {
+        setOrder({ id: number, status: "submitted" });
+        setSubmitted(true);
+      }
+    } catch {
+      setOrder({ id: number, status: "not_found" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
     setOrder(null);
     setSubmitted(false);
-    setLoading(true);
     const form = new FormData(event.currentTarget);
-
     const formData = {
       orderNumber: String(form.get("orderNumber")),
       contactName: String(form.get("contactName") || ""),
       email: String(form.get("email") || ""),
       phone: String(form.get("phone") || ""),
     };
-
+    setOrderNumber(formData.orderNumber);
     try {
       await shopApi.submitForm({ form_type: "track_order", data: formData });
-      setOrderNumber(formData.orderNumber);
-
-      if (user) {
-        try {
-          const result = await shopApi.getOrder(formData.orderNumber);
-          setOrder(result as OrderResult);
-        } catch {
-          setOrder({ id: formData.orderNumber, status: "not_found" });
-        }
-      } else {
-        setOrder({ id: formData.orderNumber, status: "submitted" });
-        setSubmitted(true);
-      }
+      await trackOrder(formData.orderNumber);
     } catch (err) {
       setError("We could not submit your request. Please try again.");
-    } finally {
-      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (trackingParam && !order && !submitted) {
+      trackOrder(trackingParam);
+    }
+  }, [trackingParam, order, submitted]);
 
   return (
     <>
@@ -86,6 +98,7 @@ export default function TrackYourOrderPage() {
                 name="orderNumber"
                 type="text"
                 placeholder="e.g. 1042"
+                defaultValue={orderNumber}
                 required
               />
 

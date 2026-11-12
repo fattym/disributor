@@ -152,7 +152,8 @@ export default function HomePage() {
             <div className="wrap">
               <div className="hero__copy">
                 <p className="hero__badge">
-                  <span aria-hidden="true">★</span> Kenya&apos;s CBC Learning Store
+                  <span aria-hidden="true">★</span> Kenya&apos;s CBC Learning
+                  Store
                 </p>
                 <h1>
                   Every book and supply your learner needs, for every CBC grade
@@ -183,7 +184,11 @@ export default function HomePage() {
                     Browse by Grade
                   </Link>
                 </div>
-                <nav className="hero__grades" id="hero-grades" aria-label="Shop by grade">
+                <nav
+                  className="hero__grades"
+                  id="hero-grades"
+                  aria-label="Shop by grade"
+                >
                   <span className="hero__grades-label">Shop by grade</span>
                   <Link href="/shop?level=pre-primary">Pre-Primary</Link>
                   <Link href="/shop?level=primary">Grade 1–6</Link>
@@ -203,7 +208,9 @@ export default function HomePage() {
                   role="img"
                   aria-label="Example school list with items ticked off: exercise books, pencils, geometry set, ruler, eraser and scissors"
                 >
-                  <p className="book__title">Your school list, all in one place</p>
+                  <p className="book__title">
+                    Your school list, all in one place
+                  </p>
                   <ul aria-hidden="true">
                     <li>
                       <span className="tick">
@@ -303,7 +310,10 @@ export default function HomePage() {
             </div>
           </div>
 
-          <section className="home-shortcuts" aria-labelledby="shop-level-heading">
+          <section
+            className="home-shortcuts"
+            aria-labelledby="shop-level-heading"
+          >
             <div className="wrap">
               <div className="home-levels">
                 <div className="home-levels__heading">
@@ -316,7 +326,10 @@ export default function HomePage() {
                     <span aria-hidden="true">→</span>
                   </Link>
                 </div>
-                <nav className="home-levels__grid" aria-label="Shop by school level">
+                <nav
+                  className="home-levels__grid"
+                  aria-label="Shop by school level"
+                >
                   <Link href="/shop?level=pre-primary">
                     <Image
                       className="home-levels__image"
@@ -368,7 +381,8 @@ export default function HomePage() {
                   <h2>Bulk school orders, made simple</h2>
                   <p className="home-bulk__description">
                     Send us your school booklist and we&apos;ll prepare a quote,
-                    source every title and deliver on schedule — term after term.
+                    source every title and deliver on schedule — term after
+                    term.
                   </p>
                   <div className="home-bulk__actions">
                     <a
@@ -379,10 +393,7 @@ export default function HomePage() {
                     >
                       Request a Quote on WhatsApp
                     </a>
-                    <a
-                      className="home-bulk__phone"
-                      href="tel:+254716815025"
-                    >
+                    <a className="home-bulk__phone" href="tel:+254716815025">
                       +254 716 815 025
                     </a>
                   </div>
@@ -404,7 +415,6 @@ export default function HomePage() {
               </aside>
             </div>
           </section>
-
         </main>
 
         <a
@@ -485,8 +495,8 @@ export default function HomePage() {
                 <ul>
                   <li>Online retail store, open 24 hours</li>
                   <li>
-                    <a href="mailto:info@theschoolbox.co.ke">
-                      info@theschoolbox.co.ke
+                    <a href="mailto:codingclubskenya@gmail.com">
+                      codingclubskenya@gmail.com
                     </a>
                   </li>
                   <li>

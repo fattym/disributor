@@ -223,11 +223,28 @@ ul {
   background: var(--orange);
 }
 .cart {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   font-weight: 700;
   color: var(--navy);
+}
+.cart-icon-wrap { position: relative; display: inline-flex; }
+.cart-count-badge {
+  position: absolute;
+  top: -9px;
+  right: -10px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border: 2px solid var(--white);
+  border-radius: 999px;
+  background: var(--orange);
+  color: #fff;
+  font-size: 0.65rem;
+  line-height: 14px;
+  text-align: center;
   text-decoration: none;
   padding: 0.5rem 0.25rem;
 }
@@ -1451,8 +1468,8 @@ section {
 }
 
 .lp-home .topbar {
-  background: var(--store-ink);
-  color: #eaf0f5;
+  background: var(--orange);
+  color: var(--white);
   font-size: 0.8rem;
   letter-spacing: 0.01em;
 }
@@ -1776,18 +1793,18 @@ section {
   position: relative;
   border: 0;
   border-radius: 1.15rem;
-  background: var(--store-ink);
-  box-shadow: 0 18px 42px rgba(20, 43, 66, 0.2);
-  color: #fff;
+  background: var(--orange);
+  color: var(--white);
+  box-shadow: 0 18px 42px rgba(230, 59, 0, 0.2);
 }
 
 .lp-home .finder h2 {
-  color: #fff;
+  color: var(--white);
   font-size: clamp(1.35rem, 2.5vw, 1.8rem);
 }
 
 .lp-home .finder p {
-  color: #c6d2dc;
+  color: var(--white);
   font-size: 0.92rem;
 }
 
@@ -1800,18 +1817,20 @@ section {
 }
 
 .lp-home .finder select:focus-visible {
-  outline-color: var(--store-accent);
+  outline-color: var(--orange);
 }
 
 .lp-home .finder .btn {
-  border-color: var(--store-accent);
-  background: var(--store-accent);
+  border-color: #25d366;
+  background: #25d366;
   white-space: nowrap;
+  color: #052e16;
 }
 
 .lp-home .finder .btn:hover {
-  border-color: #d94d35;
-  background: #d94d35;
+  border-color: #5ce28f;
+  background: #45df7d;
+  color: #052e16;
 }
 
 .lp-home .home-shortcuts {
@@ -2121,8 +2140,8 @@ html.dark-mode .lp-home .footer {
   margin-top: 1.15rem;
   padding: clamp(1.25rem, 4vw, 2.5rem);
   border-radius: 1rem;
-  background: #0f172a;
-  color: #fff;
+  background: var(--orange);
+  color: var(--white);
 }
 
 .lp-home .home-bulk h2 {
@@ -2153,7 +2172,7 @@ html.dark-mode .lp-home .footer {
 .lp-home .home-bulk__description {
   max-width: 58ch;
   margin-top: 0.75rem;
-  color: #cbd5e1;
+  color: var(--white);
   font-size: 0.95rem;
   line-height: 1.6;
 }
@@ -2228,7 +2247,7 @@ html.dark-mode .lp-home .footer {
 }
 
 .lp-home .home-bulk__stats dt {
-  color: #cbd5e1;
+  color: var(--white);
   font-size: 0.78rem;
 }
 
@@ -2347,12 +2366,15 @@ html.dark-mode .lp-home .footer {
 }
 
 .lp-home .footer {
-  background: #102338;
-  color: #fff;
+  background: var(--orange);
+  color: var(--white);
 }
 
 .lp-home .footer a {
   color: #fff;
+}
+.lp-home .footer h2 {
+  color: var(--white);
 }
 
 .lp-home main > section[class*="py-16"] {

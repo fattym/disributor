@@ -177,6 +177,7 @@ export default function CartPage() {
   }
 
   const total = getTotal();
+  const trackingId = order ? `LP-${String(order.id).padStart(6, '0')}` : null;
 
   return (
     <div>
@@ -190,14 +191,21 @@ export default function CartPage() {
           </div>
         )}
 
-        {step === 'success' && (
+        {step === 'success' && order && (
           <div className="mb-6 p-4 rounded-md bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300">
             <h2 className="font-bold">Order placed!</h2>
-            <p className="mt-1">Order #{order?.id} — Status: {order?.status}</p>
+            <p className="mt-1">Order #{order.id} — Status: {order.status}</p>
             <p className="mt-1">
-              The payment goes to the Coding Clubs Kenya main account; the commission balance
-              has been reflected on the distributor who supplied the items.
+              Tracking ID: <span className="font-mono font-bold">{trackingId}</span>
+              <br />
+              <span className="text-sm opacity-90">Use this on the Track your order page.</span>
             </p>
+            <Link
+              href={`/track-your-order?tracking=${encodeURIComponent(trackingId!)}`}
+              className="underline"
+            >
+              Track your order
+            </Link>{' '}
             <Link href="/shop" className="underline">Continue shopping</Link>
           </div>
         )}

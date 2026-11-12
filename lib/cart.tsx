@@ -1,6 +1,9 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useCallback, ReactNode } from 'react';
+import { useSupermarketStore } from '@/lib/store/supermarketStore';
+import { storefrontApi } from '@/lib/storefrontApi';
+import type { StorefrontProduct, StorefrontProductVariant } from '@/lib/types/storefront';
 
 export interface CartItem {
   product_id: number;
@@ -25,73 +28,84 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'learningpack_cart';
-
-function loadFromStorage(): CartItem[] {
-  if (typeof window !== 'undefined') {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        return Array.isArray(parsed) ? parsed : [];
-      } catch {}
-    }
-  }
-  return [];
-}
-
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [hydrated, setHydrated] = useState(false);
+  const cartItems = useSupermarketStore((s) => s.cartItems);
+  const setCartItems = useSupermarketStore((s) => s.setCartItems);
+  const addToCart = useSupermarketStore((s) => s.addToCart);
+  const removeFromCart = useSupermarketStore((s) => s.removeFromCart);
+  const updateCartQuantity = useSupermarketStore((s) => s.updateCartQuantity);
+  const clearCartStore = useSupermarketStore((s) => s.clearCart);
+  const products = useSupermarketStore((s) => s.products);
+
+  interface CartServerItem {
+    variant?: number;
+    variant_id?: number;
+    quantity?: number;
+  }
 
   useEffect(() => {
-    setItems(loadFromStorage());
-    setHydrated(true);
-  }, []);
+    let cancelled = false;
+    storefrontApi.getMyCart().then((data) => {
+      if (cancelled) return;
+      const serverItems = (Array.isArray(data) ? data : (data.results || [])) as CartServerItem[];
+      const normalized = serverItems.map((i) => ({
+        variant_id: i.variant ?? i.variant_id ?? 0,
+        quantity: i.quantity ?? 1,
+      }));
+      setCartItems(normalized);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [setCartItems]);
 
-  useEffect(() => {
-    if (hydrated) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    }
-  }, [items, hydrated]);
-
-  const stockCap = (stock: number) => (stock > 0 ? stock : Infinity);
-
-  const addItem = (item: CartItem) => {
-    const cap = stockCap(item.stock_quantity);
-    setItems((prev) => {
-      const existing = prev.find((i) => i.variant_id === item.variant_id);
-      if (existing) {
-        const nextQty = Math.min(existing.quantity + item.quantity, cap);
-        return prev.map((i) =>
-          i.variant_id === item.variant_id ? { ...i, quantity: nextQty } : i,
-        );
+  const productByVariant = useMemo(() => {
+    const map = new Map<number, { product: StorefrontProduct; variant: StorefrontProductVariant }>();
+    for (const p of products) {
+      for (const v of p.variants) {
+        map.set(v.id, { product: p, variant: v });
       }
-      return [...prev, { ...item, quantity: Math.min(item.quantity, cap) }];
-    });
-  };
+    }
+    return map;
+  }, [products]);
 
-  const removeItem = (variantId: number) => {
-    setItems((prev) => prev.filter((i) => i.variant_id !== variantId));
-  };
+  const items = useMemo(() => cartItems.map((ci) => {
+    const entry = productByVariant.get(ci.variant_id);
+    const product = entry?.product;
+    const variant = entry?.variant;
+    return {
+      product_id: product?.id ?? 0,
+      product_name: product?.name ?? '',
+      variant_id: ci.variant_id,
+      variant_label: variant?.label ?? '',
+      quantity: ci.quantity,
+      unit_price: variant ? parseFloat(variant.effective_price || '0') : 0,
+      image_url: product?.image_url ?? null,
+      stock_quantity: variant?.stock_quantity ?? 0,
+    };
+  }), [cartItems, productByVariant]);
 
-  const updateQuantity = (variantId: number, quantity: number) => {
-    setItems((prev) =>
-      prev.map((i) =>
-        i.variant_id === variantId
-          ? { ...i, quantity: Math.max(1, Math.min(quantity, stockCap(i.stock_quantity))) }
-          : i,
-      ),
-    );
-  };
+  const getTotal = useCallback(() => items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0), [items]);
+  const getItemCount = useCallback(() => items.reduce((sum, item) => sum + item.quantity, 0), [items]);
 
-  const clearCart = () => setItems([]);
+  const addItem = useCallback((item: CartItem) => {
+    addToCart(item.variant_id, item.quantity);
+  }, [addToCart]);
 
-  const getTotal = () => items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
-  const getItemCount = () => items.reduce((sum, item) => sum + item.quantity, 0);
+  const removeItem = useCallback((variantId: number) => {
+    removeFromCart(variantId);
+  }, [removeFromCart]);
+
+  const updateQuantity = useCallback((variantId: number, quantity: number) => {
+    updateCartQuantity(variantId, quantity);
+  }, [updateCartQuantity]);
+
+  const clear = useCallback(() => {
+    clearCartStore();
+  }, [clearCartStore]);
+
+  const value = useMemo(() => ({ items, addItem, removeItem, updateQuantity, clearCart: clear, getTotal, getItemCount }), [items, addItem, removeItem, updateQuantity, clear, getTotal, getItemCount]);
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, getTotal, getItemCount }}>
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );

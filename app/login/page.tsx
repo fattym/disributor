@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import ThemeToggle from "@/components/ThemeToggle";
 import "./login.css";
@@ -184,9 +185,9 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <a className="onboarding-btn" href="/distributor-onboarding">
+          <Link className="onboarding-btn" href="/distributor-onboarding">
             Get onboarded as a distributor
-          </a>
+          </Link>
 
           <div className="social-icons">
             <a href="#">

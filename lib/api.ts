@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -82,12 +82,14 @@ export const distributorApi = {
 
    getCategories: () =>
      api.get('/shop/categories/').then((r) => r.data),
-   getGrades: () =>
-     api.get('/academics/grades/').then((r) => r.data),
+getGrades: () =>
+      api.get('/academics/grades/').then((r) => r.data),
    getLearningAreas: () =>
-     api.get('/academics/learning-areas/').then((r) => r.data),
+      api.get('/academics/learning-areas/').then((r) => r.data),
    getPathways: () =>
-     api.get('/academics/pathways/').then((r) => r.data),
+      api.get('/academics/pathways/').then((r) => r.data),
+   searchVariants: (query: string) =>
+      api.get('/shop/variants/search/', { params: { q: query } }).then((r) => r.data),
 };
 
 export interface ShopProductVariant {
@@ -101,11 +103,13 @@ export interface ShopProductVariant {
 export interface ShopProduct {
   id: number;
   name: string;
+  title?: string;
   description: string;
   price: string;
   effective_price: string;
   image: string | null;
   image_url: string | null;
+  cover_image?: string | null;
   category: number;
   category_name: string;
   is_active: boolean;
@@ -141,6 +145,100 @@ export interface Grade {
   order: number;
 }
 
+export interface AcademicYear {
+  id: number;
+  name: string;
+  start_date: string;
+  end_date: string;
+  is_current: boolean;
+}
+
+export interface BooklistItem {
+  id: number;
+  booklist: number;
+  variant: number;
+  variant_label: string;
+  product_id: number;
+  product_name: string;
+  required_quantity: number;
+  status: 'required' | 'optional' | 'provided';
+  approved_alternative: number | null;
+  approved_alternative_label: string | null;
+  effective_price: string;
+  stock_quantity: number;
+  is_available: boolean;
+  image_url: string | null;
+  notes: string;
+}
+
+export interface Booklist {
+  id: number;
+  school: number;
+  school_name: string;
+  grade: number;
+  grade_name: string;
+  name: string;
+  academic_year: number;
+  year_name: string;
+  version: string;
+  status: 'draft' | 'published' | 'archived';
+  is_active: boolean;
+  items: BooklistItem[];
+  total_items: number;
+  total_required_price: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BooklistItemCreate {
+  variant: number;
+  required_quantity?: number;
+  status?: 'required' | 'optional' | 'provided';
+  approved_alternative?: number | null;
+  notes?: string;
+}
+
+export interface VariantSearchResult {
+  id: number;
+  product_id: number;
+  product_name: string;
+  category_name: string;
+  label: string;
+  size: string;
+  color: string;
+  stock_quantity: number;
+  effective_price: string;
+  image_url: string | null;
+}
+
+export const booklistApi = {
+  getAcademicYears: () =>
+    api.get<AcademicYear[] | { results: AcademicYear[] }>('/booklists/academic-years/').then((r) => r.data),
+  getBooklists: (params?: Record<string, string | number>) =>
+    api.get<Booklist[] | { results: Booklist[] }>('/booklists/', { params: { page_size: 20, ...params } }).then((r) => r.data),
+  getBooklist: (id: number | string) =>
+    api.get<Booklist>(`/booklists/${id}/`).then((r) => r.data),
+  getBooklistItems: (id: number | string) =>
+    api.get<BooklistItem[]>(`/booklists/${id}/items/`).then((r) => r.data),
+  createBooklist: (data: {
+    grade: number;
+    academic_year: number;
+    name: string;
+    version?: string;
+    status?: 'draft' | 'published' | 'archived';
+  }) => api.post<Booklist>('/booklists/', data).then((r) => r.data),
+  updateBooklist: (id: number | string, data: Partial<Booklist>) =>
+    api.patch<Booklist>(`/booklists/${id}/`, data).then((r) => r.data),
+  addItems: (id: number | string, items: BooklistItemCreate[]) =>
+    api.post<BooklistItem[]>(`/booklists/${id}/add_items/`, { items }).then((r) => r.data),
+  publishBooklist: (id: number | string) =>
+    api.post(`/booklists/${id}/publish/`).then((r) => r.data),
+  archiveBooklist: (id: number | string) =>
+    api.post(`/booklists/${id}/archive/`).then((r) => r.data),
+  deleteBooklist: (id: number | string) =>
+    api.delete(`/booklists/${id}/`).then((r) => r.data),
+};
+
 export const shopApi = {
   getCategories: () =>
     api.get<ShopCategory[] | { results: ShopCategory[] }>('/shop/categories/').then((r) => r.data),
@@ -148,8 +246,31 @@ export const shopApi = {
     api.get<ShopProduct[] | { results: ShopProduct[] }>('/shop/products/', { params }).then((r) => r.data),
   getProduct: (id: number | string) => api.get<ShopProduct>(`/shop/products/${id}/`).then((r) => r.data),
 
-  getPublicProducts: (params?: Record<string, string | number>) =>
-    api.get<ShopProduct[] | { results: ShopProduct[] }>('/shop/public/', { params }).then((r) => r.data),
+  getPublicProducts: async (params?: Record<string, string | number>) => {
+    const pageSize = 200;
+    const first = await api.get<any>('/shop/public/', { params: { page_size: pageSize, page: 1, ...params } }).then((r) => r.data);
+    if (Array.isArray(first)) return first;
+    const results: ShopProduct[] = [...(first.results || [])];
+    const count = first.count || results.length;
+    if (count <= results.length) return results;
+    const totalPages = Math.ceil(count / pageSize);
+    const pageNums: number[] = [];
+    for (let p = 2; p <= totalPages; p++) pageNums.push(p);
+    const batchSize = 6;
+    for (let i = 0; i < pageNums.length; i += batchSize) {
+      const batch = pageNums.slice(i, i + batchSize);
+      const pages = await Promise.all(
+        batch.map((p) => api.get<any>('/shop/public/', { params: { page_size: pageSize, page: p, ...params } }).then((r) => r.data))
+      );
+      for (const pg of pages) results.push(...(pg.results || []));
+    }
+    return results;
+  },
+  getHeroItems: () =>
+    api.get<ShopProduct[] | { results: ShopProduct[] }>('/shop/public/hero_items/').then((r) => {
+      const data = r.data;
+      return Array.isArray(data) ? data : (data.results || []);
+    }),
   getPublicProduct: (id: number | string) => api.get<ShopProduct>(`/shop/public/${id}/`).then((r) => r.data),
   getPublicGrades: () =>
     api.get<Grade[] | { results: Grade[] }>('/academics/grades/').then((r) => r.data),

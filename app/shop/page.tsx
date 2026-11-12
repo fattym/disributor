@@ -122,32 +122,54 @@ function ShopContent() {
   }, [searchParams, flatTaxonomy]);
 
   useEffect(() => {
+    let cancelled = false;
     const fetchData = async () => {
       try {
-        const [prodData, gradeData] = await Promise.all([
-          shopApi.getPublicProducts({}).catch(() => []),
+        const { api } = await import('@/lib/api');
+        const pageSize = 200;
+        const [firstRes, gradeData] = await Promise.all([
+          api.get('/shop/public/', { params: { page_size: pageSize, page: 1 } }).then((r) => r.data).catch(() => ({ results: [], count: 0 })),
           shopApi.getPublicGrades().catch(() => []),
         ]);
-        const prodList = Array.isArray(prodData)
-          ? prodData
-          : (prodData as { results?: ShopProduct[] })?.results || [];
+        if (cancelled) return;
+        const firstList: ShopProduct[] = Array.isArray(firstRes) ? firstRes : (firstRes.results || []);
         const gradeList = Array.isArray(gradeData)
           ? gradeData
           : (gradeData as { results?: Grade[] })?.results || [];
-        setProducts(prodList);
+        setProducts(firstList);
         setGrades(gradeList);
-        const prices = prodList.map((p: ShopProduct) => parseFloat(p.effective_price || p.price || "0"));
+        const prices = firstList.map((p: ShopProduct) => parseFloat(p.effective_price || p.price || "0"));
         if (prices.length > 0) {
           setMinPrice(Math.floor(Math.min(...prices) / 100) * 100 || 0);
           setMaxPrice(Math.ceil(Math.max(...prices) / 100) * 100 || 50000);
         }
+        setLoading(false);
+        // load remaining pages in background
+        const count = Array.isArray(firstRes) ? firstList.length : (firstRes.count || firstList.length);
+        if (count > firstList.length) {
+          const totalPages = Math.ceil(count / pageSize);
+          const pageNums: number[] = [];
+          for (let p = 2; p <= totalPages; p++) pageNums.push(p);
+          const batchSize = 6;
+          for (let i = 0; i < pageNums.length; i += batchSize) {
+            if (cancelled) return;
+            const batch = pageNums.slice(i, i + batchSize);
+            const pages = await Promise.all(
+              batch.map((p) => api.get('/shop/public/', { params: { page_size: pageSize, page: p } }).then((r) => r.data).catch(() => null))
+            );
+            if (cancelled) return;
+            const more: ShopProduct[] = [];
+            for (const pg of pages) if (pg && pg.results) more.push(...pg.results);
+            if (more.length) setProducts((prev) => [...prev, ...more]);
+          }
+        }
       } catch (err) {
         console.error("Failed to load shop:", err);
-      } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
     fetchData();
+    return () => { cancelled = true; };
   }, []);
 
   const gradeMap = useMemo(() => {

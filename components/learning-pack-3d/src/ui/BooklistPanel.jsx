@@ -1,0 +1,9 @@
+import {useState} from "react";import {PRODUCTS,BOOKLIST,kes} from "../data/catalogue.js";import {useShop} from "../store/useShop.js";import {useSupermarketStore} from "@/lib/store/supermarketStore";
+export default function BooklistPanel(){const {panel,add,goToProduct,addMissing,closeAll}=useShop(),ci=useSupermarketStore(s=>s.cartItems),products=useShop(s=>s.products),[view,setView]=useState("full"),n=BOOKLIST.filter(i=>ci.some(c=>c.variant_id===products[i]?.backendId)).length,list=view==="missing"?BOOKLIST.filter(i=>!ci.some(c=>c.variant_id===products[i]?.backendId)):BOOKLIST;
+ return(<aside className={"panel glass"+(panel==="booklist"?" on":"")}><h2>📋 Shop My Child’s Booklist</h2>
+  <div className="selects"><select aria-label="School"><option>Nairobi Primary School</option></select><select aria-label="Curriculum"><option>CBC</option></select><select aria-label="Grade"><option>Grade 5</option></select><select aria-label="Year"><option>2027</option></select></div>
+  <p><b>{n} of {BOOKLIST.length} required items added</b></p><div className="bar"><i style={{width:`${n/BOOKLIST.length*100}%`}}/></div>
+  <div className="tabs"><button className={view==="full"?"on":""} onClick={()=>setView("full")}>Full booklist</button><button onClick={closeAll}>Browse store</button><button className={view==="missing"?"on":""} onClick={()=>setView("missing")}>Missing only</button></div>
+  {list.map(i=>{const p=products[i]||PRODUCTS[i];const done=ci.some(c=>c.variant_id===p.backendId);return(<div className="row line" key={i}><div className="sw" style={{background:p.color+"33"}}>{done?"✅":p.icon}</div><div className="grow"><b>{p.name}</b><small>{kes(p.price)}</small></div>
+   <button className="btn s" onClick={()=>goToProduct(p)}>Go</button>{!done&&<button className="btn" onClick={()=>add(p.backendId)}>Add</button>}</div>)})}
+  <button className="btn w" onClick={addMissing}>Add all missing items</button></aside>)}
