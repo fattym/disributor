@@ -57,7 +57,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     storefrontApi.getMyCart().then((data) => {
       if (cancelled) return;
-      const serverItems = (Array.isArray(data) ? data : (data.results || [])) as CartServerItem[];
+      // GET /carts/ answers one cart object {id, items: [...]}; older shapes (a bare list, DRF results) still work.
+      const serverItems = (Array.isArray(data) ? data : (data.items || data.results || [])) as CartServerItem[];
       const normalized = serverItems.map((i) => ({
         variant_id: i.variant ?? i.variant_id ?? 0,
         quantity: i.quantity ?? 1,

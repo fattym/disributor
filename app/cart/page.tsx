@@ -10,11 +10,26 @@ import { shopApi, ShopProduct } from '@/lib/api';
 import { useCart } from '@/lib/cart';
 import { useAuth } from '@/lib/auth';
 
+interface LearnerUser {
+  id: number;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+}
+
 interface Learner {
   id: number;
-  learner: number;
+  // The API nests the learner's user record; older payloads carried just the id.
+  learner: number | LearnerUser;
   relationship: string;
 }
+
+const learnerId = (l: Learner) => (typeof l.learner === 'object' ? l.learner.id : l.learner);
+const learnerLabel = (l: Learner) => {
+  const u = typeof l.learner === 'object' ? l.learner : null;
+  const name = u ? `${u.first_name ?? ''} ${u.last_name ?? ''}`.trim() || u.email || `#${u.id}` : `#${l.learner}`;
+  return `${name} (${l.relationship})`;
+};
 
 function errorDetail(error: unknown, fallback: string): string {
   if (axios.isAxiosError(error) && error.response?.data?.detail) {
@@ -311,7 +326,7 @@ export default function CartPage() {
                       >
                         <option value="">Select a learner</option>
                         {learners.map((l) => (
-                          <option key={l.id} value={l.learner}>{l.relationship} (#{l.learner})</option>
+                          <option key={l.id} value={learnerId(l)}>{learnerLabel(l)}</option>
                         ))}
                       </select>
                     </div>
