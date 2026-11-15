@@ -19,7 +19,8 @@ export default function StudentBoxesPage() {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const response = await shopApi.getPublicProducts({});
+        // The API answers a bare list or a paginated {results} object.
+        const response = (await shopApi.getPublicProducts({})) as ShopProduct[] | { results?: ShopProduct[] };
         const list = Array.isArray(response)
           ? response
           : response.results || [];

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import GlobalHeader from "@/components/GlobalHeader";
@@ -17,7 +17,7 @@ type OrderResult = {
   delivery_address?: string;
 };
 
-export default function TrackYourOrderPage() {
+function TrackYourOrderContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const trackingParam = searchParams.get("tracking");
@@ -162,5 +162,14 @@ export default function TrackYourOrderPage() {
       </main>
       <GlobalFooter />
     </>
+  );
+}
+
+// useSearchParams needs a Suspense boundary for static prerendering.
+export default function TrackYourOrderPage() {
+  return (
+    <Suspense fallback={null}>
+      <TrackYourOrderContent />
+    </Suspense>
   );
 }

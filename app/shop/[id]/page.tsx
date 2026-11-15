@@ -3,8 +3,8 @@ import { shopApi } from '@/lib/api';
 
 export async function generateStaticParams() {
   try {
-    const data = await shopApi.getPublicProducts();
-    const products = Array.isArray(data) ? data : data.results || [];
+    // getPublicProducts already follows pagination and returns the full list.
+    const products = await shopApi.getPublicProducts();
     return products.slice(0, 100).map((p) => ({ id: String(p.id) }));
   } catch {
     return [{ id: 'placeholder' }];
