@@ -1440,6 +1440,21 @@ export const mockHeldFunds: AdminOrder[] = [
   },
 ];
 
+/** GET a DRF list and follow `next` so paginated endpoints (shop products) are not cut to page 1. */
+async function getAllPages<T>(url: string, params?: Record<string, string>): Promise<T[]> {
+  let res = await api.get(url, { params });
+  let rows = asArray<T>(res.data);
+  let guard = 0;
+  while (res.data && !Array.isArray(res.data) && res.data.next && guard++ < 200) {
+    // Re-request our own URL with the page number, never the absolute `next` (scheme/host/prefix may differ behind nginx).
+    const page = new URL(res.data.next, 'http://x').searchParams.get('page');
+    if (!page) break;
+    res = await api.get(url, { params: { ...params, page } });
+    rows = rows.concat(asArray<T>(res.data));
+  }
+  return rows;
+}
+
 export const adminApi = {
   getDashboardStats: async (): Promise<Stat[]> => {
     try {
@@ -1571,9 +1586,8 @@ export const adminApi = {
 
   getProducts: (params?: Record<string, string>) =>
     safe(
-      api
-        .get('/shop/products/', { params })
-        .then((r) => filterByParams(asArray<BackendProduct>(r.data).map(mapProduct), params)),
+      getAllPages<BackendProduct>('/shop/products/', params)
+        .then((rows) => filterByParams(rows.map(mapProduct), params)),
       filterByParams(mockProducts, params),
     ),
   getProduct: (id: string) =>
