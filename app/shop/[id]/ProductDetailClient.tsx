@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import GlobalHeader from '@/components/GlobalHeader';
 import GlobalFooter from '@/components/GlobalFooter';
 import { shopApi, ShopProduct } from '@/lib/api';
@@ -13,6 +13,7 @@ import { useAuth } from '@/lib/auth';
   const { user } = useAuth();
   const { addItem, getItemCount } = useCart();
   const router = useRouter();
+  const pathname = usePathname();
   const [product, setProduct] = useState<ShopProduct | null>(null);
   const [loading, setLoading] = useState(true);
   const [variantId, setVariantId] = useState<number | ''>('');
@@ -21,8 +22,12 @@ import { useAuth } from '@/lib/auth';
 
   useEffect(() => {
     const load = async () => {
+      // Static export: /shop/<any id>/ may be served by the /shop/placeholder/ page
+      // (nginx rewrite), so the real id comes from the browser URL, not build-time params.
       const resolved = await params;
-      const data = await shopApi.getPublicProduct(resolved.id);
+      const fromUrl = (pathname || '').split('/').filter(Boolean)[1];
+      const id = fromUrl && fromUrl !== 'placeholder' ? decodeURIComponent(fromUrl) : resolved.id;
+      const data = await shopApi.getPublicProduct(id);
       setProduct(data);
       if (data.variants && data.variants.length > 0) {
         setVariantId(data.variants[0].id);
@@ -30,7 +35,7 @@ import { useAuth } from '@/lib/auth';
       setLoading(false);
     };
     load();
-  }, [params]);
+  }, [params, pathname]);
 
   if (loading) {
     return (
