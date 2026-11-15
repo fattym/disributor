@@ -17,6 +17,27 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// One refresh at a time: concurrent 401s share the in-flight refresh. The API rotates and blacklists
+// refresh tokens, so a second refresh with the old token fails and would log the user out; the new
+// refresh token from each response must be stored too.
+let refreshPromise: Promise<string> | null = null;
+const refreshAccessToken = (): Promise<string> => {
+  if (!refreshPromise) {
+    refreshPromise = axios
+      .post(`${API_BASE_URL}/auth/refresh/`, { refresh: localStorage.getItem('refresh_token') })
+      .then((response) => {
+        const { access, refresh } = response.data;
+        localStorage.setItem('access_token', access);
+        if (refresh) localStorage.setItem('refresh_token', refresh);
+        return access as string;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+};
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -31,16 +52,13 @@ api.interceptors.response.use(
       window.location.href = '/account/change-password';
       return Promise.reject(error);
     }
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry
+        && !String(originalRequest.url || '').includes('/auth/refresh/')) {
       originalRequest._retry = true;
       const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null;
       if (refreshToken) {
         try {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh/`, {
-            refresh: refreshToken,
-          });
-          const { access } = response.data;
-          localStorage.setItem('access_token', access);
+          const access = await refreshAccessToken();
           originalRequest.headers.Authorization = `Bearer ${access}`;
           return api(originalRequest);
         } catch {

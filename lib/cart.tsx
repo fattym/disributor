@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useCallback, useState, ReactNode } from 'react';
 import { useSupermarketStore } from '@/lib/store/supermarketStore';
 import { storefrontApi } from '@/lib/storefrontApi';
 import type { StorefrontProduct, StorefrontProductVariant } from '@/lib/types/storefront';
@@ -41,7 +41,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
     variant?: number;
     variant_id?: number;
     quantity?: number;
+    variant_label?: string;
+    product_id?: number;
+    product_name?: string;
+    effective_price?: string;
+    stock_quantity?: number;
+    image_url?: string | null;
   }
+
+  // Line details straight from the server cart, so /cart renders on a direct page load
+  // (the product store is only filled by the shop/bookshop pages).
+  const [serverLines, setServerLines] = useState<Map<number, CartServerItem>>(new Map());
 
   useEffect(() => {
     let cancelled = false;
@@ -53,6 +63,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         quantity: i.quantity ?? 1,
       }));
       setCartItems(normalized);
+      setServerLines(new Map(serverItems.map((i) => [i.variant ?? i.variant_id ?? 0, i])));
     }).catch(() => {});
     return () => { cancelled = true; };
   }, [setCartItems]);
@@ -71,17 +82,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const entry = productByVariant.get(ci.variant_id);
     const product = entry?.product;
     const variant = entry?.variant;
+    const server = serverLines.get(ci.variant_id);
     return {
-      product_id: product?.id ?? 0,
-      product_name: product?.name ?? '',
+      product_id: product?.id ?? server?.product_id ?? 0,
+      product_name: product?.name ?? server?.product_name ?? '',
       variant_id: ci.variant_id,
-      variant_label: variant?.label ?? '',
+      variant_label: variant?.label ?? server?.variant_label ?? '',
       quantity: ci.quantity,
-      unit_price: variant ? parseFloat(variant.effective_price || '0') : 0,
-      image_url: product?.image_url ?? null,
-      stock_quantity: variant?.stock_quantity ?? 0,
+      unit_price: variant ? parseFloat(variant.effective_price || '0') : parseFloat(server?.effective_price || '0'),
+      image_url: product?.image_url ?? server?.image_url ?? null,
+      stock_quantity: variant?.stock_quantity ?? server?.stock_quantity ?? 0,
     };
-  }), [cartItems, productByVariant]);
+  }), [cartItems, productByVariant, serverLines]);
 
   const getTotal = useCallback(() => items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0), [items]);
   const getItemCount = useCallback(() => items.reduce((sum, item) => sum + item.quantity, 0), [items]);
