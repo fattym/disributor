@@ -52,19 +52,8 @@ import { useAuth } from '@/lib/auth';
   const maxQty = Math.max(stock, 1);
 
   const handleAdd = () => {
-    if (!hasVariants) {
-      addItem({
-        product_id: product.id,
-        product_name: product.name,
-        variant_id: 0,
-        variant_label: 'Default',
-        quantity,
-        unit_price: unitPrice,
-        image_url: product.image_url,
-        stock_quantity: maxQty,
-      });
-    } else if (!selectedVariant) {
-      return;
+    if (!hasVariants || !selectedVariant) {
+      return; // unavailable: never add a line without a variant id
     } else {
       addItem({
         product_id: product.id,
@@ -150,9 +139,10 @@ import { useAuth } from '@/lib/auth';
             <div className="pt-2 flex items-center gap-3">
               <button
                 onClick={handleAdd}
+                disabled={!hasVariants}
                 className="px-5 py-2.5 bg-[#0B1F3A] dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-md font-medium hover:bg-[#E63B00] dark:hover:bg-[#E63B00]/90 transition-colors"
               >
-                {added ? 'Added ✓' : 'Add to cart'}
+                {!hasVariants ? 'Unavailable' : added ? 'Added ✓' : 'Add to cart'}
               </button>
               <button
                 onClick={() => router.push('/cart')}

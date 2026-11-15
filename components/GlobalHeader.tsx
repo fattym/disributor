@@ -95,6 +95,11 @@ export default function GlobalHeader() {
                   </Link>
                 </li>
                 <li>
+                  <Link href="/bookshop">
+                    Bookshop
+                  </Link>
+                </li>
+                <li>
                   <Link href="/discovery" aria-current="page">
                     Discovery
                   </Link>

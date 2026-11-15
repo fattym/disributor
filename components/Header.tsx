@@ -45,6 +45,9 @@ export default function ParentHeader() {
             <Link href="/shop" className={navLink}>
               Shop
             </Link>
+            <Link href="/bookshop" className={navLink}>
+              Bookshop
+            </Link>
             <Link href="/cart" className={"relative " + navLink}>
               Cart
               {itemCount > 0 && (

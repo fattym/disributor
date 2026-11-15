@@ -41,9 +41,9 @@ export default function ProductCard(){
      <b>{q}</b>
      <button onClick={()=>setQ(q+1)}>+</button>
     </span>
-     <button className="btn" onClick={()=>{add(p.backendId||p.id,q);say(`Added ${q} × ${p.name||p.title}`);close()}}>
+     {p.backendId?(<button className="btn" onClick={()=>{add(p.backendId,q);say(`Added ${q} × ${p.name||p.title}`);close()}}>
      Add to Trolley
-    </button>
+    </button>):(<button className="btn" disabled aria-disabled="true">Unavailable</button>)}
    </div>
   </aside>
  );

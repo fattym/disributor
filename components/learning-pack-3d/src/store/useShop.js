@@ -14,7 +14,7 @@ export const useShop=create(persist((set,get)=>({
   loadingProducts:false,
   setShowcaseOpen:showcaseOpen=>set({showcaseOpen}),
   toggleShowcase:()=>set(s=>({showcaseOpen:!s.showcaseOpen})),
-  add:(id,q=1,quiet=false)=>{useSupermarketStore.getState().addToCart(id,q);set(s=>({xp:s.xp+(q>0&&!quiet?10*q:0)}))},
+  add:(id,q=1,quiet=false)=>{if(!id)return;useSupermarketStore.getState().addToCart(id,q);set(s=>({xp:s.xp+(q>0&&!quiet?10*q:0)}))},
   remove:id=>{useSupermarketStore.getState().removeFromCart(id);},
   clear:()=>{useSupermarketStore.getState().clearCart();},
   loadBackendProducts:async()=>{
@@ -32,7 +32,9 @@ export const useShop=create(persist((set,get)=>({
       mapped[shelfIndex]={
        ...mapped[shelfIndex],
        id:shelfIndex,
-       backendId:item.id,
+       // the cart and orders need a VARIANT id; never fall back to the product id
+       backendId:(item.variants&&item.variants[0]&&item.variants[0].id)||null,
+       unavailable:!(item.variants&&item.variants.length),
        name:item.name||item.title||mapped[shelfIndex]?.name,
        title:item.title||item.name||mapped[shelfIndex]?.name,
        publisher:item.brand||item.distributor_name||mapped[shelfIndex]?.publisher||"Learning Pack",

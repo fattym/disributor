@@ -5,5 +5,5 @@ export default function BooklistPanel(){const {panel,add,goToProduct,addMissing,
   <p><b>{n} of {BOOKLIST.length} required items added</b></p><div className="bar"><i style={{width:`${n/BOOKLIST.length*100}%`}}/></div>
   <div className="tabs"><button className={view==="full"?"on":""} onClick={()=>setView("full")}>Full booklist</button><button onClick={closeAll}>Browse store</button><button className={view==="missing"?"on":""} onClick={()=>setView("missing")}>Missing only</button></div>
   {list.map(i=>{const p=products[i]||PRODUCTS[i];const done=ci.some(c=>c.variant_id===p.backendId);return(<div className="row line" key={i}><div className="sw" style={{background:p.color+"33"}}>{done?"✅":p.icon}</div><div className="grow"><b>{p.name}</b><small>{kes(p.price)}</small></div>
-   <button className="btn s" onClick={()=>goToProduct(p)}>Go</button>{!done&&<button className="btn" onClick={()=>add(p.backendId)}>Add</button>}</div>)})}
+   <button className="btn s" onClick={()=>goToProduct(p)}>Go</button>{!done&&(p.backendId?<button className="btn" onClick={()=>add(p.backendId)}>Add</button>:<button className="btn" disabled>Unavailable</button>)}</div>)})}
   <button className="btn w" onClick={addMissing}>Add all missing items</button></aside>)}

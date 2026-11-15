@@ -377,16 +377,7 @@ function ShopContent() {
         stock_quantity: variant.stock_quantity,
       });
     } else {
-      addItem({
-        product_id: product.id,
-        product_name: product.name,
-        variant_id: 0,
-        variant_label: "Default",
-        quantity: 1,
-        unit_price: parseFloat(product.effective_price || product.price || "0"),
-        image_url: product.image_url || null,
-        stock_quantity: 0,
-      });
+      return; // no variant: unavailable, never put a broken line in the cart
     }
     setAddedIds((prev) => ({ ...prev, [product.id]: true }));
     setTimeout(() => setAddedIds((prev) => ({ ...prev, [product.id]: false })), 1400);
@@ -846,13 +837,14 @@ function ShopContent() {
                               className="shop-card__btn shop-card__btn--cart"
                               onClick={() => handleAdd(product)}
                               type="button"
+                              disabled={!product.variants || product.variants.length === 0}
                             >
                               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                                 <circle cx="9" cy="21" r="1" />
                                 <circle cx="20" cy="21" r="1" />
                                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
                               </svg>
-                              <span>{isAdded ? "Added ✓" : "Add to Cart"}</span>
+                              <span>{!product.variants || product.variants.length === 0 ? "Unavailable" : isAdded ? "Added ✓" : "Add to Cart"}</span>
                             </button>
                             <button
                               className="shop-card__btn shop-card__btn--whatsapp"
