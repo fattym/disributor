@@ -1,12 +1,90 @@
-import {useRef} from "react";import {useFrame} from "@react-three/fiber";
-const Plane=({x,w,color,y=-.03})=><mesh rotation={[-Math.PI/2,0,0]} position={[x,y,0]} receiveShadow><planeGeometry args={[w,400]}/><meshStandardMaterial color={color} roughness={.95}/></mesh>;
-const CARS=[["#f2c200",-28.5,-80,7,true],["#d1d5db",-28.5,-20,9],["#2563eb",-25.5,40,-6],["#ffffff",28.5,60,8,true],["#E63B00",25.5,-10,-6],["#16a34a",25.5,-60,-10,true]];
-function Car({c,x,z,s,van}){const g=useRef();useFrame((_,dt)=>{const p=g.current.position;p.z+=s*dt;if(p.z>100)p.z=-100;if(p.z<-100)p.z=100});
- return <group ref={g} position={[x,0,z]}><mesh position={[0,van?1.15:.75,0]} castShadow><boxGeometry args={van?[2.1,1.5,5.2]:[1.9,.8,4.2]}/><meshStandardMaterial color={c}/></mesh>
-  <mesh position={[0,van?1.55:1.45,-.2]}><boxGeometry args={van?[2.14,.5,4.2]:[1.7,.65,2.2]}/><meshStandardMaterial color="#233446"/></mesh></group>}
-export default function Outside(){return(<group>
- <mesh rotation={[-Math.PI/2,0,0]} position={[0,-.05,0]}><planeGeometry args={[400,400]}/><meshStandardMaterial color="#7fb069" roughness={1}/></mesh>
- {[-21,21].map(x=><Plane key={x} x={x} w={6} color="#cfd3da" y={-.04}/>)}{[-27,27].map(x=><Plane key={x} x={x} w={8} color="#3a3d44"/>)}
- {Array.from({length:20},(_,i)=>{const h=8+(i*7%13),w=9+(i*5%6),d=10+(i*3%6);return <mesh key={i} position={i<14?[(i%2?1:-1)*(42+(i*11%10)),h/2,-120+i*15]:[-60+(i-14)*24,h/2,-75]} castShadow><boxGeometry args={[w,h,d]}/><meshStandardMaterial color={["#f2d7b6","#d9e4ee","#e8c4c4","#c9dfc9","#f4e3a1"][i%5]}/></mesh>})}
- {Array.from({length:30},(_,i)=><group key={i} position={[(i%2?1:-1)*20.8,0,-100+(i>>1)*13+(i%3)]}><mesh position={[0,1.5,0]} castShadow><cylinderGeometry args={[.18,.28,3,8]}/><meshStandardMaterial color="#6b4a2b"/></mesh><mesh position={[0,3.4,0]} scale={[1.8,.8,1.8]} castShadow><sphereGeometry args={[1,10,6]}/><meshStandardMaterial color="#4f8f3a"/></mesh></group>)}
- {CARS.map(([c,x,z,s,van],i)=><Car key={i} c={c} x={x} z={z} s={s} van={van}/>)}</group>)}
+import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import { STORE } from "../data/layout.js";
+
+// Cars driving along the road in front of the shop, visible through the glazing and the entrance.
+const CARS = [
+  ["#f2c200", 34, -40, 7, true],
+  ["#d1d5db", 31, 20, 9],
+  ["#2563eb", 34, 60, -6],
+  ["#ffffff", 31, -10, -8, true],
+  ["#d98b62", 34, 5, 6],
+];
+
+function Car({ c, z, x, s, van }) {
+  const g = useRef();
+  useFrame((_, dt) => {
+    const p = g.current.position;
+    p.x += s * dt;
+    if (p.x > 90) p.x = -90;
+    if (p.x < -90) p.x = 90;
+  });
+  return (
+    <group ref={g} position={[x - 30, 0, z]} rotation={[0, s > 0 ? Math.PI / 2 : -Math.PI / 2, 0]}>
+      <mesh position={[0, van ? 1.15 : 0.75, 0]}>
+        <boxGeometry args={van ? [2.1, 1.5, 5.2] : [1.9, 0.8, 4.2]} />
+        <meshStandardMaterial color={c} />
+      </mesh>
+      <mesh position={[0, van ? 1.6 : 1.45, -0.2]}>
+        <boxGeometry args={van ? [2.14, 0.5, 4.2] : [1.7, 0.65, 2.2]} />
+        <meshStandardMaterial color="#233446" />
+      </mesh>
+    </group>
+  );
+}
+
+export default function Outside() {
+  const z0 = STORE.zFront;
+  return (
+    <group>
+      {/* grass, pavement, car park, road */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]}>
+        <planeGeometry args={[400, 400]} />
+        <meshStandardMaterial color="#8fbf78" roughness={1} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.03, z0 + 3]}>
+        <planeGeometry args={[400, 6]} />
+        <meshStandardMaterial color="#d4d7dd" roughness={0.9} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.03, z0 + 12]}>
+        <planeGeometry args={[400, 12]} />
+        <meshStandardMaterial color="#4b4f58" roughness={0.95} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.03, z0 + 26]}>
+        <planeGeometry args={[400, 9]} />
+        <meshStandardMaterial color="#2f333a" roughness={0.95} />
+      </mesh>
+      {Array.from({ length: 30 }, (_, i) => (
+        <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} position={[-87 + i * 6, -0.02, z0 + 26]}>
+          <planeGeometry args={[3, 0.2]} />
+          <meshBasicMaterial color="#f2f2f2" />
+        </mesh>
+      ))}
+      {/* opposite buildings */}
+      {Array.from({ length: 12 }, (_, i) => {
+        const h = 9 + ((i * 7) % 13);
+        return (
+          <mesh key={i} position={[-66 + i * 12, h / 2, z0 + 50]}>
+            <boxGeometry args={[10, h, 12]} />
+            <meshStandardMaterial color={["#f2d7b6", "#d9e4ee", "#e8c4c4", "#c9dfc9", "#f4e3a1"][i % 5]} />
+          </mesh>
+        );
+      })}
+      {Array.from({ length: 14 }, (_, i) => (
+        <group key={i} position={[-42 + i * 7 + (i % 3), 0, z0 + 7.5]}>
+          <mesh position={[0, 1.4, 0]}>
+            <cylinderGeometry args={[0.16, 0.26, 2.8, 8]} />
+            <meshStandardMaterial color="#6b4a2b" />
+          </mesh>
+          <mesh position={[0, 3.2, 0]} scale={[1.8, 0.9, 1.8]}>
+            <sphereGeometry args={[1, 10, 8]} />
+            <meshStandardMaterial color="#4f8f3a" />
+          </mesh>
+        </group>
+      ))}
+      {CARS.map(([c, , x, s, van], i) => (
+        <Car key={i} c={c} z={z0 + 24 + (i % 2) * 4.2 - 1} x={x} s={s} van={van} />
+      ))}
+    </group>
+  );
+}

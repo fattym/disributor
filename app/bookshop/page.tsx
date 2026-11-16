@@ -15,7 +15,7 @@ const Bookshop3D = dynamic(
     loading: () => (
       <div className="bookshop-loading">
         <div className="spinner" />
-        <p>Initializing 3D bookshop…</p>
+        <p>Opening the Learning Pack store…</p>
       </div>
     ),
   }

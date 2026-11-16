@@ -1,9 +1,132 @@
-import {useState} from "react";import {PRODUCTS,BOOKLIST,kes} from "../data/catalogue.js";import {useShop} from "../store/useShop.js";import {useSupermarketStore} from "@/lib/store/supermarketStore";
-export default function BooklistPanel(){const {panel,add,goToProduct,addMissing,closeAll}=useShop(),ci=useSupermarketStore(s=>s.cartItems),products=useShop(s=>s.products),[view,setView]=useState("full"),n=BOOKLIST.filter(i=>ci.some(c=>c.variant_id===products[i]?.backendId)).length,list=view==="missing"?BOOKLIST.filter(i=>!ci.some(c=>c.variant_id===products[i]?.backendId)):BOOKLIST;
- return(<aside className={"panel glass"+(panel==="booklist"?" on":"")}><h2>📋 Shop My Child’s Booklist</h2>
-  <div className="selects"><select aria-label="School"><option>Nairobi Primary School</option></select><select aria-label="Curriculum"><option>CBC</option></select><select aria-label="Grade"><option>Grade 5</option></select><select aria-label="Year"><option>2027</option></select></div>
-  <p><b>{n} of {BOOKLIST.length} required items added</b></p><div className="bar"><i style={{width:`${n/BOOKLIST.length*100}%`}}/></div>
-  <div className="tabs"><button className={view==="full"?"on":""} onClick={()=>setView("full")}>Full booklist</button><button onClick={closeAll}>Browse store</button><button className={view==="missing"?"on":""} onClick={()=>setView("missing")}>Missing only</button></div>
-  {list.map(i=>{const p=products[i]||PRODUCTS[i];const done=ci.some(c=>c.variant_id===p.backendId);return(<div className="row line" key={i}><div className="sw" style={{background:p.color+"33"}}>{done?"✅":p.icon}</div><div className="grow"><b>{p.name}</b><small>{kes(p.price)}</small></div>
-   <button className="btn s" onClick={()=>goToProduct(p)}>Go</button>{!done&&(p.backendId?<button className="btn" onClick={()=>add(p.backendId)}>Add</button>:<button className="btn" disabled>Unavailable</button>)}</div>)})}
-  <button className="btn w" onClick={addMissing}>Add all missing items</button></aside>)}
+import { CURRICULA, kes } from "../data/catalogue.js";
+import { useCart, useInCart, useShop } from "../store/useShop.js";
+import Icon from "./Icon.jsx";
+import Thumb from "./Thumb.jsx";
+
+const YEAR = new Date().getFullYear();
+
+export default function BooklistPanel() {
+  const open = useShop((s) => s.panel === "booklist");
+  const closeAll = useShop((s) => s.closeAll);
+  const selection = useShop((s) => s.selection);
+  const schools = useShop((s) => s.schools);
+  const setSelection = useShop((s) => s.setSelection);
+  const booklist = useShop((s) => s.booklist);
+  const gradeBundle = useShop((s) => s.gradeBundle);
+  const view = useShop((s) => s.view);
+  const setView = useShop((s) => s.setView);
+  const goTo = useShop((s) => s.goTo);
+  const add = useShop((s) => s.add);
+  const addMissing = useShop((s) => s.addMissing);
+  const say = useShop((s) => s.say);
+  const have = useInCart();
+  const cart = useCart();
+
+  const lines = booklist.map((l) => ({ ...l, done: !!l.product && have.has(l.product.variantId) }));
+  const required = lines.filter((l) => l.product);
+  const added = required.filter((l) => l.done).length;
+  const missing = required.length - added;
+  const shown = view === "missing" ? lines.filter((l) => !l.done) : lines;
+  const missingTotal = required.filter((l) => !l.done).reduce((a, l) => a + l.product.price, 0);
+
+  return (
+    <aside className={"panel" + (open ? " on" : "")} inert={!open} aria-label="School booklist">
+      <header className="p-head">
+        <h2><Icon name="list" /> Shop My Child’s Booklist</h2>
+        <button className="icon-btn sm" onClick={closeAll} aria-label="Close booklist"><Icon name="x" /></button>
+      </header>
+      <div className="p-body">
+        <div className="selects">
+          <label>School
+            <select value={selection.school} onChange={(e) => setSelection({ school: e.target.value })}>
+              {!selection.school && <option value="">Select your school</option>}
+              {schools.map((s) => <option key={s.id}>{s.name}</option>)}
+              {selection.school && !schools.some((s) => s.name === selection.school) && <option>{selection.school}</option>}
+            </select>
+          </label>
+          <label>Curriculum
+            <select value={selection.curriculum} onChange={(e) => setSelection({ curriculum: e.target.value })}>
+              {Object.keys(CURRICULA).map((c) => <option key={c}>{c}</option>)}
+            </select>
+          </label>
+          <label>Grade / class
+            <select value={selection.grade} onChange={(e) => setSelection({ grade: e.target.value })}>
+              {CURRICULA[selection.curriculum].map((g) => <option key={g}>{g}</option>)}
+            </select>
+          </label>
+          <label>Academic year
+            <select value={selection.year} onChange={(e) => setSelection({ year: Number(e.target.value) })}>
+              {[YEAR, YEAR + 1].map((y) => <option key={y}>{y}</option>)}
+            </select>
+          </label>
+        </div>
+
+        <div className="progress" role="status">
+          <div className="pg-top">
+            <b>{added} of {required.length} required items added</b>
+            {missing === 0 && required.length > 0 && <span className="tag ok"><Icon name="check" /> Complete</span>}
+          </div>
+          <div className="bar"><i style={{ width: required.length ? `${(added / required.length) * 100}%` : 0 }} /></div>
+          {lines.length > required.length && <small>{lines.length - required.length} item{lines.length - required.length > 1 ? "s" : ""} not in our catalogue yet. Ask us at the counter.</small>}
+        </div>
+
+        <button
+          className="lp-btn wide"
+          disabled={!missing}
+          onClick={() => {
+            const n = addMissing();
+            say(n ? `Added ${n} booklist item${n > 1 ? "s" : ""} to your trolley` : "Everything is already in your trolley");
+          }}
+        >
+          <Icon name="cart" /> {missing ? `Shop My Child’s Booklist · ${kes(missingTotal)}` : "Booklist complete"}
+        </button>
+
+        <div className="tabs" role="tablist" aria-label="Booklist view">
+          <button role="tab" aria-selected={view === "full"} className={view === "full" ? "on" : ""} onClick={() => setView("full")}>Full booklist</button>
+          <button role="tab" aria-selected={view === "browse"} className={view === "browse" ? "on" : ""} onClick={() => { setView("browse"); closeAll(); }}>Browse store</button>
+          <button role="tab" aria-selected={view === "missing"} className={view === "missing" ? "on" : ""} onClick={() => setView("missing")}>Missing only</button>
+        </div>
+
+        {gradeBundle && (
+          <div className="bundle-row">
+            <Thumb product={gradeBundle} />
+            <div className="l-main">
+              <b>{gradeBundle.name}</b>
+              <small>{gradeBundle.items.length} items · {kes(gradeBundle.price)}</small>
+            </div>
+            <button className="lp-btn s" onClick={() => goTo(gradeBundle)}>View</button>
+          </div>
+        )}
+
+        <ul className="lines">
+          {shown.map((l) => (
+            <li key={l.key} className={"line bl" + (l.done ? " done" : "") + (!l.product ? " na" : "")}>
+              <span className="state" aria-label={l.done ? "In trolley" : l.product ? "Missing" : "Not in catalogue"}>
+                <Icon name={l.done ? "check" : l.product ? "plus" : "warn"} />
+              </span>
+              <div className="l-main">
+                <small className="req">{l.label}</small>
+                <b>{l.product ? l.product.name : "Not in our catalogue yet"}</b>
+                {l.product && <small>{kes(l.product.price)}</small>}
+              </div>
+              {l.product && (
+                <div className="bl-act">
+                  <button className="lp-btn s ghost" onClick={() => goTo(l.product)} aria-label={`Find ${l.product.name} on the shelf`}>Find</button>
+                  {!l.done && l.product?.unavailable && <button className="lp-btn s" disabled>Unavailable</button>}
+                  {!l.done && !l.product?.unavailable && <button className="lp-btn s" onClick={() => { add(l.product, 1); say(`Added ${l.product.name}`); }}>Add</button>}
+                </div>
+              )}
+            </li>
+          ))}
+          {!shown.length && <li className="lp-empty small"><Icon name="check" /><b>Nothing missing</b><p>Every required item is in your trolley.</p></li>}
+        </ul>
+        <p className="note">Booklist suggestions are matched from our catalogue for {selection.grade}. Always confirm against your school’s official list.</p>
+      </div>
+      <footer className="p-foot">
+        <button className="lp-btn wide" disabled={!cart.count} onClick={() => useShop.getState().setPanel("cart")}>
+          <Icon name="cart" /> View trolley ({cart.count})
+        </button>
+      </footer>
+    </aside>
+  );
+}

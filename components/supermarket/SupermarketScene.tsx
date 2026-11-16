@@ -65,10 +65,8 @@ export function SupermarketScene({ targetAisle, onArrive }: SupermarketSceneProp
   const setSelectedProduct = useSupermarketStore((s) => s.setSelectedProduct);
   const setHoveredProduct = useSupermarketStore((s) => s.setHoveredProduct);
   const setBooklistKioskOpen = useSupermarketStore((s) => s.setBooklistKioskOpen);
-  const { searchQuery, categoryFilter } = useSupermarketStore((s) => ({
-    searchQuery: s.searchQuery,
-    categoryFilter: s.categoryFilter,
-  }));
+  const searchQuery = useSupermarketStore((s) => s.searchQuery);
+  const categoryFilter = useSupermarketStore((s) => s.categoryFilter);
   const [sections, setSections] = useState<ShelfSection[]>([]);
   const [mappings, setMappingsLocal] = useState<ProductMapping[]>([]);
   const [productsMap, setProductsMap] = useState<Record<number, StorefrontProduct>>({});

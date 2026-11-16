@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import Link from 'next/link';
@@ -34,7 +34,7 @@ function SidebarNav({ isMobile = false, onItemClick }: { isMobile?: boolean; onI
               active
                 ? 'bg-orange-600 text-white'
                 : 'text-zinc-300 hover:text-white hover:bg-white/10'
-            }}`}
+            }`}
           >
             <span>{item.icon}</span>
             <span>{item.label}</span>
@@ -49,6 +49,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout, loading } = useAuth();
   const router = useRouter();
+  const denied = !loading && (!user || user.role !== 'DISTRIBUTOR');
+
+  useEffect(() => {
+    if (denied) router.replace('/login');
+  }, [denied, router]);
 
   if (loading) {
     return (
@@ -58,10 +63,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!user || user.role !== 'DISTRIBUTOR') {
-    router.push('/login');
-    return null;
-  }
+  if (denied || !user) return null;
 
   return (
     <div className="flex h-screen w-full overflow-hidden">

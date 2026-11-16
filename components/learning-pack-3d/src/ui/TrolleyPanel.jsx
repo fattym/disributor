@@ -1,9 +1,66 @@
-import {PRODUCTS,kes} from "../data/catalogue.js";import {useShop,cartItems} from "../store/useShop.js";import {useSupermarketStore} from "@/lib/store/supermarketStore";
-export default function TrolleyPanel(){const {panel,add,remove,setPanel,closeAll}=useShop(),ci=cartItems(),products=useShop(s=>s.products);
-  const lines=ci.map(c=>{const p=products.find(pp=>pp.backendId===c.variant_id)||PRODUCTS[c.variant_id];return{...c,p}});
-  return(<aside className={"panel glass"+(panel==="cart"?" on":"")} aria-hidden={panel!=="cart"}><h2>🛒 Your Trolley</h2>
-  {lines.length?lines.map(c=>{const p=c.p;return(<div className="row line" key={c.variant_id}><div className="sw" style={{background:(p&&p.color?"#2563eb":"#2563eb")+"33"}}>{p&&p.icon?p.icon:"📘"}</div>
-   <div className="grow"><b>{p&&p.name?p.name:"Item "+c.variant_id}</b><small>{kes((p&&p.price?p.price:0))*c.quantity} each</small><span className="qty"><button onClick={()=>add(c.variant_id,-1)}>−</button>{c.quantity}<button onClick={()=>add(c.variant_id,1,true)}>+</button><button onClick={()=>remove(c.variant_id)} aria-label="Remove">🗑</button></span></div></div>)})
-   :<p className="empty">Your trolley is empty. Click any book on a shelf to add it.</p>}
-  <h3>Subtotal: {kes(ci.reduce((a,c)=>{const p=products.find(pp=>pp.backendId===c.variant_id);return a+(p?p.price*c.quantity:0);},0))}</h3><p className="small">Delivery within Nairobi in 1–2 days (KES 300), or collect free in store.</p>
-  <button className="btn w ghost" onClick={closeAll}>Continue Shopping</button><button className="btn w" disabled={!lines.length} onClick={()=>setPanel("checkout")}>Proceed to Checkout</button></aside>)}
+import { kes } from "../data/catalogue.js";
+import { useCart, useShop } from "../store/useShop.js";
+import Icon from "./Icon.jsx";
+import Thumb from "./Thumb.jsx";
+
+export default function TrolleyPanel() {
+  const open = useShop((s) => s.panel === "cart");
+  const setPanel = useShop((s) => s.setPanel);
+  const closeAll = useShop((s) => s.closeAll);
+  const setQuantity = useShop((s) => s.setQuantity);
+  const remove = useShop((s) => s.remove);
+  const goTo = useShop((s) => s.goTo);
+  const cart = useCart();
+
+  return (
+    <aside className={"panel" + (open ? " on" : "")} inert={!open} aria-label="Your trolley">
+      <header className="p-head">
+        <h2><Icon name="cart" /> Your Trolley <small>{cart.count} item{cart.count === 1 ? "" : "s"}</small></h2>
+        <button className="icon-btn sm" onClick={closeAll} aria-label="Close trolley"><Icon name="x" /></button>
+      </header>
+      <div className="p-body">
+        {cart.lines.length ? (
+          <ul className="lines">
+            {cart.lines.map(({ variantId, quantity, product, subtotal }) => (
+              <li key={variantId} className="line">
+                <button className="l-thumb" onClick={() => !product.unresolved && goTo(product)} aria-label={`Find ${product.name} on the shelf`}>
+                  <Thumb product={product} />
+                </button>
+                <div className="l-main">
+                  <b>{product.name}</b>
+                  <small>{product.unresolved ? "Added elsewhere in the shop" : `${kes(product.price)} each`}</small>
+                  <div className="l-row">
+                    <span className="qty sm" role="group" aria-label={`Quantity of ${product.name}`}>
+                      <button onClick={() => setQuantity(variantId, quantity - 1)} aria-label="Decrease quantity"><Icon name="minus" /></button>
+                      <b>{quantity}</b>
+                      <button onClick={() => setQuantity(variantId, quantity + 1)} aria-label="Increase quantity"><Icon name="plus" /></button>
+                    </span>
+                    <button className="link danger" onClick={() => remove(variantId)} aria-label={`Remove ${product.name}`}>
+                      <Icon name="trash" /> Remove
+                    </button>
+                  </div>
+                </div>
+                <b className="l-total">{kes(subtotal)}</b>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="lp-empty">
+            <Icon name="cart" />
+            <b>Your trolley is empty</b>
+            <p>Click any product on a shelf, or open your child’s booklist to add everything they need.</p>
+            <button className="lp-btn ghost" onClick={() => setPanel("booklist")}><Icon name="list" /> Open booklist</button>
+          </div>
+        )}
+      </div>
+      <footer className="p-foot">
+        <div className="sum-row big"><span>Subtotal</span><b>{kes(cart.subtotal)}</b></div>
+        <p className="note"><Icon name="truck" /> Collect free in store, or delivery in Nairobi within 1–2 days (KES 300). Delivery is added at checkout.</p>
+        <div className="p-actions">
+          <button className="lp-btn ghost" onClick={closeAll}>Continue Shopping</button>
+          <button className="lp-btn" disabled={!cart.lines.length} onClick={() => setPanel("checkout")}>Proceed to Checkout</button>
+        </div>
+      </footer>
+    </aside>
+  );
+}

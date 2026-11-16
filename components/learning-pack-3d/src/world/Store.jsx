@@ -1,29 +1,231 @@
+import { useMemo } from "react";
 import * as THREE from "three";
-import {useShop,cartItems} from "../store/useShop.js";import {CATEGORIES} from "../data/catalogue.js";import {UNIT_X} from "../data/layout.js";
-const Box=({a,p,color="#eeeae2",...r})=><mesh position={p} castShadow receiveShadow {...r}><boxGeometry args={a}/><meshStandardMaterial color={color} roughness={.8}/></mesh>;
-const signCache=new Map();
-function signMap(text,w,h,bg){const key=bg+"|"+w+"|"+h+"|"+text;if(signCache.has(key))return signCache.get(key);
- const pxW=1024,pxH=Math.max(96,Math.round(pxW*(h/w))),c=document.createElement("canvas");c.width=pxW;c.height=pxH;const g=c.getContext("2d");
- g.fillStyle=bg;g.fillRect(0,0,pxW,pxH);g.fillStyle="#fff";g.textAlign="center";g.textBaseline="middle";
- const lines=String(text||"").split("\n");let fontPx=Math.floor(pxH/(lines.length+.7));
- const measure=()=>{g.font=`700 ${fontPx}px "Trebuchet MS",sans-serif`;return Math.max(...lines.map(l=>g.measureText(l).width),1)};
- if(measure()>pxW*.92)fontPx=Math.max(18,Math.floor(fontPx*(pxW*.92)/measure()));measure();
- const lh=fontPx*1.15,start=pxH/2-((lines.length-1)*lh)/2;lines.forEach((line,i)=>g.fillText(line,pxW/2,start+i*lh));
- const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;signCache.set(key,t);return t}
-const Sign=({p,w,h,bg="#E63B00",text,size:_size=.3,ry=0,...r})=><group position={p} rotation={[0,ry,0]} {...r}><mesh><planeGeometry args={[w,h]}/><meshBasicMaterial map={signMap(text,w,h,bg)} toneMapped={false} side={2}/></mesh></group>;
-const GAPS=[[-17.5,-12],[-10.5,-5],[-3.5,2]],PIERS=[[-20,-17.5],[-12,-10.5],[-5,-3.5],[2,16]];
-function SideWall({x}){return <group><Box a={[.3,1,36]} p={[x,.5,-2]}/><Box a={[.3,1.6,36]} p={[x,4.2,-2]}/>
- {PIERS.map(([a,b])=><Box key={a} a={[.3,2.4,b-a]} p={[x,2.2,(a+b)/2]}/>)}
- {GAPS.map(([a,b])=><mesh key={a} position={[x,2.2,(a+b)/2]} rotation={[0,Math.PI/2,0]}><planeGeometry args={[b-a,2.4]}/><meshPhysicalMaterial transparent opacity={.15} roughness={0} color="#bfe3ff" side={2} depthWrite={false}/></mesh>)}</group>}
-export default function Store(){const setPanel=useShop(s=>s.setPanel);return(<group>
- <mesh rotation={[-Math.PI/2,0,0]} position={[0,0,-2]} receiveShadow><planeGeometry args={[36,40]}/><meshStandardMaterial color="#d8cfbf" roughness={.35} metalness={.1}/></mesh>
- <mesh rotation={[Math.PI/2,0,0]} position={[0,5,-2]}><planeGeometry args={[36,40]}/><meshStandardMaterial color="#b9b4aa"/></mesh>
- {[-13.5,-9,-4.5,0,4.5,9,13.5].map(x=><mesh key={x} position={[x,4.95,-2]}><boxGeometry args={[.35,.06,34]}/><meshBasicMaterial color="#fff"/></mesh>)}
- <Box a={[36,5,.3]} p={[0,2.5,-20]}/>
- <Box a={[13,5,.3]} p={[-11.5,2.5,16]}/><Box a={[13,5,.3]} p={[11.5,2.5,16]}/><Box a={[10,1.15,.3]} p={[0,4.42,16]}/>
- <SideWall x={-18}/><SideWall x={18}/>
- <Sign p={[0,3.2,-19.8]} w={9} h={2.2} bg="#0B1F3A" text={"Everything Your Child\nNeeds for School"} size={.5}/>
- <Sign p={[0,3.6,15.8]} w={6} h={1.6} bg="#0B1F3A" text="Learning Pack · Karibu" size={.42}/>
- {UNIT_X.map((x,u)=><Sign key={x} p={[x,3.7,2.4]} w={2.8} h={.9} size={.2} text={`Aisle ${u*2+1}: ${CATEGORIES[u*2].name}\nAisle ${u*2+2}: ${CATEGORIES[u*2+1].name}`}/>)}
- <Box a={[6,1,1.2]} p={[-12,.5,11]} color="#0B1F3A"/><Box a={[6.1,.06,1.3]} p={[-12,1.03,11]} color="#ffffff"/>
- <Sign p={[-12,3,11]} w={4.2} h={.8} size={.3} text="PROCEED TO CHECKOUT" onClick={e=>{e.stopPropagation();if(e.delta>6)return;const s=useShop.getState();if(!cartItems().length){s.say("Add something to your trolley first");return}setPanel("checkout")}} onPointerOver={()=>document.body.style.cursor="pointer"} onPointerOut={()=>document.body.style.cursor=""}/></group>)}
+import { AISLES } from "../data/catalogue.js";
+import { AISLE_WALK, STORE, WALK_X } from "../data/layout.js";
+import { BRAND, FONT, ceilingTexture, fillBg, fitFont, floorTexture, signTexture, textSign, wallTexture } from "./textures.js";
+
+const SIGN_W = 4.8;
+const SIGN_H = 1.3;
+const W = STORE.x1 - STORE.x0;
+const D = STORE.zFront - STORE.zBack;
+const H = STORE.height;
+const CZ = (STORE.zFront + STORE.zBack) / 2;
+
+function Box({ a, p, color = "#ffffff", rough = 0.7, metal = 0, ...rest }) {
+  return (
+    <mesh position={p} castShadow receiveShadow {...rest}>
+      <boxGeometry args={a} />
+      <meshStandardMaterial color={color} roughness={rough} metalness={metal} />
+    </mesh>
+  );
+}
+
+/** Flat, unlit sign so lettering stays crisp under any lighting. */
+export function Sign({ p, w, h, tex, ry = 0, double = false, ...rest }) {
+  return (
+    <group position={p} rotation={[0, ry, 0]} {...rest}>
+      <mesh>
+        <planeGeometry args={[w, h]} />
+        <meshBasicMaterial map={tex} toneMapped={false} side={double ? THREE.DoubleSide : THREE.FrontSide} />
+      </mesh>
+    </group>
+  );
+}
+
+// -------------------------------------------------------------------- aisle signs
+
+/** Hanging walkway sign: the aisle on each side of the walkway, with a pointer toward it. */
+function walkwayTexture(walk, flip) {
+  const aisles = AISLES.filter((a, i) => AISLE_WALK[i] === walk).map((a) => ({ ...a, west: a.id % 2 === 1 }));
+  // aisles facing +x (odd ids) have their shelves on the *west* of the walkway
+  const west = aisles.find((a) => a.west);
+  const east = aisles.find((a) => !a.west);
+  const halves = flip ? [east, west] : [west, east];
+  return signTexture(`walk|${walk}|${flip}`, SIGN_W, SIGN_H, (g, Wd, Ht) => {
+    fillBg(g, Wd, Ht, BRAND.orange);
+    g.fillStyle = "rgba(255,255,255,.35)";
+    g.fillRect(Wd / 2 - 1.5, Ht * 0.14, 3, Ht * 0.72);
+    halves.forEach((a, i) => {
+      if (!a) return;
+      const cx = i === 0 ? Wd * 0.25 : Wd * 0.75;
+      // number badge
+      g.fillStyle = "#fff";
+      g.beginPath();
+      g.arc(cx - Wd * 0.17, Ht * 0.5, Ht * 0.28, 0, 7);
+      g.fill();
+      g.fillStyle = BRAND.orange;
+      g.textAlign = "center";
+      g.font = `800 ${Ht * 0.38}px ${FONT}`;
+      g.fillText(String(a.id + 1), cx - Wd * 0.17, Ht * 0.53);
+      // name + arrow toward the shelf
+      g.fillStyle = "#fff";
+      g.textAlign = "left";
+      const label = a.name;
+      const s = fitFont(g, label, Wd * 0.3, Ht * 0.36, 800);
+      g.font = `800 ${s}px ${FONT}`;
+      g.fillText(label, cx - Wd * 0.1, Ht * 0.42);
+      g.font = `700 ${Ht * 0.17}px ${FONT}`;
+      g.globalAlpha = 0.9;
+      g.fillText(i === 0 ? "◀  this side" : "this side  ▶", cx - Wd * 0.1, Ht * 0.7);
+      g.globalAlpha = 1;
+    });
+  });
+}
+
+function WalkwaySign({ walk, z }) {
+  const x = WALK_X[walk];
+  const y = 3.75;
+  const front = useMemo(() => walkwayTexture(walk, false), [walk]);
+  const back = useMemo(() => walkwayTexture(walk, true), [walk]);
+  return (
+    <group position={[x, y, z]}>
+      {[-2.05, 2.05].map((dx) => (
+        <mesh key={dx} position={[dx, (H - y) / 2, 0]}>
+          <cylinderGeometry args={[0.012, 0.012, H - y, 6]} />
+          <meshStandardMaterial color="#9aa3b2" />
+        </mesh>
+      ))}
+      <Sign p={[0, 0, 0.02]} w={SIGN_W} h={SIGN_H} tex={front} />
+      <Sign p={[0, 0, -0.02]} w={SIGN_W} h={SIGN_H} tex={back} ry={Math.PI} />
+      <Box a={[SIGN_W + 0.06, 0.08, 0.08]} p={[0, SIGN_H / 2, 0]} color={BRAND.navy} />
+      <Box a={[SIGN_W + 0.06, 0.08, 0.08]} p={[0, -SIGN_H / 2, 0]} color={BRAND.navy} />
+    </group>
+  );
+}
+
+// -------------------------------------------------------------------- shell
+
+function Floor() {
+  const map = useMemo(() => floorTexture(), []);
+  return (
+    <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, CZ]} receiveShadow>
+        <planeGeometry args={[W, D]} />
+        <meshStandardMaterial map={map} roughness={0.22} metalness={0.04} envMapIntensity={0.55} />
+      </mesh>
+      {/* welcome mat */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.006, STORE.zFront - 1.1]}>
+        <planeGeometry args={[6.4, 1.8]} />
+        <meshBasicMaterial map={textSign("KARIBU · WELCOME", 6.4, 1.8, { bg: BRAND.navy, accent: BRAND.orange })} toneMapped={false} />
+      </mesh>
+    </group>
+  );
+}
+
+function Ceiling() {
+  const map = useMemo(() => ceilingTexture(), []);
+  const rows = WALK_X;
+  return (
+    <group>
+      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, H, CZ]}>
+        <planeGeometry args={[W, D]} />
+        <meshStandardMaterial map={map} roughness={0.95} />
+      </mesh>
+      {/* LED strip fixtures over every walkway, plus the entrance plaza */}
+      {rows.map((x) => (
+        <mesh key={x} position={[x, H - 0.05, -3.2]}>
+          <boxGeometry args={[0.26, 0.07, 28]} />
+          <meshBasicMaterial color="#ffffff" toneMapped={false} />
+        </mesh>
+      ))}
+      {[-9, -2, 5].map((z) => (
+        <mesh key={z} position={[0, H - 0.05, z + 12.5]}>
+          <boxGeometry args={[26, 0.07, 0.26]} />
+          <meshBasicMaterial color="#ffffff" toneMapped={false} />
+        </mesh>
+      ))}
+      {[-12, -3.5, 5, 11].map((z) => (
+        <Box key={z} a={[W, 0.34, 0.45]} p={[0, H - 0.2, z]} color={BRAND.navy} rough={0.6} />
+      ))}
+    </group>
+  );
+}
+
+function Walls() {
+  const wall = useMemo(() => wallTexture(), []);
+  const mat = <meshStandardMaterial map={wall} roughness={0.9} />;
+  const posters = useMemo(
+    () => [
+      textSign("BACK TO SCHOOL", 3.6, 1.3, { bg: BRAND.navy, accent: BRAND.orange, sub: "Shop your child's booklist" }),
+      textSign("CBC TEXTBOOKS", 3.6, 1.3, { bg: BRAND.orange, sub: "From Kenya's leading publishers" }),
+      textSign("FREE PICKUP", 3.6, 1.3, { bg: BRAND.navy, accent: BRAND.orange, sub: "Or delivery in Nairobi, 1–2 days" }),
+    ],
+    []
+  );
+  const welcome = useMemo(() => textSign("Everything Your Child\nNeeds for School", 11, 2.5, { bg: BRAND.navy, accent: BRAND.orange }), []);
+  return (
+    <group>
+      {/* back wall */}
+      <mesh position={[0, H / 2, STORE.zBack]} receiveShadow>
+        <planeGeometry args={[W, H]} />
+        {mat}
+      </mesh>
+      <Sign p={[0, 3.9, STORE.zBack + 0.05]} w={11} h={2.5} tex={welcome} />
+      {/* side walls with posters */}
+      {[-1, 1].map((s) => (
+        <group key={s}>
+          <mesh position={[s * STORE.x1, H / 2, CZ]} rotation={[0, -s * Math.PI / 2, 0]} receiveShadow>
+            <planeGeometry args={[D, H]} />
+            {mat}
+          </mesh>
+          {[-11, -3, 5].map((z, i) => (
+            <Sign key={z} p={[s * (STORE.x1 - 0.05), 3.5, z]} w={3.6} h={1.3} ry={-s * Math.PI / 2} tex={posters[(i + (s > 0 ? 1 : 0)) % 3]} />
+          ))}
+        </group>
+      ))}
+      <Storefront />
+    </group>
+  );
+}
+
+function Storefront() {
+  const z = STORE.zFront;
+  const entrance = 4.6;
+  const sideW = STORE.x1 - entrance;
+  const outside = useMemo(() => textSign("LEARNING PACK", 9, 1.6, { bg: BRAND.navy, accent: BRAND.orange, sub: "School books & supplies · Karibu" }), []);
+  const exit = useMemo(() => textSign("EXIT  ➜", 2.2, 0.7, { bg: "#0f7a3d" }), []);
+  return (
+    <group>
+      {[-1, 1].map((s) => {
+        const cx = s * (entrance + sideW / 2);
+        return (
+          <group key={s}>
+            <Box a={[sideW, 1.0, 0.3]} p={[cx, 0.5, z]} color="#f6f7f9" />
+            <Box a={[sideW, 1.8, 0.3]} p={[cx, 5.3, z]} color="#f6f7f9" />
+            <mesh position={[cx, 2.9, z]}>
+              <planeGeometry args={[sideW, 3.4]} />
+              <meshPhysicalMaterial color="#d6ecff" transparent opacity={0.16} roughness={0.05} side={THREE.DoubleSide} depthWrite={false} />
+            </mesh>
+            {[0.25, 0.5, 0.75].map((f) => (
+              <Box key={f} a={[0.1, 3.4, 0.14]} p={[s * (entrance + sideW * f), 2.9, z]} color={BRAND.navy} />
+            ))}
+          </group>
+        );
+      })}
+      {/* entrance portal */}
+      <Box a={[entrance * 2, 1.8, 0.3]} p={[0, 5.3, z]} color={BRAND.navy} />
+      <Box a={[0.3, 4.4, 0.4]} p={[-entrance, 2.9, z]} color={BRAND.navy} />
+      <Box a={[0.3, 4.4, 0.4]} p={[entrance, 2.9, z]} color={BRAND.navy} />
+      <Sign p={[0, 5.3, z + 0.17]} w={9} h={1.6} tex={outside} />
+      <Box a={[entrance * 2 - 0.3, 0.12, 0.4]} p={[0, 4.5, z]} color={BRAND.orange} />
+      {/* exit over the left glazing */}
+      <Sign p={[-9.4, 4.05, z - 0.18]} w={2.2} h={0.7} tex={exit} ry={Math.PI} />
+    </group>
+  );
+}
+
+export default function Store() {
+  return (
+    <group>
+      <Floor />
+      <Ceiling />
+      <Walls />
+      {[0, 1, 2, 3, 4].map((w) => (
+        <group key={w}>
+          <WalkwaySign walk={w} z={0.4} />
+          <WalkwaySign walk={w} z={-9.5} />
+        </group>
+      ))}
+    </group>
+  );
+}

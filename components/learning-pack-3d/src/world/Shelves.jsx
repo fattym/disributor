@@ -1,159 +1,204 @@
-import {useMemo,useState} from "react";
-import {Edges} from "@react-three/drei";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import {SHELF_ITEMS,UNIT_X} from "../data/layout.js";
-import {PRODUCTS} from "../data/catalogue.js";
-import {useShop} from "../store/useShop.js";
+import { useSupermarketStore } from "@/lib/store/supermarketStore";
+import { AISLES } from "../data/catalogue.js";
+import { UNIT_W, UNIT_X, UNIT_Z, LEVELS, firstSlotOfTile, slotPose, tileOfSlot } from "../data/layout.js";
+import { useShop } from "../store/useShop.js";
+import { lowEnd } from "./state.js";
+import { GAP, applyLabels, applyStock, disposeRig, makeRig, tickRig } from "./rig.js";
+import { BRAND, blobTexture, textSign } from "./textures.js";
 
-const BOX=new THREE.BoxGeometry(1,1,1),PLANE=new THREE.PlaneGeometry(.42,.13),cache=new Map(),textureCache=new Map();
-const canvasTex=(w,h,draw)=>{
- const c=document.createElement("canvas");
- c.width=w;c.height=h;
- draw(c.getContext("2d"),w,h);
- const t=new THREE.CanvasTexture(c);
- t.colorSpace=THREE.SRGBColorSpace;
- t.anisotropy=4;
- return t;
-};
-
-function getFrontTexture(p,fallbackTex){
- const imgUrl=p.cover_image||p.image_url||(p.image&&!p.image.endsWith("kids.png")?p.image:null);
- if(!imgUrl)return fallbackTex;
- if(textureCache.has(imgUrl))return textureCache.get(imgUrl);
-
- const loader=new THREE.TextureLoader();
- loader.setCrossOrigin("anonymous");
- const tex=loader.load(
-  imgUrl,
-  loadedTex=>{
-   loadedTex.colorSpace=THREE.SRGBColorSpace;
-   loadedTex.anisotropy=4;
-   loadedTex.needsUpdate=true;
-  },
-  undefined,
-  ()=>{console.warn("Failed to load book texture:",imgUrl)}
- );
- tex.colorSpace=THREE.SRGBColorSpace;
- textureCache.set(imgUrl,tex);
- return tex;
-}
-
-function covers(p){
- if(!p)return null;
- const key=`${p.id}_${p.cover_image||p.image_url||p.image||p.name}`;
- if(cache.has(key))return cache.get(key);
-
- const fallbackTex=canvasTex(200,260,(g,W,H)=>{
-  g.fillStyle=p.color||"#2563eb";
-  g.fillRect(0,0,W,H);
-  g.fillStyle="rgba(255,255,255,.93)";
-  g.fillRect(12,12,W-24,H*.56);
-  g.fillStyle="#0B1F3A";
-  g.font="bold 20px sans-serif";
-  g.textAlign="center";
-  const name=p.title||p.name||"Book";
-  const ln=[""];
-  name.split(" ").forEach(w=>{
-   const j=(ln.at(-1)+" "+w).trim();
-   j.length>14?ln.push(w):ln[ln.length-1]=j;
-  });
-  ln.slice(0,3).forEach((l,i)=>g.fillText(l,W/2,48+i*26));
-
-  if(p.icon){
-   g.font="52px serif";
-   g.fillText(p.icon,W/2,H*.82);
-  }
-  g.fillStyle="#E63B00";
-  g.fillRect(0,H-28,W,28);
-  g.fillStyle="#fff";
-  g.font="bold 15px sans-serif";
-  g.fillText(p.publisher||p.brand||"Learning Pack",W/2,H-8);
- });
-
- const frontMap=(p.cover_image||p.image_url)?getFrontTexture(p,fallbackTex):fallbackTex;
- const edgeColor=[0,1,6].includes(p.category)?"#f1e8d0":(p.color||"#334155");
- const edge=new THREE.MeshStandardMaterial({color:edgeColor,roughness:.7});
- const front=new THREE.MeshStandardMaterial({map:frontMap,roughness:.6});
-
- const priceStr=typeof p.price==='number'?p.price.toLocaleString():String(p.price||'');
- const tag=new THREE.MeshBasicMaterial({
-  map:canvasTex(128,40,(g,W,H)=>{
-   g.fillStyle="#E63B00";
-   g.fillRect(0,0,W,H);
-   g.fillStyle="#fff";
-   g.font="bold 24px sans-serif";
-   g.textAlign="center";
-   g.textBaseline="middle";
-   g.fillText(priceStr,W/2,H/2);
-  })
- });
-
- const r={
-  m:[-1,1].map(sd=>{
-   const a=Array(6).fill(edge);
-   a[sd>0?0:1]=front;
-   return a;
-  }),
-  tag
- };
- cache.set(key,r);
- return r;
-}
-
-function Book({it,product}){
- const p=product||PRODUCTS[it.productId]||PRODUCTS[0];
- const {m,tag}=useMemo(()=>covers(p),[p]);
- const [hover,setHover]=useState(false);
- const sel=useShop(s=>s.selectedKey===it.key);
- const select=useShop(s=>s.select);
- const lift=sel?it.side*.35:0;
-
- return(
-  <>
-   <mesh
-    geometry={BOX}
-    material={m[it.side>0?1:0]}
-    position={[it.position[0]+lift,it.position[1],it.position[2]]}
-    rotation={[0,sel?it.side*.5:0,0]}
-    scale={it.size}
-    castShadow
-    receiveShadow
-    onClick={e=>{e.stopPropagation();if(e.delta>6)return;select(p,it.key)}}
-    onPointerOver={e=>{e.stopPropagation();setHover(true);document.body.style.cursor="pointer"}}
-    onPointerOut={()=>{setHover(false);document.body.style.cursor=""}}
-   >
-    {(hover||sel)&&<Edges color={sel?"#E63B00":"#ffd23f"}/>}
-   </mesh>
-   {it.tag&&(
-    <mesh geometry={PLANE} material={tag} position={it.tagPosition} rotation={[0,it.side*Math.PI/2,0]}/>
-   )}
-  </>
- );
-}
-
-export default function Shelves(){
- const products=useShop(s=>s.products);
- return(
-  <group>
-   {UNIT_X.map(x=>(
-    <group key={x}>
-     <mesh position={[x,1.25,-7]} castShadow receiveShadow>
-      <boxGeometry args={[1.2,2.5,18]}/>
-      <meshStandardMaterial color="#bfc4cc" metalness={.5} roughness={.4}/>
-     </mesh>
-     {[.31,1.06,1.81].map(y=>
-      [-1,1].map(s=>(
-       <mesh key={y+"_"+s} position={[x+s*.62,y,-7]}>
-        <boxGeometry args={[.08,.05,18]}/>
-        <meshStandardMaterial color="#E63B00"/>
-       </mesh>
-      ))
-     )}
+/** Outline around one facing, used for hover and selection. */
+function Outline({ rig, slot, color, opacity = 0.2 }) {
+  const pose = slotPose(rig.aisle, slot);
+  const { S, side, ux } = rig;
+  const w = GAP * 0.94;
+  const h = S.h + 0.07;
+  const dep = S.d + 0.1;
+  const edges = useMemo(() => new THREE.EdgesGeometry(new THREE.BoxGeometry(1, 1, 1)), []);
+  useEffect(() => () => edges.dispose(), [edges]);
+  return (
+    <group position={[ux + side * (0.2 + dep / 2 - 0.02), pose.y + h / 2 - 0.02, pose.z]} scale={[dep, h, w]}>
+      <lineSegments geometry={edges}>
+        <lineBasicMaterial color={color} toneMapped={false} />
+      </lineSegments>
+      <mesh>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshBasicMaterial color={color} transparent opacity={opacity} depthWrite={false} toneMapped={false} />
+      </mesh>
     </group>
-   ))}
-   {SHELF_ITEMS.map(it=>(
-    <Book key={it.key} it={it} product={products[it.productId]||PRODUCTS[it.productId]}/>
-   ))}
-  </group>
- );
+  );
+}
+
+function AisleStock({ aisle, small }) {
+  const list = useShop((s) => s.stock[aisle]);
+  const version = useShop((s) => s.stockVersion);
+  const booklist = useShop((s) => s.booklist);
+  const cartItems = useSupermarketStore((s) => s.cartItems);
+  const select = useShop((s) => s.select);
+  const setHover = useShop((s) => s.setHover);
+  const selectedTile = useShop((s) => (s.selected ? s.stock[aisle].findIndex((p) => p.id === s.selected.id) : -1));
+  const rig = useMemo(() => makeRig(aisle, small), [aisle, small]);
+  const [hoverSlot, setHoverSlot] = useState(-1);
+  const acc = useRef(0);
+  const last = useRef(-1);
+
+  useEffect(() => () => disposeRig(rig), [rig]);
+
+  // Restock: repaint placeholders and remap every instance to its tile.
+  useLayoutEffect(() => {
+    applyStock(rig, aisle, list);
+    last.current = -1;
+  }, [rig, list, version, aisle]);
+
+  // Labels reflect the booklist and the trolley, so they are repainted whenever either changes.
+  useLayoutEffect(() => {
+    applyLabels(rig, list, booklist, cartItems);
+  }, [rig, list, version, booklist, cartItems]);
+
+  useFrame((_, dt) => {
+    acc.current += dt;
+    const poll = acc.current > 0.45;
+    if (poll) acc.current = 0;
+    tickRig(rig, aisle, list, poll);
+  });
+
+  const slotOf = (e) => Math.floor(e.instanceId / rig.copies);
+  const productAt = (slot) => list[tileOfSlot(slot, rig.n)];
+
+  return (
+    <group>
+      <primitive object={rig.body} />
+      <primitive
+        object={rig.front}
+        onPointerMove={(e) => {
+          e.stopPropagation();
+          const slot = slotOf(e);
+          if (slot === last.current) return;
+          last.current = slot;
+          setHoverSlot(slot);
+          setHover(productAt(slot) || null);
+          document.body.style.cursor = "pointer";
+        }}
+        onPointerOut={() => {
+          last.current = -1;
+          setHoverSlot(-1);
+          setHover(null);
+          document.body.style.cursor = "";
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (e.delta > 6) return;
+          const p = productAt(slotOf(e));
+          if (p) select(p);
+        }}
+      />
+      <primitive object={rig.label} />
+      {hoverSlot >= 0 && <Outline rig={rig} slot={hoverSlot} color="#FFFFFF" opacity={0.12} />}
+      {selectedTile >= 0 && <Outline rig={rig} slot={firstSlotOfTile(selectedTile, list.length)} color={BRAND.orange} opacity={0.18} />}
+    </group>
+  );
+}
+
+/** Instanced helper for repeated static boxes (shelf boards, lips, uprights). */
+function Boxes({ items, color, rough = 0.6, metal = 0, shadow = true }) {
+  const ref = useRef();
+  useLayoutEffect(() => {
+    const d = new THREE.Object3D();
+    items.forEach(([p, s], i) => {
+      d.position.set(...p);
+      d.scale.set(...s);
+      d.updateMatrix();
+      ref.current.setMatrixAt(i, d.matrix);
+    });
+    ref.current.instanceMatrix.needsUpdate = true;
+    ref.current.computeBoundingSphere();
+  }, [items]);
+  return (
+    <instancedMesh ref={ref} args={[undefined, undefined, items.length]} castShadow={shadow} receiveShadow>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial color={color} roughness={rough} metalness={metal} />
+    </instancedMesh>
+  );
+}
+
+function Gondolas() {
+  const zc = (UNIT_Z[0] + UNIT_Z[1]) / 2;
+  const len = UNIT_Z[1] - UNIT_Z[0];
+  const { boards, lips, posts } = useMemo(() => {
+    const boards = [];
+    const lips = [];
+    const posts = [];
+    UNIT_X.forEach((ux) => {
+      [-1, 1].forEach((side) => {
+        LEVELS.forEach((y) => {
+          boards.push([[ux + side * 0.33, y - 0.02, zc], [0.6, 0.04, len - 0.2]]);
+          lips.push([[ux + side * 0.625, y - 0.035, zc], [0.03, 0.09, len - 0.2]]);
+        });
+        for (let z = UNIT_Z[0] + 0.1; z <= UNIT_Z[1]; z += len / 5) posts.push([[ux + side * 0.64, 1.25, z], [0.05, 2.5, 0.06]]);
+      });
+    });
+    return { boards, lips, posts };
+  }, [zc, len]);
+  const blob = useMemo(() => blobTexture(), []);
+
+  return (
+    <group>
+      {UNIT_X.map((ux, u) => (
+        <group key={ux}>
+          <mesh position={[ux, 0.06, zc]} castShadow receiveShadow>
+            <boxGeometry args={[UNIT_W, 0.12, len]} />
+            <meshStandardMaterial color={BRAND.navy} roughness={0.5} />
+          </mesh>
+          <mesh position={[ux, 1.25, zc]} castShadow receiveShadow>
+            <boxGeometry args={[0.07, 2.5, len]} />
+            <meshStandardMaterial color="#d3d9e2" roughness={0.8} />
+          </mesh>
+          <mesh position={[ux, 2.54, zc]} castShadow>
+            <boxGeometry args={[UNIT_W, 0.16, len]} />
+            <meshStandardMaterial color={BRAND.navy} roughness={0.5} />
+          </mesh>
+          {[-1, 1].map((s) => (
+            <mesh key={s} position={[ux + s * 0.665, 2.54, zc]}>
+              <boxGeometry args={[0.02, 0.17, len + 0.02]} />
+              <meshStandardMaterial color={BRAND.orange} roughness={0.5} />
+            </mesh>
+          ))}
+          {/* end panels; the entrance-side one carries the aisle numbers */}
+          <mesh position={[ux, 1.3, UNIT_Z[0]]} castShadow>
+            <boxGeometry args={[UNIT_W, 2.6, 0.1]} />
+            <meshStandardMaterial color={BRAND.navy} roughness={0.5} />
+          </mesh>
+          <mesh position={[ux, 1.3, UNIT_Z[1]]} castShadow>
+            <boxGeometry args={[UNIT_W, 2.6, 0.1]} />
+            <meshStandardMaterial color={BRAND.navy} roughness={0.5} />
+          </mesh>
+          <mesh position={[ux, 1.72, UNIT_Z[1] + 0.056]}>
+            <planeGeometry args={[UNIT_W - 0.14, 1.0]} />
+            <meshBasicMaterial map={textSign(`${u * 2 + 1}  ·  ${u * 2 + 2}`, UNIT_W - 0.14, 1.0, { bg: BRAND.orange, sub: `${AISLES[u * 2].name} / ${AISLES[u * 2 + 1].name}` })} toneMapped={false} />
+          </mesh>
+          <mesh position={[ux, 0.005, zc]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[UNIT_W + 2.4, len + 2.2]} />
+            <meshBasicMaterial map={blob} transparent opacity={0.55} depthWrite={false} />
+          </mesh>
+        </group>
+      ))}
+      <Boxes items={boards} color="#e6e9ee" rough={0.45} />
+      <Boxes items={lips} color={BRAND.navy} rough={0.45} />
+      <Boxes items={posts} color={BRAND.navy} rough={0.4} metal={0.3} />
+    </group>
+  );
+}
+
+export default function Shelves() {
+  const small = useMemo(() => lowEnd(), []);
+  return (
+    <group>
+      <Gondolas />
+      {AISLES.map((a) => (
+        <AisleStock key={a.id} aisle={a.id} small={small} />
+      ))}
+    </group>
+  );
 }

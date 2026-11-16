@@ -45,3 +45,4 @@ components/learning-pack-3d/node_modules/
 components/learning-pack-3d/dist/
 *.sqlite3
 .kilo/
+graphify-out/

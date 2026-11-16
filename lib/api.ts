@@ -286,9 +286,10 @@ export const shopApi = {
     api.get<ShopProduct[] | { results: ShopProduct[] }>('/shop/products/', { params }).then((r) => r.data),
   getProduct: (id: number | string) => api.get<ShopProduct>(`/shop/products/${id}/`).then((r) => r.data),
 
-  getPublicProducts: async (params?: Record<string, string | number>) => {
+  getPublicProducts: async (params?: Record<string, string | number>): Promise<ShopProduct[]> => {
+    type Page = ShopProduct[] | { results?: ShopProduct[]; count?: number };
     const pageSize = 200;
-    const first = await api.get<any>('/shop/public/', { params: { page_size: pageSize, page: 1, ...params } }).then((r) => r.data);
+    const first = await api.get<Page>('/shop/public/', { params: { page_size: pageSize, page: 1, ...params } }).then((r) => r.data);
     if (Array.isArray(first)) return first;
     const results: ShopProduct[] = [...(first.results || [])];
     const count = first.count || results.length;
@@ -300,9 +301,9 @@ export const shopApi = {
     for (let i = 0; i < pageNums.length; i += batchSize) {
       const batch = pageNums.slice(i, i + batchSize);
       const pages = await Promise.all(
-        batch.map((p) => api.get<any>('/shop/public/', { params: { page_size: pageSize, page: p, ...params } }).then((r) => r.data))
+        batch.map((p) => api.get<Page>('/shop/public/', { params: { page_size: pageSize, page: p, ...params } }).then((r) => r.data))
       );
-      for (const pg of pages) results.push(...(pg.results || []));
+      for (const pg of pages) results.push(...(Array.isArray(pg) ? pg : pg.results || []));
     }
     return results;
   },

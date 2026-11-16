@@ -23,9 +23,12 @@
 .shop-nav__top {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.25rem;
   padding-block: 0.35rem;
-  flex-wrap: nowrap;
+  /* Wrap rather than spill past the viewport; overflow stays visible so the
+     mega-menu dropdowns aren't clipped. The <=900px rule switches to scroll. */
+  flex-wrap: wrap;
   overflow: visible;
 }
 
@@ -38,7 +41,7 @@
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.85rem 1.1rem;
+  padding: 0.85rem clamp(0.7rem, 0.9vw, 1.1rem);
   border: none;
   background: transparent;
   color: var(--white);
@@ -275,6 +278,7 @@ html.dark .shop-nav__group-title {
 
   .shop-nav__top {
     flex-wrap: nowrap;
+    justify-content: flex-start;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;

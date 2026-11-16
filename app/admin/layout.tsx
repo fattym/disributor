@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import Link from 'next/link';
@@ -144,6 +144,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { user, logout, loading } = useAuth();
   const router = useRouter();
+  const denied = !loading && (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN'));
+
+  useEffect(() => {
+    if (denied) router.replace('/login');
+  }, [denied, router]);
 
   if (loading) {
     return (
@@ -153,10 +158,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN')) {
-    router.push('/login');
-    return null;
-  }
+  if (denied || !user) return null;
 
   return (
     <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950">
