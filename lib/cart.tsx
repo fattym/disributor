@@ -55,6 +55,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+    // Guests have no server cart (GET /carts/ answers 400 without an X-Session-Key); their cart lives in the local store.
+    if (typeof window === 'undefined' || !localStorage.getItem('access_token')) return;
     storefrontApi.getMyCart().then((data) => {
       if (cancelled) return;
       // GET /carts/ answers one cart object {id, items: [...]}; older shapes (a bare list, DRF results) still work.

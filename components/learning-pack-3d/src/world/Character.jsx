@@ -35,7 +35,7 @@ const G = {
 const mats = new Map();
 const M = (c, r = 0.75, side) => {
   const k = `${c}|${r}|${side || 0}`;
-  if (!mats.has(k)) mats.set(k, new MeshStandardMaterial({ color: c, roughness: r, side }));
+  if (!mats.has(k)) mats.set(k, new MeshStandardMaterial(side === undefined ? { color: c, roughness: r } : { color: c, roughness: r, side }));
   return mats.get(k);
 };
 
