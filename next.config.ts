@@ -6,7 +6,8 @@ import type { NextConfig } from "next";
 const COVER_ORIGIN = process.env.LP_COVER_ORIGIN || "https://image.codingclubskenya.com";
 
 const nextConfig: NextConfig = {
-  output: "export",
+  // Static export drops rewrites, so only export for production builds; `next dev` keeps /lp-cover working.
+  ...(process.env.NODE_ENV === "production" ? { output: "export" as const } : {}),
   trailingSlash: true,
   images: {
     unoptimized: true,
