@@ -61,6 +61,10 @@ interface Product {
   unit_price: string;
   min_order_quantity: number;
   available_stock: number;
+  /** Units owed beyond what is on hand (backorder sales). The API never sends a negative stock. */
+  on_backorder?: number;
+  /** On hand minus units held for unpaid orders. */
+  sellable_stock?: number;
   tags: string[];
   attributes: Record<string, unknown>;
   bulk_pricing: Array<{ min_qty: number; price: number }>;
@@ -1445,7 +1449,9 @@ export default function ProductsPage() {
                         onChange={(e) => setFormData({ ...formData, available_stock: e.target.value })}
                         className={inputCls}
                       />
-                      <span className="text-[11px] text-zinc-500 mt-0.5 block">Inventory count</span>
+                      <span className="text-[11px] text-zinc-500 mt-0.5 block">
+                        Inventory count. Setting it above zero turns backorders off.
+                      </span>
                     </div>
                   </div>
                 </section>
@@ -1915,15 +1921,29 @@ export default function ProductsPage() {
 
                       {/* Stock */}
                       <td className="py-3 px-4">
-                        <span
-                          className={`font-semibold text-xs ${
-                            product.available_stock > 5
-                              ? 'text-zinc-900 dark:text-zinc-100'
-                              : 'text-amber-600'
-                          }`}
-                        >
-                          {product.available_stock} in stock
-                        </span>
+                        {(product.on_backorder ?? 0) > 0 ? (
+                          <span className="font-semibold text-xs text-amber-600">
+                            {product.on_backorder} on backorder
+                          </span>
+                        ) : (
+                          <span
+                            className={`font-semibold text-xs ${
+                              product.available_stock > 5
+                                ? 'text-zinc-900 dark:text-zinc-100'
+                                : 'text-amber-600'
+                            }`}
+                          >
+                            {product.available_stock} in stock
+                          </span>
+                        )}
+                        {product.sellable_stock !== undefined && product.sellable_stock < product.available_stock && (
+                          <span className="block text-[11px] text-zinc-500">
+                            {product.available_stock - product.sellable_stock} held for unpaid orders
+                          </span>
+                        )}
+                        {product.backorders && (
+                          <span className="block text-[11px] text-amber-600">Backorders on</span>
+                        )}
                       </td>
 
                       {/* Store Status (Dynamic Toggle) */}
