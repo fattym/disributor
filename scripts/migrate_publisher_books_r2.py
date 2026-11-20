@@ -6,11 +6,20 @@ import boto3
 from botocore.config import Config
 
 CDN_BASE = 'https://image.codingclubskenya.com'
-BUCKET = 'learningpackbooks'
-ACCOUNT_ID = 'c784ad89fd4c270a50b5c5bb326138ac'
+def _env(name):
+    """R2 settings come from the environment only (no defaults): export R2_BUCKET, R2_ACCOUNT_ID,
+    R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY before running this script."""
+    value = os.environ.get(name, '').strip()
+    if not value:
+        raise SystemExit(f'Missing environment variable {name}. See the comment above _env().')
+    return value
+
+
+BUCKET = _env('R2_BUCKET')
+ACCOUNT_ID = _env('R2_ACCOUNT_ID')
 ENDPOINT = f'https://{ACCOUNT_ID}.r2.cloudflarestorage.com'
-ACCESS_KEY = 'be06f1637e66d0763ca868236c3c5b23'
-SECRET_KEY = '74d45937f7538ec15766da55561282626babd8a228528f5f33782a365f1cb4b4'
+ACCESS_KEY = _env('R2_ACCESS_KEY_ID')
+SECRET_KEY = _env('R2_SECRET_ACCESS_KEY')
 INCREMENT = 70
 
 def slugify(text):
