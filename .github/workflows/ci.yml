@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # No real network in CI: the shop page falls back to the placeholder route when the API is unreachable.
+      NEXT_PUBLIC_API_URL: https://api.invalid/api
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - name: eslint (report only)
+        run: timeout 180 npm run lint
+        continue-on-error: true
+      - run: npm run build
+        env:
+          NODE_ENV: production
