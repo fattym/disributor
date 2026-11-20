@@ -21,7 +21,6 @@ export interface DiscoveryProduct {
   brand: string;
   product_type: string;
   is_reseller_listing: boolean;
-  commission_amount: string | null;
   tags: number[];
   learning_areas: number[];
   created_at: string;

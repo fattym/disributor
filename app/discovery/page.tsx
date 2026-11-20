@@ -113,14 +113,6 @@ export default function DiscoveryPage() {
     ? Math.max(...products.map((p) => parseFloat(p.effective_price || p.price || "0")))
     : 10000;
 
-  const affiliateProducts = useMemo(
-    () =>
-      products.filter(
-        (p) => p.commission_amount && parseFloat(p.commission_amount) > 0,
-      ),
-    [products],
-  );
-
   const clearFilters = () => {
     setQuery("");
     setQueryInput("");
@@ -319,13 +311,6 @@ export default function DiscoveryPage() {
                       {formatPrice(product.effective_price || product.price)}
                     </p>
 
-                    {product.commission_amount &&
-                      parseFloat(product.commission_amount) > 0 && (
-                      <p className="mt-1 text-xs text-green-600 dark:text-green-400">
-                        Affiliate commission: {formatPrice(product.commission_amount)}
-                      </p>
-                    )}
-
                     <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                       Stock:{" "}
                       {product.total_stock > 0
@@ -515,59 +500,9 @@ export default function DiscoveryPage() {
           </section>
         )}
 
-        {/* ===== Section D: Affiliate & Institutional Discovery ===== */}
+        {/* ===== Section D: Institutional Discovery ===== */}
         <section className="py-12">
           <div className="wrap">
-            {affiliateProducts.length > 0 && (
-              <div className="mb-12">
-                <h2 className="text-2xl font-bold">Affiliate Picks</h2>
-                <p className="mt-2 text-gray-600 dark:text-gray-400">
-                  Products available for affiliate promotion with commission.
-                </p>
-
-                <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                  {affiliateProducts.map((product) => (
-                    <article
-                      key={product.id}
-                      className="overflow-hidden rounded-xl border bg-white dark:bg-gray-800 dark:border-gray-700"
-                    >
-                      <Link href={`/shop/${product.id}`} className="block">
-                        {product.image_url ? (
-                          <img
-                            src={product.image_url}
-                            alt={product.name}
-                            className="h-40 w-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-40 items-center justify-center bg-gray-100 dark:bg-gray-700 text-gray-400">
-                            No image
-                          </div>
-                        )}
-                      </Link>
-                      <div className="p-4">
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {product.category_name}
-                        </p>
-                        <h3 className="mt-1 font-semibold">{product.name}</h3>
-                        <p className="mt-2 font-bold">
-                          {formatPrice(product.effective_price || product.price)}
-                        </p>
-                        <p className="mt-1 text-xs text-green-600 dark:text-green-400">
-                          Commission: {formatPrice(product.commission_amount)}
-                        </p>
-                        <Link
-                          href={`/shop/${product.id}`}
-                          className="mt-3 block rounded-lg bg-indigo-600 px-3 py-2 text-center text-sm font-medium text-white"
-                        >
-                          Promote
-                        </Link>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              </div>
-            )}
-
             <div>
               <h2 className="text-2xl font-bold">Bulk Order Enquiry</h2>
               <p className="mt-2 text-gray-600 dark:text-gray-400">
