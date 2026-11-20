@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/adminApi';
+import LoadError from '@/components/admin/LoadError';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import type { AdminPayment, PaymentStatus } from '@/lib/adminApi';
 
@@ -22,7 +23,7 @@ const methodIcons: Record<AdminPayment['method'], string> = {
 export default function RefundsPage() {
   const [payments, setPayments] = useState<AdminPayment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState('');
+  const [loadError, setLoadError] = useState<unknown>(null);
 
   useEffect(() => {
     const fetchPayments = async () => {
@@ -31,6 +32,7 @@ export default function RefundsPage() {
         setPayments(data);
       } catch (error) {
         console.error('Failed to fetch payments:', error);
+        setLoadError(error);
       } finally {
         setLoading(false);
       }
@@ -41,17 +43,12 @@ export default function RefundsPage() {
   const refunds = payments.filter((p) => p.status === 'REFUNDED' || p.status === 'FAILED');
   const refundedTotal = refunds.filter((p) => p.status === 'REFUNDED').reduce((sum, p) => sum + parseFloat(p.amount), 0);
 
-  const handleRefund = (payment: AdminPayment) => {
-    setPayments(
-      payments.map((p) => (p.id === payment.id ? { ...p, status: 'REFUNDED' } : p)),
-    );
-    adminApi.getPayments({ status: 'refunded' }).catch(() => {});
-    setMessage(`Refund processed for ${payment.transaction_id}`);
-    setTimeout(() => setMessage(''), 3000);
-  };
-
   if (loading) {
     return <div className="text-lg">Loading refunds...</div>;
+  }
+
+  if (loadError) {
+    return <LoadError what="payments" error={loadError} onRetry={() => window.location.reload()} />;
   }
 
   return (
@@ -69,12 +66,6 @@ export default function RefundsPage() {
         </div>
       </div>
 
-      {message && (
-        <div className="p-3 text-sm text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-md">
-          {message}
-        </div>
-      )}
-
       <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden">
         {refunds.length === 0 ? (
           <div className="p-6 text-center text-zinc-500">No refunds or failed payments found.</div>
@@ -90,8 +81,7 @@ export default function RefundsPage() {
                   <th className="text-left py-3 px-4 text-zinc-600 dark:text-zinc-400">Method</th>
                   <th className="text-left py-3 px-4 text-zinc-600 dark:text-zinc-400">Date</th>
                   <th className="text-left py-3 px-4 text-zinc-600 dark:text-zinc-400">Status</th>
-                  <th className="text-left py-3 px-4 text-zinc-600 dark:text-zinc-400">Actions</th>
-                </tr>
+                  </tr>
               </thead>
               <tbody>
                 {refunds.map((payment) => (
@@ -113,25 +103,6 @@ export default function RefundsPage() {
                       <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${statusColor[payment.status]}`}>
                         {payment.status}
                       </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      {payment.status === 'FAILED' && (
-                        <button
-                          type="button"
-                          onClick={() => handleRefund(payment)}
-                          className="text-xs px-2.5 py-1 text-white bg-orange-600 rounded hover:bg-orange-700 transition-colors"
-                        >
-                          Process Refund
-                        </button>
-                      )}
-                      {payment.status === 'REFUNDED' && (
-                        <button
-                          type="button"
-                          className="text-xs px-2 py-1 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors"
-                        >
-                          View
-                        </button>
-                      )}
                     </td>
                   </tr>
                 ))}

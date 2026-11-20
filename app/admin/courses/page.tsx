@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/adminApi';
+import LoadError, { ActionError, errorMessage } from '@/components/admin/LoadError';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import type { AdminCourse } from '@/lib/adminApi';
 
@@ -29,6 +30,8 @@ export default function CoursesPage() {
   const [courses, setCourses] = useState<AdminCourse[]>([]);
   const [activeTab, setActiveTab] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<unknown>(null);
+  const [actionError, setActionError] = useState('');
   const [message, setMessage] = useState('');
   const [selectedCourse, setSelectedCourse] = useState<AdminCourse | null>(null);
 
@@ -39,6 +42,7 @@ export default function CoursesPage() {
         setCourses(data);
       } catch (error) {
         console.error('Failed to fetch courses:', error);
+        setLoadError(error);
       } finally {
         setLoading(false);
       }
@@ -54,24 +58,28 @@ export default function CoursesPage() {
     return true;
   });
 
-  const handleApprove = (course: AdminCourse) => {
-    setCourses(courses.map((c) => (c.id === course.id ? { ...c, status: 'PUBLISHED' } : c)));
-    adminApi.updateCourse(course.id.toString(), { status: 'PUBLISHED' }).catch(() => {});
-    setMessage(`"${course.title}" has been approved and published`);
+  const setCourseStatus = async (course: AdminCourse, status: 'PUBLISHED' | 'DELETED', done: string) => {
+    setActionError('');
+    try {
+      await adminApi.updateCourse(course.id.toString(), { status });
+      setCourses((rows) => rows.map((c) => (c.id === course.id ? { ...c, status } : c)));
+      setMessage(`"${course.title}" ${done}`);
+    } catch (err) {
+      setActionError(`Could not update "${course.title}". ${errorMessage(err)}`);
+    }
     setTimeout(() => setMessage(''), 3000);
   };
-
-  const handleReject = (course: AdminCourse) => {
-    setCourses(courses.map((c) => (c.id === course.id ? { ...c, status: 'DELETED' } : c)));
-    adminApi.updateCourse(course.id.toString(), { status: 'DELETED' }).catch(() => {});
-    setMessage(`"${course.title}" has been rejected`);
-    setTimeout(() => setMessage(''), 3000);
-  };
+  const handleApprove = (course: AdminCourse) => setCourseStatus(course, 'PUBLISHED', 'has been approved and published');
+  const handleReject = (course: AdminCourse) => setCourseStatus(course, 'DELETED', 'has been rejected');
 
   const pendingCount = courses.filter((c) => c.status === 'PENDING_APPROVAL').length;
 
   if (loading) {
     return <div className="text-lg">Loading courses...</div>;
+  }
+
+  if (loadError) {
+    return <LoadError what="courses" error={loadError} onRetry={() => window.location.reload()} />;
   }
 
   return (
@@ -96,6 +104,8 @@ export default function CoursesPage() {
           ⚠ {pendingCount} course{pendingCount !== 1 ? 's' : ''} waiting for approval.
         </div>
       )}
+
+      {actionError && <ActionError message={actionError} />}
 
       {message && (
         <div className="p-3 text-sm text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-md">

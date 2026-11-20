@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { adminApi } from '@/lib/adminApi';
+import LoadError, { ActionError, errorMessage } from '@/components/admin/LoadError';
 import { formatCurrency } from '@/lib/utils';
 import type { AdminProduct } from '@/lib/adminApi';
 
@@ -27,6 +28,8 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [activeTab, setActiveTab] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<unknown>(null);
+  const [actionError, setActionError] = useState('');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -36,6 +39,7 @@ export default function ProductsPage() {
         setProducts(data);
       } catch (error) {
         console.error('Failed to fetch products:', error);
+        setLoadError(error);
       } finally {
         setLoading(false);
       }
@@ -53,37 +57,41 @@ export default function ProductsPage() {
     return true;
   });
 
-  const handleApprove = (product: AdminProduct) => {
-    setProducts(
-      products.map((p) =>
-        p.id === product.id ? { ...p, status: 'PUBLISHED' } : p,
-      ),
-    );
-    adminApi.updateProduct(product.id.toString(), { status: 'PUBLISHED' }).catch(() => {});
-    setMessage(`"${product.name}" approved and published`);
-    setTimeout(() => setMessage(''), 3000);
+  const setProductFields = async (
+    product: AdminProduct,
+    patch: Partial<AdminProduct>,
+    done?: string,
+  ) => {
+    setActionError('');
+    try {
+      await adminApi.updateProduct(product.id.toString(), patch);
+      setProducts((rows) => rows.map((p) => (p.id === product.id ? { ...p, ...patch } : p)));
+      if (done) {
+        setMessage(done);
+        setTimeout(() => setMessage(''), 3000);
+      }
+    } catch (err) {
+      setActionError(`Could not update "${product.name}". ${errorMessage(err)}`);
+    }
   };
 
-  const toggleFeatured = (product: AdminProduct) => {
-    setProducts(
-      products.map((p) => (p.id === product.id ? { ...p, featured: !p.featured } : p)),
-    );
-    adminApi.updateProduct(product.id.toString(), { featured: !product.featured }).catch(() => {});
-  };
+  const handleApprove = (product: AdminProduct) =>
+    setProductFields(product, { status: 'PUBLISHED' }, `"${product.name}" approved and published`);
 
-  const toggleStatus = (product: AdminProduct) => {
-    const newStatus = product.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED';
-    setProducts(
-      products.map((p) => (p.id === product.id ? { ...p, status: newStatus } : p)),
-    );
-    adminApi.updateProduct(product.id.toString(), { status: newStatus }).catch(() => {});
-  };
+  const toggleFeatured = (product: AdminProduct) => setProductFields(product, { featured: !product.featured });
+
+  const toggleStatus = (product: AdminProduct) =>
+    setProductFields(product, { status: product.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED' });
 
   const pendingCount = products.filter((p) => p.status === 'PENDING_APPROVAL').length;
   const outOfStockCount = products.filter((p) => p.status === 'OUT_OF_STOCK').length;
 
   if (loading) {
     return <div className="text-lg">Loading products...</div>;
+  }
+
+  if (loadError) {
+    return <LoadError what="products" error={loadError} onRetry={() => window.location.reload()} />;
   }
 
   return (
@@ -108,6 +116,8 @@ export default function ProductsPage() {
           ⚠ {pendingCount} product{pendingCount !== 1 ? 's' : ''} waiting for approval.
         </div>
       )}
+
+      {actionError && <ActionError message={actionError} />}
 
       {message && (
         <div className="p-3 text-sm text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-md">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { adminApi } from '@/lib/adminApi';
+import LoadError, { ActionError, errorMessage } from '@/components/admin/LoadError';
 import type { AdminUser, AccountType, UserStatus } from '@/lib/adminApi';
 
 const typeMap: Record<string, { label: string; type: AccountType | null }> = {
@@ -23,6 +24,8 @@ const statusColor: Record<UserStatus, string> = {
 export default function UserManagement({ activeType }: { activeType: keyof typeof typeMap }) {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<unknown>(null);
+  const [actionError, setActionError] = useState('');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -32,6 +35,7 @@ export default function UserManagement({ activeType }: { activeType: keyof typeo
         setUsers(data);
       } catch (error) {
         console.error('Failed to fetch users:', error);
+        setLoadError(error);
       } finally {
         setLoading(false);
       }
@@ -41,11 +45,16 @@ export default function UserManagement({ activeType }: { activeType: keyof typeo
 
   const filtered = activeType === 'all' ? users : users.filter((u) => u.account_type === typeMap[activeType].type);
 
-  const handleSuspend = (user: AdminUser) => {
+  const handleSuspend = async (user: AdminUser) => {
     const newStatus: UserStatus = user.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
-    setUsers(users.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u)));
-    adminApi.updateUser(user.id.toString(), { status: newStatus }).catch(() => {});
-    setMessage(`${user.name} has been ${newStatus === 'ACTIVE' ? 'activated' : 'suspended'}`);
+    setActionError('');
+    try {
+      await adminApi.updateUser(user.id.toString(), { status: newStatus });
+      setUsers((rows) => rows.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u)));
+      setMessage(`${user.name} has been ${newStatus === 'ACTIVE' ? 'activated' : 'suspended'}`);
+    } catch (err) {
+      setActionError(`Could not update ${user.name}. ${errorMessage(err)}`);
+    }
     setTimeout(() => setMessage(''), 3000);
   };
 
@@ -62,6 +71,10 @@ export default function UserManagement({ activeType }: { activeType: keyof typeo
 
   if (loading) {
     return <div className="text-lg">Loading users...</div>;
+  }
+
+  if (loadError) {
+    return <LoadError what="users" error={loadError} onRetry={() => window.location.reload()} />;
   }
 
   return (
@@ -98,6 +111,8 @@ export default function UserManagement({ activeType }: { activeType: keyof typeo
           );
         })}
       </div>
+
+      {actionError && <ActionError message={actionError} />}
 
       {message && (
         <div className="p-3 text-sm text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-md">

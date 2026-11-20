@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { adminApi } from '@/lib/adminApi';
+import LoadError, { ActionError, errorMessage } from '@/components/admin/LoadError';
 import type { AdminSeller, UserStatus } from '@/lib/adminApi';
 import { formatCurrency } from '@/lib/utils';
 
@@ -15,6 +16,8 @@ const statusColor: Record<Exclude<UserStatus, null>, string> = {
 export default function SellersPage() {
   const [sellers, setSellers] = useState<AdminSeller[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<unknown>(null);
+  const [actionError, setActionError] = useState('');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -24,6 +27,7 @@ export default function SellersPage() {
         setSellers(data);
       } catch (error) {
         console.error('Failed to fetch sellers:', error);
+        setLoadError(error);
       } finally {
         setLoading(false);
       }
@@ -31,11 +35,16 @@ export default function SellersPage() {
     fetchSellers();
   }, []);
 
-  const handleToggleStatus = (seller: AdminSeller) => {
+  const handleToggleStatus = async (seller: AdminSeller) => {
     const newStatus: UserStatus = seller.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
-    setSellers(sellers.map((s) => (s.id === seller.id ? { ...s, status: newStatus } : s)));
-    adminApi.updateSeller(seller.id.toString(), { status: newStatus }).catch(() => {});
-    setMessage(`${seller.store_name} status updated`);
+    setActionError('');
+    try {
+      await adminApi.updateSeller(seller.id.toString(), { status: newStatus });
+      setSellers((rows) => rows.map((s) => (s.id === seller.id ? { ...s, status: newStatus } : s)));
+      setMessage(`${seller.store_name} status updated`);
+    } catch (err) {
+      setActionError(`Could not update ${seller.store_name}. ${errorMessage(err)}`);
+    }
     setTimeout(() => setMessage(''), 3000);
   };
 
@@ -47,6 +56,10 @@ export default function SellersPage() {
 
   if (loading) {
     return <div className="text-lg">Loading sellers...</div>;
+  }
+
+  if (loadError) {
+    return <LoadError what="sellers" error={loadError} onRetry={() => window.location.reload()} />;
   }
 
   return (
@@ -65,6 +78,8 @@ export default function SellersPage() {
           Review Applications
         </Link>
       </div>
+
+      {actionError && <ActionError message={actionError} />}
 
       {message && (
         <div className="p-3 text-sm text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-md">

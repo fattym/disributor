@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/adminApi';
+import LoadError from '@/components/admin/LoadError';
 import { formatCurrency } from '@/lib/utils';
 import type { SalesPoint } from '@/lib/adminApi';
 
@@ -19,6 +20,7 @@ const reportTypes = [
 export default function ReportsPage() {
   const [salesData, setSalesData] = useState<SalesPoint[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [activeReport, setActiveReport] = useState('sales');
   const [dateRange, setDateRange] = useState('2026-01-01_to_2026-12-31');
 
@@ -29,6 +31,7 @@ export default function ReportsPage() {
         setSalesData(data);
       } catch (error) {
         console.error('Failed to fetch analytics:', error);
+        setLoadError(error);
       } finally {
         setLoading(false);
       }
@@ -61,6 +64,10 @@ export default function ReportsPage() {
 
   if (loading) {
     return <div className="text-lg">Loading reports...</div>;
+  }
+
+  if (loadError) {
+    return <LoadError what="reports" error={loadError} onRetry={() => window.location.reload()} />;
   }
 
   return (

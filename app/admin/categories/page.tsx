@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import React from 'react';
 import { adminApi } from '@/lib/adminApi';
+import LoadError from '@/components/admin/LoadError';
 import type { CategoryNode } from '@/lib/adminApi';
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<CategoryNode[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [expanded, setExpanded] = useState<Record<number, boolean>>({});
-  const [message, setMessage] = useState('');
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -18,6 +19,7 @@ export default function CategoriesPage() {
         setCategories(data);
       } catch (error) {
         console.error('Failed to fetch categories:', error);
+        setLoadError(error);
       } finally {
         setLoading(false);
       }
@@ -56,19 +58,6 @@ export default function CategoriesPage() {
           </td>
           <td className="py-2 px-4 text-zinc-600 dark:text-zinc-400">{node.product_count} products</td>
           <td className="py-2 px-4 text-zinc-600 dark:text-zinc-400">{node.course_count} courses</td>
-          <td className="py-2 px-4 text-right">
-            <button
-              type="button"
-              onClick={() => {
-                adminApi.updateCategory(node.id.toString(), { name: node.name + ' (renamed)' }).catch(() => {});
-                setMessage(`"${node.name}" updated`);
-                setTimeout(() => setMessage(''), 3000);
-              }}
-              className="text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 px-2 py-0.5 rounded"
-            >
-              Edit
-            </button>
-          </td>
         </tr>
         {hasChildren && isExpanded &&
           node.children.map((child) => renderNode(child, depth + 1))}
@@ -78,6 +67,10 @@ export default function CategoriesPage() {
 
   if (loading) {
     return <div className="text-lg">Loading categories...</div>;
+  }
+
+  if (loadError) {
+    return <LoadError what="categories" error={loadError} onRetry={() => window.location.reload()} />;
   }
 
   return (
@@ -97,12 +90,6 @@ export default function CategoriesPage() {
         </button>
       </div>
 
-      {message && (
-        <div className="p-3 text-sm text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-md">
-          {message}
-        </div>
-      )}
-
       <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-800">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -111,7 +98,6 @@ export default function CategoriesPage() {
                 <th className="text-left py-3 px-4 text-zinc-600 dark:text-zinc-400">Category Tree</th>
                 <th className="text-left py-3 px-4 text-zinc-600 dark:text-zinc-400">Products</th>
                 <th className="text-left py-3 px-4 text-zinc-600 dark:text-zinc-400">Courses</th>
-                <th className="text-left py-3 px-4 text-zinc-600 dark:text-zinc-400 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>{categories.map((node) => renderNode(node))}</tbody>

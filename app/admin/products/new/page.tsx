@@ -12,6 +12,7 @@ import {
   type CreateProductData,
 } from '@/lib/adminApi';
 import type { CategoryNode } from '@/lib/adminApi';
+import { ActionError, errorMessage } from '@/components/admin/LoadError';
 import { useAuth } from '@/lib/auth';
 import { formatCurrency } from '@/lib/utils';
 
@@ -113,6 +114,8 @@ export default function NewProductPage() {
   ]);
   const nextVariantId = useRef(1);
 
+  const [pageError, setPageError] = useState('');
+
   // Publishing (defaults to Draft: products only appear on /shop once an admin publishes them)
   const [publish, setPublish] = useState(false);
 
@@ -122,10 +125,12 @@ export default function NewProductPage() {
       router.push('/login');
       return;
     }
-    adminApi.getCategories().then((tree) => setCategories(flatten(tree)));
-    adminApi.getGrades().then(setGradesAll);
-    adminApi.getLearningAreas().then(setAreasAll);
-    adminApi.getPathways().then(setPathwaysAll);
+    const lookupFailed = (err: unknown) =>
+      setPageError(`Could not load the category and curriculum lists. ${errorMessage(err)} Reload to retry before saving.`);
+    adminApi.getCategories().then((tree) => setCategories(flatten(tree))).catch(lookupFailed);
+    adminApi.getGrades().then(setGradesAll).catch(lookupFailed);
+    adminApi.getLearningAreas().then(setAreasAll).catch(lookupFailed);
+    adminApi.getPathways().then(setPathwaysAll).catch(lookupFailed);
   }, [user, router]);
 
   if (userLoading || !user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN')) {
@@ -191,7 +196,7 @@ export default function NewProductPage() {
       setImportResult(res);
     } catch (error) {
       console.error('Import failed:', error);
-      alert('Import failed. See console for details.');
+      setPageError(`Import failed. ${errorMessage(error)}`);
     } finally {
       setImporting(false);
     }
@@ -203,6 +208,7 @@ export default function NewProductPage() {
       alert('Product name, category and selling price are required.');
       return;
     }
+    setPageError('');
     setSaving(true);
     try {
       const payload: CreateProductData = {
@@ -240,7 +246,7 @@ export default function NewProductPage() {
       setCreated(saved);
     } catch (error) {
       console.error('Failed to create product:', error);
-      alert('Could not create product. See console for details.');
+      setPageError(`Could not create the product. ${errorMessage(error)}`);
     } finally {
       setSaving(false);
     }
@@ -287,6 +293,12 @@ export default function NewProductPage() {
           Cancel
         </Link>
       </div>
+
+      {pageError && (
+        <div className="mb-4">
+          <ActionError message={pageError} />
+        </div>
+      )}
 
       <form onSubmit={handleSave} className="space-y-6">
         <section className={cardCls}>

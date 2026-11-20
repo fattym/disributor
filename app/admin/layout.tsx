@@ -47,7 +47,6 @@ const navItems: NavItem[] = [
       { href: '/admin/products', label: 'Products', icon: '📦' },
       { href: '/admin/categories', label: 'Categories', icon: '📁' },
       { href: '/admin/courses', label: 'Courses', icon: '🎓' },
-      { href: '/admin/reviews', label: 'Reviews', icon: '⭐' },
     ],
   },
   { href: '/admin/orders', label: 'Orders', icon: '📦' },
@@ -57,22 +56,9 @@ const navItems: NavItem[] = [
     children: [
       { href: '/admin/payments', label: 'Transactions', icon: '💳' },
       { href: '/admin/refunds', label: 'Refunds', icon: '↩️' },
-      { href: '/admin/withdrawals', label: 'Withdrawals', icon: '🏧' },
-    ],
-  },
-  {
-    icon: '🎟️',
-    label: 'Marketing',
-    children: [
-      { href: '/admin/coupons', label: 'Coupons', icon: '🎟️' },
-      { href: '/admin/promotions', label: 'Promotions', icon: '📢' },
-      { href: '/admin/featured', label: 'Featured Items', icon: '⭐' },
     ],
   },
   { href: '/admin/reports', label: 'Reports', icon: '📊' },
-  { href: '/admin/notifications', label: 'Notifications', icon: '🔔' },
-  { href: '/admin/content', label: 'Content', icon: '🌐' },
-  { href: '/admin/settings', label: 'Settings', icon: '⚙️' },
 ];
 
 function SidebarItem({ item, isCollapsed }: { item: NavItem; isCollapsed: boolean }) {

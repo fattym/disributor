@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/adminApi';
+import LoadError from '@/components/admin/LoadError';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import type { AdminOrder, OrderStatus } from '@/lib/adminApi';
 
@@ -18,6 +19,7 @@ const statusColor: Record<OrderStatus, string> = {
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [message, setMessage] = useState('');
   const [filter, setFilter] = useState<'all' | OrderStatus>('all');
 
@@ -28,6 +30,7 @@ export default function AdminOrdersPage() {
         setOrders(data);
       } catch (error) {
         console.error('Failed to fetch orders:', error);
+        setLoadError(error);
       } finally {
         setLoading(false);
       }
@@ -71,6 +74,10 @@ export default function AdminOrdersPage() {
 
   if (loading) {
     return <div className="text-lg">Loading orders...</div>;
+  }
+
+  if (loadError) {
+    return <LoadError what="orders" error={loadError} onRetry={() => window.location.reload()} />;
   }
 
   return (

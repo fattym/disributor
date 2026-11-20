@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/adminApi';
+import LoadError, { ActionError, errorMessage } from '@/components/admin/LoadError';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import type { AdminPayment, AdminOrder, PaymentStatus, OrderStatus } from '@/lib/adminApi';
 
@@ -43,6 +44,8 @@ export default function PaymentsPage() {
   const [heldFunds, setHeldFunds] = useState<AdminOrder[]>([]);
   const [activeTab, setActiveTab] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<unknown>(null);
+  const [actionError, setActionError] = useState('');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -56,6 +59,7 @@ export default function PaymentsPage() {
         setHeldFunds(held);
       } catch (error) {
         console.error('Failed to fetch payments:', error);
+        setLoadError(error);
       } finally {
         setLoading(false);
       }
@@ -64,6 +68,7 @@ export default function PaymentsPage() {
   }, []);
 
   const handleRelease = async (order: AdminOrder) => {
+    setActionError('');
     try {
       await adminApi.releaseFunds(order.id.toString());
       setHeldFunds((prev) => prev.filter((o) => o.id !== order.id));
@@ -71,6 +76,7 @@ export default function PaymentsPage() {
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Failed to release funds:', error);
+      setActionError(`Could not release ${order.order_number}. ${errorMessage(error)}`);
     }
   };
 
@@ -94,6 +100,10 @@ export default function PaymentsPage() {
     return <div className="text-lg">Loading payments...</div>
   }
 
+  if (loadError) {
+    return <LoadError what="payments" error={loadError} onRetry={() => window.location.reload()} />;
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -102,6 +112,8 @@ export default function PaymentsPage() {
           Track money flowing through the platform ({payments.length} transactions)
         </p>
       </div>
+
+      {actionError && <ActionError message={actionError} />}
 
       {message && (
         <div className="p-3 text-sm text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-md">

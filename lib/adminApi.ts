@@ -193,820 +193,20 @@ export type SalesPoint = {
   orders: number;
 };
 
-// ---- Mock data ----
+// ---- Dashboard tiles (labels only; values always come from the API) ----
 
-export const mockStats: Record<string, Stat> = {
-  totalRevenue: {
-    label: 'Total Revenue',
-    value: 'KSh 4,850,000',
-    icon: '💰',
-    href: '/admin/reports',
-  },
-  todayRevenue: {
-    label: "Today's Revenue",
-    value: 'KSh 125,400',
-    icon: '📈',
-    href: '/admin/reports',
-  },
-  totalOrders: {
-    label: 'Total Orders',
-    value: '3,421',
-    icon: '📦',
-    href: '/admin/orders',
-  },
-  pendingOrders: {
-    label: 'Pending Orders',
-    value: '86',
-    icon: '⏳',
-    href: '/admin/orders',
-  },
-  totalCustomers: {
-    label: 'Total Customers',
-    value: '12,850',
-    icon: '👥',
-    href: '/admin/users/customers',
-  },
-  activeSellers: {
-    label: 'Active Sellers',
-    value: '486',
-    icon: '🏪',
-    href: '/admin/sellers',
-  },
-  totalProducts: {
-    label: 'Total Products',
-    value: '8,420',
-    icon: '📚',
-    href: '/admin/products',
-  },
-  totalCourses: {
-    label: 'Total Courses',
-    value: '725',
-    icon: '🎓',
-    href: '/admin/courses',
-  },
-};
-
-export const mockStatsList: Stat[] = [
-  mockStats.totalRevenue,
-  mockStats.todayRevenue,
-  mockStats.totalOrders,
-  mockStats.pendingOrders,
-  mockStats.totalCustomers,
-  mockStats.activeSellers,
-  mockStats.totalProducts,
-  mockStats.totalCourses,
-];
-
-export const mockSalesData: SalesPoint[] = [
-  { month: 'Jan', revenue: 120000, orders: 320 },
-  { month: 'Feb', revenue: 180000, orders: 450 },
-  { month: 'Mar', revenue: 150000, orders: 390 },
-  { month: 'Apr', revenue: 210000, orders: 510 },
-  { month: 'May', revenue: 175000, orders: 430 },
-  { month: 'Jun', revenue: 240000, orders: 580 },
-  { month: 'Jul', revenue: 260000, orders: 640 },
-  { month: 'Aug', revenue: 290000, orders: 690 },
-  { month: 'Sep', revenue: 310000, orders: 730 },
-  { month: 'Oct', revenue: 340000, orders: 810 },
-  { month: 'Nov', revenue: 380000, orders: 920 },
-  { month: 'Dec', revenue: 420000, orders: 1050 },
-];
-
-export const mockRecentOrders: AdminOrder[] = [
-  {
-    id: 10245,
-    order_number: 'LP10245',
-    customer: 'Jane Wanjiku',
-    customer_email: 'jane.wanjiku@email.com',
-    items: 3,
-    amount: '4500.00',
-    payment: 'PAID',
-    status: 'PROCESSING',
-    date: '2026-09-27T08:30:00Z',
-    is_digital: false,
-  },
-  {
-    id: 10244,
-    order_number: 'LP10244',
-    customer: 'Samuel Ochieng',
-    customer_email: 'sam@email.com',
-    items: 1,
-    amount: '1250.00',
-    payment: 'PAID',
-    status: 'DELIVERED',
-    date: '2026-09-26T14:20:00Z',
-    is_digital: true,
-  },
-  {
-    id: 10243,
-    order_number: 'LP10243',
-    customer: 'Amina Hassan',
-    customer_email: 'amina.hassan@email.com',
-    items: 5,
-    amount: '7800.00',
-    payment: 'PENDING',
-    status: 'PENDING',
-    date: '2026-09-26T11:05:00Z',
-    is_digital: false,
-  },
-  {
-    id: 10242,
-    order_number: 'LP10242',
-    customer: 'David Mwangi',
-    customer_email: 'david.mwangi@email.com',
-    items: 2,
-    amount: '3200.00',
-    payment: 'PAID',
-    status: 'SHIPPED',
-    date: '2026-09-25T16:45:00Z',
-    is_digital: false,
-  },
-  {
-    id: 10241,
-    order_number: 'LP10241',
-    customer: 'Fatuma Ali',
-    customer_email: 'fatuma.ali@email.com',
-    items: 1,
-    amount: '2500.00',
-    payment: 'PAID',
-    status: 'DELIVERED',
-    date: '2026-09-25T09:10:00Z',
-    is_digital: true,
-  },
-];
-
-export const mockNotifications: PlatformNotification[] = [
-  {
-    id: 1,
-    title: 'New seller applications',
-    message: '5 new seller applications require your review',
-    type: 'info',
-    read: false,
-    created_at: '2026-09-27T09:00:00Z',
-  },
-  {
-    id: 2,
-    title: 'Product approvals',
-    message: '3 products waiting for approval',
-    type: 'warning',
-    read: false,
-    created_at: '2026-09-27T08:45:00Z',
-  },
-  {
-    id: 3,
-    title: 'Withdrawal requests',
-    message: '8 withdrawal requests are pending',
-    type: 'info',
-    read: false,
-    created_at: '2026-09-26T18:30:00Z',
-  },
-  {
-    id: 4,
-    title: 'Payment failures',
-    message: '2 payment failures detected',
-    type: 'error',
-    read: true,
-    created_at: '2026-09-26T14:12:00Z',
-  },
-  {
-    id: 5,
-    title: 'Reported reviews',
-    message: '4 reviews have been reported and need moderation',
-    type: 'warning',
-    read: true,
-    created_at: '2026-09-26T11:00:00Z',
-  },
-];
-
-export const mockUsers: AdminUser[] = [
-  {
-    id: 1,
-    name: 'Jane Wanjiku',
-    email: 'jane.wanjiku@email.com',
-    phone: '+254 712 345 678',
-    account_type: 'CUSTOMER',
-    registration_date: '2024-03-12',
-    status: 'ACTIVE',
-    last_login: '2026-09-27T08:30:00Z',
-  },
-  {
-    id: 2,
-    name: 'ABC Education',
-    email: 'abc@education.co.ke',
-    phone: '+254 700 111 222',
-    account_type: 'SELLER',
-    registration_date: '2024-01-08',
-    status: 'ACTIVE',
-    last_login: '2026-09-26T14:20:00Z',
-  },
-  {
-    id: 3,
-    name: 'John Kamau',
-    email: 'john.kamau@teacher.ke',
-    phone: '+254 722 333 444',
-    account_type: 'TEACHER',
-    registration_date: '2024-06-15',
-    status: 'ACTIVE',
-    last_login: '2026-09-25T10:00:00Z',
-  },
-  {
-    id: 4,
-    name: 'Nairobi Primary School',
-    email: 'info@nairobi-primary.ac.ke',
-    phone: '+254 20 123 4567',
-    account_type: 'SCHOOL_ACCOUNT',
-    registration_date: '2023-11-20',
-    status: 'ACTIVE',
-    last_login: '2026-09-24T16:45:00Z',
-  },
-  {
-    id: 5,
-    name: 'Samuel Ochieng',
-    email: 'sam.ochieng@email.com',
-    phone: '+254 733 555 666',
-    account_type: 'CUSTOMER',
-    registration_date: '2025-02-01',
-    status: 'SUSPENDED',
-    last_login: '2026-09-20T09:00:00Z',
-  },
-  {
-    id: 6,
-    name: 'Grace Njoroge',
-    email: 'grace@admin.learningpack.ke',
-    phone: '+254 711 000 111',
-    account_type: 'ADMINISTRATOR',
-    registration_date: '2022-08-01',
-    status: 'ACTIVE',
-    last_login: '2026-09-27T09:50:00Z',
-  },
-  {
-    id: 8,
-    name: 'Amina Hassan',
-    email: 'amina.hassan@email.com',
-    phone: '+254 709 888 777',
-    account_type: 'SELLER',
-    registration_date: '2025-08-30',
-    status: 'PENDING',
-    last_login: null,
-  },
-];
-
-export const mockSellers: AdminSeller[] = [
-  {
-    id: 1,
-    store_name: 'ABC Education',
-    owner: 'Mary Ochieng',
-    owner_email: 'mary@abceducation.co.ke',
-    products: 125,
-    orders: 342,
-    revenue: '850000.00',
-    commission: '85000.00',
-    status: 'ACTIVE',
-    registration_date: '2024-01-08',
-    verified: true,
-    payout_method: 'M-Pesa',
-  },
-  {
-    id: 2,
-    store_name: 'Smart Teachers',
-    owner: 'David Mwangi',
-    owner_email: 'david@smartteachers.co.ke',
-    products: 87,
-    orders: 210,
-    revenue: '523000.00',
-    commission: '52300.00',
-    status: 'ACTIVE',
-    registration_date: '2024-03-22',
-    verified: true,
-    payout_method: 'Bank',
-  },
-  {
-    id: 3,
-    store_name: 'Kenya Books Ltd',
-    owner: 'Sarah Mutua',
-    owner_email: 'sarah@kenyabooks.co.ke',
-    products: 340,
-    orders: 588,
-    revenue: '1280000.00',
-    commission: '128000.00',
-    status: 'ACTIVE',
-    registration_date: '2023-09-14',
-    verified: true,
-    payout_method: 'M-Pesa',
-  },
-  {
-    id: 4,
-    store_name: 'Bright Minds',
-    owner: 'James Njoroge',
-    owner_email: 'james@brightminds.ke',
-    products: 56,
-    orders: 134,
-    revenue: '412000.00',
-    commission: '41200.00',
-    status: 'SUSPENDED',
-    registration_date: '2024-07-30',
-    verified: true,
-    payout_method: 'Bank',
-  },
-  {
-    id: 5,
-    store_name: 'EduKids Centre',
-    owner: 'Linda Akinyi',
-    owner_email: 'linda@edukids.co.ke',
-    products: 98,
-    orders: 267,
-    revenue: '670000.00',
-    commission: '67000.00',
-    status: 'ACTIVE',
-    registration_date: '2024-05-12',
-    verified: false,
-    payout_method: 'M-Pesa',
-  },
-];
-
-export const mockPendingSellers: Omit<AdminSeller, 'products' | 'orders' | 'revenue' | 'commission'>[] = [
-  {
-    id: 10,
-    store_name: 'ABC Academy',
-    owner: 'Peter Otieno',
-    owner_email: 'peter@abcacademy.co.ke',
-    status: 'PENDING',
-    registration_date: '2026-09-22',
-    verified: false,
-  },
-  {
-    id: 11,
-    store_name: 'Smart Teachers',
-    owner: 'Rachel Adisa',
-    owner_email: 'rachel@smartteachers.co.ke',
-    status: 'PENDING',
-    registration_date: '2026-09-20',
-    verified: false,
-  },
-  {
-    id: 12,
-    store_name: 'Kenya Books',
-    owner: 'Tom Odhiambo',
-    owner_email: 'tom@kenyabooks.co.ke',
-    status: 'PENDING',
-    registration_date: '2026-09-18',
-    verified: false,
-  },
-];
-
-export const mockProducts: AdminProduct[] = [
-  {
-    id: 1,
-    name: 'Grade 6 Mathematics Revision',
-    seller: 'ABC Academy',
-    seller_id: 1,
-    price: '500.00',
-    stock: 245,
-    status: 'PUBLISHED',
-    featured: true,
-    created_at: '2024-02-10T09:00:00Z',
-    category: 'Primary School > Mathematics',
-  },
-  {
-    id: 2,
-    name: 'KCPE Mock Exams 2024',
-    seller: 'Kenya Books Ltd',
-    seller_id: 3,
-    price: '1200.00',
-    stock: 89,
-    status: 'PENDING_APPROVAL',
-    created_at: '2026-09-25T14:30:00Z',
-    category: 'Exams & Tests',
-  },
-  {
-    id: 3,
-    name: 'Grade 4 English Workbooks',
-    seller: 'Smart Teachers',
-    seller_id: 2,
-    price: '750.00',
-    stock: 0,
-    status: 'OUT_OF_STOCK',
-    featured: false,
-    created_at: '2024-06-18T10:00:00Z',
-    category: 'Primary School > English',
-  },
-  {
-    id: 4,
-    name: 'Form 3 Chemistry Past Papers',
-    seller: 'Bright Minds',
-    seller_id: 4,
-    price: '1800.00',
-    stock: 156,
-    status: 'PUBLISHED',
-    created_at: '2024-08-22T11:00:00Z',
-    category: 'Secondary School > Chemistry',
-  },
-  {
-    id: 5,
-    name: 'Grade 8 Science Notes',
-    seller: 'EduKids Centre',
-    seller_id: 5,
-    price: '950.00',
-    stock: 320,
-    status: 'DRAFT',
-    created_at: '2026-09-20T08:00:00Z',
-    category: 'Primary School > Science',
-  },
-];
-
-export const mockCourses: AdminCourse[] = [
-  {
-    id: 1,
-    title: 'Python Programming for Beginners',
-    instructor: 'John Kamau',
-    instructor_email: 'john.kamau@teacher.ke',
-    students: 324,
-    price: '2500.00',
-    rating: 4.7,
-    rating_count: 128,
-    status: 'PENDING_APPROVAL',
-    category: 'Professional > Programming',
-    created_at: '2026-09-10T09:00:00Z',
-  },
-  {
-    id: 2,
-    title: 'KCSE Biology Mastery',
-    instructor: 'Dr. Wanjiru',
-    instructor_email: 'wanjiru@biology.co.ke',
-    students: 512,
-    price: '3500.00',
-    rating: 4.8,
-    rating_count: 203,
-    status: 'PUBLISHED',
-    category: 'Secondary School > Biology',
-    created_at: '2024-09-01T10:00:00Z',
-  },
-  {
-    id: 3,
-    title: 'Grade 6 Mathematics Bootcamp',
-    instructor: 'Samuel Ochieng',
-    instructor_email: 'sam@math.co.ke',
-    students: 187,
-    price: '1800.00',
-    rating: 4.5,
-    rating_count: 76,
-    status: 'PUBLISHED',
-    category: 'Primary School > Mathematics',
-    created_at: '2024-04-15T11:00:00Z',
-  },
-  {
-    id: 4,
-    title: 'Digital Marketing Fundamentals',
-    instructor: 'Amina Hassan',
-    instructor_email: 'amina@marketing.ke',
-    students: 421,
-    price: '0.00',
-    rating: 4.9,
-    rating_count: 311,
-    status: 'DRAFT',
-    category: 'Professional > Digital Marketing',
-    created_at: '2026-09-18T08:00:00Z',
-  },
-];
-
-export const mockOrders: AdminOrder[] = [
-  {
-    id: 10245,
-    order_number: 'LP10245',
-    customer: 'Jane Wanjiku',
-    customer_email: 'jane.wanjiku@email.com',
-    items: 3,
-    amount: '4500.00',
-    payment: 'PAID',
-    status: 'PROCESSING',
-    date: '2026-09-27T08:30:00Z',
-    is_digital: false,
-  },
-  {
-    id: 10244,
-    order_number: 'LP10244',
-    customer: 'Samuel Ochieng',
-    customer_email: 'sam@email.com',
-    items: 1,
-    amount: '1250.00',
-    payment: 'PAID',
-    status: 'DELIVERED',
-    date: '2026-09-26T14:20:00Z',
-    is_digital: true,
-  },
-  {
-    id: 10243,
-    order_number: 'LP10243',
-    customer: 'Amina Hassan',
-    customer_email: 'amina.hassan@email.com',
-    items: 5,
-    amount: '7800.00',
-    payment: 'PENDING',
-    status: 'PENDING',
-    date: '2026-09-26T11:05:00Z',
-    is_digital: false,
-  },
-  {
-    id: 10242,
-    order_number: 'LP10242',
-    customer: 'David Mwangi',
-    customer_email: 'david.mwangi@email.com',
-    items: 2,
-    amount: '3200.00',
-    payment: 'PAID',
-    status: 'SHIPPED',
-    date: '2026-09-25T16:45:00Z',
-    is_digital: false,
-  },
-  {
-    id: 10241,
-    order_number: 'LP10241',
-    customer: 'Fatuma Ali',
-    customer_email: 'fatuma.ali@email.com',
-    items: 1,
-    amount: '2500.00',
-    payment: 'PAID',
-    status: 'DELIVERED',
-    date: '2026-09-25T09:10:00Z',
-    is_digital: true,
-  },
-  {
-    id: 10240,
-    order_number: 'LP10240',
-    customer: 'Grace Njoroge',
-    customer_email: 'grace@email.com',
-    items: 4,
-    amount: '6700.00',
-    payment: 'PAID',
-    status: 'CANCELLED',
-    date: '2026-09-24T13:25:00Z',
-    is_digital: false,
-  },
-  {
-    id: 10239,
-    order_number: 'LP10239',
-    customer: 'Samuel Ochieng',
-    customer_email: 'sam@email.com',
-    items: 2,
-    amount: '3400.00',
-    payment: 'FAILED',
-    status: 'PENDING',
-    date: '2026-09-24T16:20:00Z',
-    is_digital: false,
-  },
-  {
-    id: 10238,
-    order_number: 'LP10238',
-    customer: 'Amina Hassan',
-    customer_email: 'amina.hassan@email.com',
-    items: 1,
-    amount: '1850.00',
-    payment: 'PAID',
-    status: 'PAID',
-    date: '2026-09-23T10:40:00Z',
-    is_digital: true,
-  },
-];
-
-export const mockPayments: AdminPayment[] = [
-  {
-    id: 1,
-    transaction_id: 'MPESA-20260927-0012',
-    order: 'LP10241',
-    customer: 'Fatuma Ali',
-    amount: '2500.00',
-    method: 'M-Pesa',
-    date: '2026-09-25T09:10:00Z',
-    status: 'SUCCESSFUL',
-  },
-  {
-    id: 2,
-    transaction_id: 'VISA-20260926-0098',
-    order: 'LP10243',
-    customer: 'Amina Hassan',
-    amount: '7800.00',
-    method: 'Visa',
-    date: '2026-09-26T11:05:00Z',
-    status: 'PENDING',
-  },
-  {
-    id: 3,
-    transaction_id: 'MC-20260925-0045',
-    order: 'LP10242',
-    customer: 'David Mwangi',
-    amount: '3200.00',
-    method: 'Mastercard',
-    date: '2026-09-25T16:45:00Z',
-    status: 'SUCCESSFUL',
-  },
-  {
-    id: 4,
-    transaction_id: 'MPESA-20260924-0088',
-    order: 'LP10239',
-    customer: 'Samuel Ochieng',
-    amount: '1250.00',
-    method: 'M-Pesa',
-    date: '2026-09-24T16:20:00Z',
-    status: 'FAILED',
-  },
-  {
-    id: 5,
-    transaction_id: 'PAY-20260923-0101',
-    order: 'LP10230',
-    customer: 'Jane Wanjiku',
-    amount: '4500.00',
-    method: 'Other',
-    date: '2026-09-23T08:00:00Z',
-    status: 'REFUNDED',
-  },
-];
-
-export const mockWithdrawals: AdminWithdrawal[] = [
-  {
-    id: 1,
-    seller: 'ABC Education',
-    seller_id: 1,
-    amount: '45000.00',
-    platform_fee: '4500.00',
-    seller_receives: '40500.00',
-    status: 'PENDING',
-    requested_at: '2026-09-25T10:00:00Z',
-    paid_at: null,
-    payout_method: 'M-Pesa',
-  },
-  {
-    id: 2,
-    seller: 'Smart Teachers',
-    seller_id: 2,
-    amount: '18500.00',
-    platform_fee: '1850.00',
-    seller_receives: '16650.00',
-    status: 'APPROVED',
-    requested_at: '2026-09-24T14:00:00Z',
-    paid_at: null,
-    payout_method: 'Bank',
-  },
-  {
-    id: 3,
-    seller: 'Kenya Books Ltd',
-    seller_id: 3,
-    amount: '72000.00',
-    platform_fee: '7200.00',
-    seller_receives: '64800.00',
-    status: 'PAID',
-    requested_at: '2026-09-22T09:00:00Z',
-    paid_at: '2026-09-23T09:00:00Z',
-    payout_method: 'M-Pesa',
-  },
-  {
-    id: 4,
-    seller: 'Bright Minds',
-    seller_id: 4,
-    amount: '23000.00',
-    platform_fee: '2300.00',
-    seller_receives: '20700.00',
-    status: 'REJECTED',
-    requested_at: '2026-09-21T11:00:00Z',
-    paid_at: null,
-    payout_method: 'Bank',
-  },
-];
-
-export const mockCategories: CategoryNode[] = [
-  {
-    id: 1,
-    name: 'Primary School',
-    slug: 'primary-school',
-    product_count: 3240,
-    course_count: 120,
-    children: [
-      { id: 2, name: 'Mathematics', slug: 'mathematics', product_count: 780, course_count: 24, children: [] },
-      { id: 3, name: 'English', slug: 'english', product_count: 650, course_count: 31, children: [] },
-      { id: 4, name: 'Science', slug: 'science', product_count: 420, course_count: 18, children: [] },
-      { id: 5, name: 'Social Studies', slug: 'social-studies', product_count: 310, course_count: 12, children: [] },
-    ],
-  },
-  {
-    id: 6,
-    name: 'Secondary School',
-    slug: 'secondary-school',
-    product_count: 2180,
-    course_count: 205,
-    children: [
-      { id: 7, name: 'Mathematics', slug: 'mathematics', product_count: 490, course_count: 42, children: [] },
-      { id: 8, name: 'Biology', slug: 'biology', product_count: 410, course_count: 56, children: [] },
-      { id: 9, name: 'Chemistry', slug: 'chemistry', product_count: 380, course_count: 33, children: [] },
-      { id: 10, name: 'Physics', slug: 'physics', product_count: 390, course_count: 28, children: [] },
-    ],
-  },
-  {
-    id: 11,
-    name: 'Professional',
-    slug: 'professional',
-    product_count: 3000,
-    course_count: 400,
-    children: [
-      { id: 12, name: 'Programming', slug: 'programming', product_count: 890, course_count: 156, children: [] },
-      { id: 13, name: 'Business', slug: 'business', product_count: 720, course_count: 98, children: [] },
-      { id: 14, name: 'Accounting', slug: 'accounting', product_count: 640, course_count: 87, children: [] },
-      { id: 15, name: 'Digital Marketing', slug: 'digital-marketing', product_count: 750, course_count: 59, children: [] },
-    ],
-  },
-];
-
-export const mockReviews: AdminReview[] = [
-  {
-    id: 1,
-    product: 'Grade 6 Mathematics Revision',
-    product_id: 1,
-    customer: 'Jane',
-    rating: 5,
-    comment: 'Very useful revision material.',
-    date: '2026-09-20T10:00:00Z',
-    status: 'APPROVED',
-  },
-  {
-    id: 2,
-    product: 'KCPE Mock Exams 2024',
-    product_id: 2,
-    customer: 'Samuel O.',
-    rating: 4,
-    comment: 'Good practice papers, helped a lot with revision.',
-    date: '2026-09-24T14:00:00Z',
-    status: 'PENDING',
-  },
-  {
-    id: 3,
-    product: 'Form 3 Chemistry Past Papers',
-    product_id: 4,
-    customer: 'Amina H.',
-    rating: 1,
-    comment: 'Worst purchase ever. Papers were outdated.',
-    date: '2026-09-23T09:30:00Z',
-    status: 'PENDING',
-  },
-  {
-    id: 4,
-    product: 'Grade 8 Science Notes',
-    product_id: 3,
-    customer: 'David M.',
-    rating: 3,
-    comment: 'Average content, could be better organized.',
-    date: '2026-09-22T16:20:00Z',
-    status: 'HIDDEN',
-  },
-];
-
-export const mockCoupons: AdminCoupon[] = [
-  {
-    id: 1,
-    code: 'BACKTOSCHOOL',
-    discount_type: 'PERCENTAGE',
-    discount_value: '20',
-    start_date: '2026-09-01',
-    end_date: '2026-09-30',
-    usage_limit: 1000,
-    used: 342,
-    active: true,
-    created_at: '2026-08-25T10:00:00Z',
-  },
-  {
-    id: 2,
-    code: 'NEWUSER500',
-    discount_type: 'FIXED_AMOUNT',
-    discount_value: '500',
-    start_date: '2026-09-20',
-    end_date: '2026-12-31',
-    usage_limit: 500,
-    used: 87,
-    active: true,
-    created_at: '2026-09-15T08:00:00Z',
-  },
-];
-
-export const mockSettings: AdminSettings = {
-  commission: 10,
-  currency: 'KES',
-  currency_symbol: 'KSh',
-  default_country: 'Kenya',
-  allow_seller_registration: true,
-  require_product_approval: true,
-  require_course_approval: true,
-  mpesa_enabled: true,
-  visa_enabled: true,
-  tax_rate: 0,
-  email_notifications: true,
-};
+export const STAT_TILES = {
+  totalRevenue: { label: 'Total Revenue', icon: '💰', href: '/admin/reports' },
+  todayRevenue: { label: "Today's Revenue", icon: '📈', href: '/admin/reports' },
+  totalOrders: { label: 'Total Orders', icon: '📦', href: '/admin/orders' },
+  pendingOrders: { label: 'Pending Orders', icon: '⏳', href: '/admin/orders' },
+  totalCustomers: { label: 'Total Customers', icon: '👥', href: '/admin/users/customers' },
+  activeSellers: { label: 'Active Sellers', icon: '🏪', href: '/admin/sellers' },
+  totalProducts: { label: 'Total Products', icon: '📚', href: '/admin/products' },
+  totalCourses: { label: 'Total Courses', icon: '🎓', href: '/admin/courses' },
+} as const;
 
 // ---- Helpers ----
-
-const safe = async <T>(promise: Promise<unknown>, fallback: T): Promise<T> => {
-  try {
-    return (await promise) as T;
-  } catch {
-    return fallback;
-  }
-};
 
 function filterByParams<T>(data: T[], params?: Record<string, string>): T[] {
   if (!params) return data;
@@ -1020,7 +220,7 @@ function filterByParams<T>(data: T[], params?: Record<string, string>): T[] {
   );
 }
 
-// ---- Response mappers + API client (falls back to mock data when backend is unavailable) ----
+// ---- Response mappers + API client ----
 
 const asArray = <T,>(data: unknown): T[] =>
   Array.isArray(data)
@@ -1409,37 +609,6 @@ const mapCategoryTree = (flat: BackendCategory[]): CategoryNode[] => {
   return nodes;
 };
 
-export const mockHeldFunds: AdminOrder[] = [
-  {
-    id: 10245,
-    order_number: 'LP10245',
-    customer: 'Jane Wanjiku',
-    customer_email: 'jane.wanjiku@email.com',
-    items: 3,
-    amount: '4500.00',
-    payment: 'PAID',
-    status: 'DELIVERED',
-    fund_status: 'HELD',
-    disputed: false,
-    date: '2026-09-27T08:30:00Z',
-    is_digital: false,
-  },
-  {
-    id: 10244,
-    order_number: 'LP10244',
-    customer: 'Samuel Ochieng',
-    customer_email: 'sam@email.com',
-    items: 1,
-    amount: '1250.00',
-    payment: 'PAID',
-    status: 'DELIVERED',
-    fund_status: 'HELD',
-    disputed: false,
-    date: '2026-09-26T14:20:00Z',
-    is_digital: true,
-  },
-];
-
 /** GET a DRF list and follow `next` so paginated endpoints (shop products) are not cut to page 1. */
 async function getAllPages<T>(url: string, params?: Record<string, string>): Promise<T[]> {
   let res = await api.get(url, { params });
@@ -1455,73 +624,65 @@ async function getAllPages<T>(url: string, params?: Record<string, string>): Pro
   return rows;
 }
 
+const toPayments = (rows: BackendOrder[]): AdminPayment[] => rows.map((o, i) => mapPayment(o, i));
+
+// Every read throws on failure (callers show the error) and returns [] / null for genuinely empty data.
+// There is no mock fallback: a failed request must never render as invented figures.
 export const adminApi = {
   getDashboardStats: async (): Promise<Stat[]> => {
-    try {
-      const [orders, users, products, sellers, courses] = await Promise.all([
-        adminApi.getOrders(),
-        adminApi.getUsers(),
-        adminApi.getProducts(),
-        adminApi.getSellers(),
-        adminApi.getCourses(),
-      ]);
-      const totalRevenue = orders.reduce((s, o) => s + (parseFloat(o.amount) || 0), 0);
-      const today = new Date().toISOString().slice(0, 10);
-      const todayRevenue = orders
-        .filter((o) => (o.date || '').slice(0, 10) === today)
-        .reduce((s, o) => s + (parseFloat(o.amount) || 0), 0);
-      const pendingOrders = orders.filter((o) => o.status === 'PENDING' || o.payment === 'PENDING').length;
-      const totalCustomers = users.filter((u) => u.account_type === 'CUSTOMER').length;
-      const activeSellers = sellers.filter((s) => s.status === 'ACTIVE').length;
-      return [
-        { ...mockStats.totalRevenue, value: statMoney(totalRevenue) },
-        { ...mockStats.todayRevenue, value: statMoney(todayRevenue) },
-        { ...mockStats.totalOrders, value: statCount(orders.length) },
-        { ...mockStats.pendingOrders, value: statCount(pendingOrders) },
-        { ...mockStats.totalCustomers, value: statCount(totalCustomers) },
-        { ...mockStats.activeSellers, value: statCount(activeSellers) },
-        { ...mockStats.totalProducts, value: statCount(products.length) },
-        { ...mockStats.totalCourses, value: statCount(courses.length) },
-      ];
-    } catch {
-      return mockStatsList;
-    }
+    const [orders, users, productCount, sellers, courses] = await Promise.all([
+      adminApi.getOrders(),
+      adminApi.getUsers(),
+      adminApi.getProductCount(),
+      adminApi.getSellers(),
+      adminApi.getCourses(),
+    ]);
+    const totalRevenue = orders.reduce((s, o) => s + (parseFloat(o.amount) || 0), 0);
+    const today = new Date().toISOString().slice(0, 10);
+    const todayRevenue = orders
+      .filter((o) => (o.date || '').slice(0, 10) === today)
+      .reduce((s, o) => s + (parseFloat(o.amount) || 0), 0);
+    const pendingOrders = orders.filter((o) => o.status === 'PENDING' || o.payment === 'PENDING').length;
+    const totalCustomers = users.filter((u) => u.account_type === 'CUSTOMER').length;
+    const activeSellers = sellers.filter((s) => s.status === 'ACTIVE').length;
+    return [
+      { ...STAT_TILES.totalRevenue, value: statMoney(totalRevenue) },
+      { ...STAT_TILES.todayRevenue, value: statMoney(todayRevenue) },
+      { ...STAT_TILES.totalOrders, value: statCount(orders.length) },
+      { ...STAT_TILES.pendingOrders, value: statCount(pendingOrders) },
+      { ...STAT_TILES.totalCustomers, value: statCount(totalCustomers) },
+      { ...STAT_TILES.activeSellers, value: statCount(activeSellers) },
+      { ...STAT_TILES.totalProducts, value: statCount(productCount) },
+      { ...STAT_TILES.totalCourses, value: statCount(courses.length) },
+    ];
   },
 
-  getSalesAnalytics: () =>
-    safe(
-      adminApi.getOrders().then((orders) => {
-        const byMonth = new Map<string, { revenue: number; orders: number }>();
-        orders.forEach((o) => {
-          const d = new Date(o.date || 0);
-          const key = `${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()}`;
-          const cur = byMonth.get(key) || { revenue: 0, orders: 0 };
-          cur.revenue += parseFloat(o.amount) || 0;
-          cur.orders += 1;
-          byMonth.set(key, cur);
-        });
-        return Array.from(byMonth.entries())
-          .sort((a, b) => (a[0] < b[0] ? -1 : 1))
-          .map(([month, v]) => ({ month, revenue: Math.round(v.revenue), orders: v.orders }));
-      }),
-      mockSalesData,
-    ),
+  getSalesAnalytics: async (): Promise<SalesPoint[]> => {
+    const orders = await adminApi.getOrders();
+    const byMonth = new Map<string, { revenue: number; orders: number }>();
+    orders.forEach((o) => {
+      const d = new Date(o.date);
+      if (!o.date || Number.isNaN(d.getTime())) return;
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const cur = byMonth.get(key) || { revenue: 0, orders: 0 };
+      cur.revenue += parseFloat(o.amount) || 0;
+      cur.orders += 1;
+      byMonth.set(key, cur);
+    });
+    return Array.from(byMonth.entries())
+      .sort((a, b) => (a[0] < b[0] ? -1 : 1))
+      .map(([key, v]) => {
+        const [y, m] = key.split('-').map(Number);
+        const month = `${new Date(y, m - 1, 1).toLocaleString('default', { month: 'short' })} ${y}`;
+        return { month, revenue: Math.round(v.revenue), orders: v.orders };
+      });
+  },
 
-  getRecentOrders: () => safe(adminApi.getOrders().then((orders) => orders.slice(0, 5)), mockRecentOrders),
-
-  getNotifications: () =>
-    safe(api.get('/admin/notifications/').then((r) => asArray(r.data)), mockNotifications),
+  getRecentOrders: () => adminApi.getOrders().then((orders) => orders.slice(0, 5)),
 
   getUsers: (params?: Record<string, string>) =>
-    safe(
-      api.get('/auth/users/', { params }).then((r) => asArray<BackendUser>(r.data).map(mapUser)),
-      filterByParams(mockUsers, params),
-    ),
-  getUser: (id: string) =>
-    safe(
-      api.get(`/auth/users/${id}/`).then((r) => mapUser(r.data)),
-      mockUsers.find((u) => u.id === Number(id)) ?? null,
-    ),
+    api.get('/auth/users/', { params }).then((r) => asArray<BackendUser>(r.data).map(mapUser)),
+  getUser: (id: string) => api.get(`/auth/users/${id}/`).then((r) => mapUser(r.data)),
   updateUser: (id: string, data: Partial<AdminUser>) => {
     const patch: Record<string, unknown> = {};
     if (data.status === 'ACTIVE') patch.is_active = true;
@@ -1536,33 +697,25 @@ export const adminApi = {
   },
   deleteUser: (id: string) => api.delete(`/auth/users/${id}/`).then((r) => r.data),
 
-  getSellers: () =>
-    safe(
-      (async () => {
-        const [profiles, wallets] = await Promise.all([
-          api.get('/distributor/profiles/').then((r) => asArray<BackendProfile>(r.data)),
-          api.get('/distributor/wallet/').then((r) =>
-            asArray<{ distributor: number; transactions?: Array<{ order_total?: string | number; amount?: string | number }> }>(r.data),
-          ),
-        ]);
-        const walletByProfile = new Map<number, { revenue: number; commission: number }>();
-        wallets.forEach((w) => {
-          const base = walletByProfile.get(w.distributor) || { revenue: 0, commission: 0 };
-          (w.transactions || []).forEach((t) => {
-            base.revenue += parseFloat(t.order_total == null ? '0' : String(t.order_total)) || 0;
-            base.commission += parseFloat(t.amount == null ? '0' : String(t.amount)) || 0;
-          });
-          walletByProfile.set(w.distributor, base);
-        });
-        return profiles.map((p) => mapSeller(p, walletByProfile.get(p.id)));
-      })(),
-      mockSellers,
-    ),
-  getSeller: (id: string) =>
-    safe(
-      api.get(`/distributor/profiles/${id}/`).then((r) => mapSeller(r.data)),
-      mockSellers.find((s) => s.id === Number(id)) ?? null,
-    ),
+  getSellers: async (): Promise<AdminSeller[]> => {
+    const [profiles, wallets] = await Promise.all([
+      api.get('/distributor/profiles/').then((r) => asArray<BackendProfile>(r.data)),
+      api.get('/distributor/wallet/').then((r) =>
+        asArray<{ distributor: number; transactions?: Array<{ order_total?: string | number; amount?: string | number }> }>(r.data),
+      ),
+    ]);
+    const walletByProfile = new Map<number, { revenue: number; commission: number }>();
+    wallets.forEach((w) => {
+      const base = walletByProfile.get(w.distributor) || { revenue: 0, commission: 0 };
+      (w.transactions || []).forEach((t) => {
+        base.revenue += parseFloat(t.order_total == null ? '0' : String(t.order_total)) || 0;
+        base.commission += parseFloat(t.amount == null ? '0' : String(t.amount)) || 0;
+      });
+      walletByProfile.set(w.distributor, base);
+    });
+    return profiles.map((p) => mapSeller(p, walletByProfile.get(p.id)));
+  },
+  getSeller: (id: string) => api.get(`/distributor/profiles/${id}/`).then((r) => mapSeller(r.data)),
   updateSeller: (id: string, data: Partial<AdminSeller>) => {
     if (data.status === 'SUSPENDED') {
       return api.post(`/distributor/profiles/${id}/suspend/`).then((r) =>
@@ -1577,24 +730,19 @@ export const adminApi = {
     return api.patch(`/distributor/profiles/${id}/`, data).then((r) => mapSeller(r.data));
   },
   getPendingSellers: () =>
-    safe(
-      api.get('/distributor/profiles/pending/').then((r) => asArray<BackendProfile>(r.data).map(mapPendingSeller)),
-      mockPendingSellers,
-    ),
+    api.get('/distributor/profiles/pending/').then((r) => asArray<BackendProfile>(r.data).map(mapPendingSeller)),
   approveSeller: (id: string) => api.post(`/distributor/profiles/${id}/approve/`).then((r) => r.data),
   rejectSeller: (id: string) => api.post(`/distributor/profiles/${id}/suspend/`).then((r) => r.data),
 
   getProducts: (params?: Record<string, string>) =>
-    safe(
-      getAllPages<BackendProduct>('/shop/products/', params)
-        .then((rows) => filterByParams(rows.map(mapProduct), params)),
-      filterByParams(mockProducts, params),
-    ),
-  getProduct: (id: string) =>
-    safe(
-      api.get(`/shop/products/${id}/`).then((r) => mapProduct(r.data)),
-      mockProducts.find((p) => p.id === Number(id)) ?? null,
-    ),
+    getAllPages<BackendProduct>('/shop/products/', params).then((rows) => filterByParams(rows.map(mapProduct), params)),
+  /** Total from the paginated list's `count`, so the dashboard does not download every product page. */
+  getProductCount: (): Promise<number> =>
+    api.get('/shop/products/', { params: { page_size: 1 } }).then((r) => {
+      const d = r.data as { count?: number } | unknown[];
+      return Array.isArray(d) ? d.length : typeof d?.count === 'number' ? d.count : asArray(d).length;
+    }),
+  getProduct: (id: string) => api.get(`/shop/products/${id}/`).then((r) => mapProduct(r.data)),
   updateProduct: (id: string, data: Partial<AdminProduct>) => {
     const patch: Record<string, unknown> = {};
     if (data.status !== undefined) {
@@ -1604,13 +752,7 @@ export const adminApi = {
     return api.patch(`/shop/products/${id}/`, patch).then((r) => mapProduct(r.data));
   },
   deleteProduct: (id: string) => api.delete(`/shop/products/${id}/`).then((r) => r.data),
-  createProduct: (data: CreateProductData) => {
-    const fallback: BackendProduct = {
-      id: Date.now(),
-      name: data.name,
-      price: data.price,
-      is_active: data.is_active !== false,
-    };
+  createProduct: async (data: CreateProductData) => {
     const payload: Record<string, unknown> = {
       name: data.name,
       category: data.category,
@@ -1634,24 +776,20 @@ export const adminApi = {
     if (data.shipping_height) payload.shipping_height = data.shipping_height;
     if (data.institution_categories && data.institution_categories.length)
       payload.institution_categories = data.institution_categories;
-    const base = safe(
-      api.post('/shop/products/', payload).then((r) => r.data),
-      fallback,
-    );
-    return base.then(async (product: BackendProduct) => {
-      if (data.images && data.images.length > 0 && product.id) {
-        const form = new FormData();
-        data.images.forEach((f) => form.append('files', f));
-        try {
-          await api.post(`/shop/products/${product.id}/upload_images/`, form, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-          });
-        } catch {
-          /* image upload best-effort */
-        }
+    // A failed create must reject: never hand back an invented product.
+    const product: BackendProduct = await api.post('/shop/products/', payload).then((r) => r.data);
+    if (data.images && data.images.length > 0 && product.id) {
+      const form = new FormData();
+      data.images.forEach((f) => form.append('files', f));
+      try {
+        await api.post(`/shop/products/${product.id}/upload_images/`, form, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      } catch {
+        throw new Error('Product was created, but its images failed to upload. Add them from the product page.');
       }
-      return product;
-    });
+    }
+    return product;
   },
   uploadProductImages: (id: number, files: File[]) => {
     const form = new FormData();
@@ -1673,27 +811,15 @@ export const adminApi = {
   },
 
   getCourses: (params?: Record<string, string>) =>
-    safe(
-      api
-        .get('/courses/courses/', { params })
-        .then((r) => filterByParams(asArray<BackendCourse>(r.data).map(mapCourse), params)),
-      filterByParams(mockCourses, params),
-    ),
-  getCourse: (id: string) =>
-    safe(
-      api.get(`/courses/courses/${id}/`).then((r) => mapCourse(r.data)),
-      mockCourses.find((c) => c.id === Number(id)) ?? null,
-    ),
+    api
+      .get('/courses/courses/', { params })
+      .then((r) => filterByParams(asArray<BackendCourse>(r.data).map(mapCourse), params)),
+  getCourse: (id: string) => api.get(`/courses/courses/${id}/`).then((r) => mapCourse(r.data)),
   updateCourse: (id: string, data: Partial<AdminCourse>) =>
     api.patch(`/courses/courses/${id}/`, data).then((r) => mapCourse(r.data)),
 
   getOrders: (params?: Record<string, string>) =>
-    safe(
-      api
-        .get('/shop/orders/', { params })
-        .then((r) => filterByParams(asArray<BackendOrder>(r.data).map(mapOrder), params)),
-      filterByParams(mockOrders, params),
-    ),
+    getAllPages<BackendOrder>('/shop/orders/', params).then((rows) => filterByParams(rows.map(mapOrder), params)),
   updateOrder: (id: string, data: Partial<AdminOrder>) => {
     const patch: Record<string, unknown> = {};
     if (data.status !== undefined) {
@@ -1712,28 +838,13 @@ export const adminApi = {
   },
 
   getPayments: (params?: Record<string, string>) =>
-    safe(
-      api.get('/shop/orders/').then((r) =>
-        filterByParams(
-          asArray<BackendOrder>(r.data).map((o, i) => mapPayment(o, i)),
-          params,
-        ),
-      ),
-      filterByParams(mockPayments, params),
-    ),
-  getTransactions: () =>
-    safe(
-      api.get('/shop/orders/').then((r) => asArray<BackendOrder>(r.data).map((o, i) => mapPayment(o, i))),
-      mockPayments,
-    ),
+    getAllPages<BackendOrder>('/shop/orders/').then((rows) => filterByParams(toPayments(rows), params)),
+  getTransactions: () => getAllPages<BackendOrder>('/shop/orders/').then(toPayments),
 
   getHeldFunds: () =>
-    safe(
-      adminApi.getOrders().then((orders) =>
-        orders.filter((o) => o.fund_status === 'HELD' && o.status === 'DELIVERED' && !o.disputed),
-      ),
-      mockHeldFunds,
-    ),
+    adminApi
+      .getOrders()
+      .then((orders) => orders.filter((o) => o.fund_status === 'HELD' && o.status === 'DELIVERED' && !o.disputed)),
   releaseFunds: (id: string) =>
     api.post(`/shop/orders/${id}/release_funds/`, {}).then((r) => r.data),
   confirmDelivery: (id: string) =>
@@ -1741,52 +852,15 @@ export const adminApi = {
   disputeOrder: (id: string, reason: string) =>
     api.post(`/shop/orders/${id}/dispute/`, { reason }).then((r) => r.data),
 
-  getWithdrawals: (params?: Record<string, string>) =>
-    safe(
-      api.get('/admin/withdrawals/', { params }).then((r) => filterByParams(asArray(r.data), params)),
-      filterByParams(mockWithdrawals, params),
-    ),
-  updateWithdrawal: (id: string, data: Partial<AdminWithdrawal>) =>
-    api.patch(`/admin/withdrawals/${id}/`, data).then((r) => r.data),
-
   getCategories: () =>
-    safe(
-      api.get('/shop/categories/').then((r) => mapCategoryTree(asArray<BackendCategory>(r.data))),
-      mockCategories,
-    ),
+    api.get('/shop/categories/').then((r) => mapCategoryTree(asArray<BackendCategory>(r.data))),
   createCategory: (data: unknown) => api.post('/shop/categories/', data).then((r) => r.data),
   updateCategory: (id: string, data: unknown) => api.patch(`/shop/categories/${id}/`, data).then((r) => r.data),
 
-  getGrades: () =>
-    safe(
-      api.get('/academics/grades/').then((r) => asArray<BackendGrade>(r.data)),
-      [],
-    ),
-  getLearningAreas: () =>
-    safe(
-      api.get('/academics/learning-areas/').then((r) => asArray<BackendLearningArea>(r.data)),
-      [],
-    ),
-  getPathways: () =>
-    safe(
-      api.get('/academics/pathways/').then((r) => asArray<BackendPathway>(r.data)),
-      [],
-    ),
+  getGrades: () => api.get('/academics/grades/').then((r) => asArray<BackendGrade>(r.data)),
+  getLearningAreas: () => api.get('/academics/learning-areas/').then((r) => asArray<BackendLearningArea>(r.data)),
+  getPathways: () => api.get('/academics/pathways/').then((r) => asArray<BackendPathway>(r.data)),
 
-  getReviews: (params?: Record<string, string>) =>
-    safe(
-      api.get('/admin/reviews/', { params }).then((r) => filterByParams(asArray(r.data), params)),
-      filterByParams(mockReviews, params),
-    ),
-  updateReview: (id: string, data: Partial<AdminReview>) => api.patch(`/admin/reviews/${id}/`, data).then((r) => r.data),
-
-  getCoupons: () => safe(api.get('/admin/coupons/').then((r) => asArray(r.data)), mockCoupons),
-  createCoupon: (data: Omit<AdminCoupon, 'id'>) => api.post('/admin/coupons/', data).then((r) => r.data),
-  updateCoupon: (id: string, data: Partial<AdminCoupon>) => api.patch(`/admin/coupons/${id}/`, data).then((r) => r.data),
-
-  getContent: () => safe(api.get('/admin/content/').then((r) => asArray(r.data)), [] as ContentItem[]),
-  updateContent: (id: string, data: Partial<ContentItem>) => api.patch(`/admin/content/${id}/`, data).then((r) => r.data),
-
-  getSettings: () => safe(api.get('/admin/settings/').then((r) => ({ ...mockSettings, ...r.data })), mockSettings),
-  updateSettings: (data: Partial<AdminSettings>) => api.patch('/admin/settings/', data).then((r) => r.data),
+  // Coupons, withdrawals, settings, reviews, notifications and content have no backend yet
+  // (see docs/specs/distributor-december-plan.md). Their methods were removed, not mocked.
 };

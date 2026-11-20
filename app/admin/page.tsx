@@ -3,39 +3,46 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { adminApi } from '@/lib/adminApi';
-import type { Stat, SalesPoint, AdminOrder, PlatformNotification } from '@/lib/adminApi';
+import type { Stat, SalesPoint, AdminOrder } from '@/lib/adminApi';
+import LoadError from '@/components/admin/LoadError';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stat[]>([]);
   const [salesData, setSalesData] = useState<SalesPoint[]>([]);
   const [recentOrders, setRecentOrders] = useState<AdminOrder[]>([]);
-  const [notifications, setNotifications] = useState<PlatformNotification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const [statsData, sales, orders, notes] = await Promise.all([
+        const [statsData, sales, orders] = await Promise.all([
           adminApi.getDashboardStats(),
           adminApi.getSalesAnalytics(),
           adminApi.getRecentOrders(),
-          adminApi.getNotifications(),
         ]);
         setStats(statsData);
         setSalesData(sales);
         setRecentOrders(orders);
-        setNotifications(notes);
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
+      } catch (err) {
+        console.error('Failed to fetch dashboard data:', err);
+        setError(err);
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-  }, []);
+  }, [attempt]);
 
   if (loading) {
     return <div className="text-lg">Loading dashboard...</div>;
+  }
+
+  if (error) {
+    return <LoadError what="the dashboard" error={error} onRetry={() => setAttempt((n) => n + 1)} />;
   }
 
   const maxRevenue = Math.max(...salesData.map((s) => s.revenue), 1);
@@ -93,6 +100,11 @@ export default function AdminDashboard() {
         {/* Sales Analytics chart */}
         <div className="lg:col-span-2 bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-6">
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4"> Sales Analytics </h2>
+          {salesData.length === 0 ? (
+            <div className="h-[260px] flex items-center justify-center text-sm text-zinc-500">
+              No orders yet, so there is nothing to chart.
+            </div>
+          ) : (
           <div className="h-[260px]">
             <svg
               width="100%"
@@ -154,6 +166,7 @@ export default function AdminDashboard() {
               </g>
             </svg>
           </div>
+          )}
           <div className="mt-3 flex gap-5 text-xs text-zinc-600 dark:text-zinc-400">
             <div className="flex items-center gap-2">
               <span className="h-3 w-3 rounded bg-zinc-900 dark:bg-zinc-100" />
@@ -166,39 +179,8 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Notifications summary */}
+        {/* Quick actions */}
         <div className="space-y-5">
-          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-6">
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4"> Notifications </h2>
-            <div className="space-y-3">
-              {notifications.slice(0, 5).map((note) => (
-                <div
-                  key={note.id}
-                  className={`p-3 rounded-lg border ${
-                    note.read
-                      ? 'border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950'
-                      : 'border-orange-200 dark:border-orange-900/30 bg-orange-50/30 dark:bg-orange-900/10'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{note.title}</p>
-                    {!note.read && <span className="h-2 w-2 rounded-full bg-orange-500" />}
-                  </div>
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">{note.message}</p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
-                    {new Date(note.created_at).toLocaleString()}
-                  </p>
-                </div>
-              ))}
-            </div>
-            <Link
-              href="/admin/notifications"
-              className="block text-center text-xs font-medium text-orange-600 dark:text-orange-400 hover:underline mt-3"
-            >
-              View all notifications
-            </Link>
-          </div>
-
           <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-6">
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">Quick Actions</h2>
             <div className="grid grid-cols-2 gap-2">
@@ -215,16 +197,10 @@ export default function AdminDashboard() {
                 Moderate Products
               </Link>
               <Link
-                href="/admin/withdrawals"
-                className="px-3 py-2 text-xs font-medium text-center text-zinc-700 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
-              >
-                Process Payouts
-              </Link>
-              <Link
                 href="/admin/reports"
                 className="px-3 py-2 text-xs font-medium text-center text-zinc-700 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
               >
-                Export Report
+                View Reports
               </Link>
             </div>
           </div>
@@ -256,6 +232,13 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody>
+              {recentOrders.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="py-6 px-4 text-center text-zinc-500">
+                    No orders yet.
+                  </td>
+                </tr>
+              )}
               {recentOrders.map((order) => (
                 <tr key={order.id} className="border-b border-zinc-100 dark:border-zinc-800">
                   <td className="py-3 px-4 text-zinc-900 dark:text-zinc-100 font-medium">{order.order_number}</td>

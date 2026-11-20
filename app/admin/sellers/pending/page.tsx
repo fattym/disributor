@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { adminApi } from '@/lib/adminApi';
+import LoadError, { ActionError, errorMessage } from '@/components/admin/LoadError';
 import type { AdminSeller } from '@/lib/adminApi';
 
 interface PendingSeller extends Omit<AdminSeller, 'products' | 'orders' | 'revenue' | 'commission'> {
@@ -13,6 +14,8 @@ interface PendingSeller extends Omit<AdminSeller, 'products' | 'orders' | 'reven
 export default function PendingSellersPage() {
   const [sellers, setSellers] = useState<PendingSeller[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<unknown>(null);
+  const [actionError, setActionError] = useState('');
   const [selected, setSelected] = useState<PendingSeller | null>(null);
   const [message, setMessage] = useState('');
 
@@ -23,6 +26,7 @@ export default function PendingSellersPage() {
         setSellers(data);
       } catch (error) {
         console.error('Failed to fetch pending sellers:', error);
+        setLoadError(error);
       } finally {
         setLoading(false);
       }
@@ -30,22 +34,27 @@ export default function PendingSellersPage() {
     fetchPending();
   }, []);
 
-  const handleApprove = (seller: PendingSeller) => {
-    adminApi.approveSeller(seller.id.toString()).catch(() => {});
-    setSellers(sellers.filter((s) => s.id !== seller.id));
-    setMessage(`${seller.store_name} has been approved`);
+  const decide = async (seller: PendingSeller, action: 'approve' | 'reject') => {
+    setActionError('');
+    try {
+      if (action === 'approve') await adminApi.approveSeller(seller.id.toString());
+      else await adminApi.rejectSeller(seller.id.toString());
+      setSellers((rows) => rows.filter((s) => s.id !== seller.id));
+      setMessage(`${seller.store_name} has been ${action === 'approve' ? 'approved' : 'rejected'}`);
+    } catch (err) {
+      setActionError(`Could not ${action} ${seller.store_name}. ${errorMessage(err)}`);
+    }
     setTimeout(() => setMessage(''), 3000);
   };
-
-  const handleReject = (seller: PendingSeller) => {
-    adminApi.rejectSeller(seller.id.toString()).catch(() => {});
-    setSellers(sellers.filter((s) => s.id !== seller.id));
-    setMessage(`${seller.store_name} has been rejected`);
-    setTimeout(() => setMessage(''), 3000);
-  };
+  const handleApprove = (seller: PendingSeller) => decide(seller, 'approve');
+  const handleReject = (seller: PendingSeller) => decide(seller, 'reject');
 
   if (loading) {
     return <div className="text-lg">Loading pending applications...</div>;
+  }
+
+  if (loadError) {
+    return <LoadError what="pending sellers" error={loadError} onRetry={() => window.location.reload()} />;
   }
 
   return (
@@ -64,6 +73,8 @@ export default function PendingSellersPage() {
           ← All Sellers
         </Link>
       </div>
+
+      {actionError && <ActionError message={actionError} />}
 
       {message && (
         <div className="p-3 text-sm text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-md">
