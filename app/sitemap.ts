@@ -17,13 +17,8 @@ const STATIC_PAGES: Array<[string, number]> = [
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  let products: Awaited<ReturnType<typeof getBuildProducts>> = [];
-  try {
-    products = await getBuildProducts();
-  } catch (e) {
-    // Loud on purpose: a silent fallback would ship a sitemap without products.
-    console.error('[seo] could not load the catalogue for sitemap.xml:', e instanceof Error ? e.message : e);
-  }
+  // No try/catch: a build that cannot read the catalogue must fail, not ship a sitemap without products.
+  const products = await getBuildProducts();
   return [
     ...STATIC_PAGES.map(([path, priority]) => ({ url: abs(path), lastModified: now, priority })),
     ...products.map((p) => ({ url: abs(`/shop/${p.id}/`), lastModified: now, priority: 0.8 })),
