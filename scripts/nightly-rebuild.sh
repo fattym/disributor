@@ -1,18 +1,17 @@
-#!/usr/bin/env bash
 # Nightly static rebuild of learningpack, so JSON-LD prices/availability and sitemap.xml are never >24h stale.
-# Stages a build with deploy-static.sh, sanity-checks it against what is live, and only then swaps.
-# Any failure leaves the live site untouched (deploy-static.sh only swaps on success).
+# It rebuilds the EXACT COMMIT the live release was built from (read from the live release's own git worktree),
+# never a branch name, so it can only refresh data, never deploy different code. New code goes out through a normal
+# deploy-static.sh run. Stages a build, sanity-checks it against what is live, and only then swaps. Any failure
+# leaves the live site untouched.
 #
-# Install: copy this file to ~devops/deploy-scripts/learningpack-nightly.sh (outside every git checkout, so it never
-# blocks a pull). Needs backend >= 25c6b61 on the server so deploy-static.sh prunes to KEEP=5, and Node 20+ on cron's
-# PATH (or NODE_BIN=...). REF must be the branch that is LIVE: feat/seo until it is merged, then main (a wrong REF
-# would deploy older code).
+# Install: copy to ~devops/deploy-scripts/learningpack-nightly.sh (outside every git checkout, so it never blocks a
+# pull). Do NOT install the cron until backend >= 25c6b61 is deployed on the server (deploy-static.sh then prunes to
+# KEEP=5; the older script keeps 3). Node 20+ must be on cron's PATH (or set NODE_BIN=...).
 #
 # Crontab (devops), after the 02:30 backup and 03:15 lockout purge:
-#   10 4 * * * KEEP=5 REF=feat/seo $HOME/deploy-scripts/learningpack-nightly.sh >> $HOME/home/personal/personalweb/logs/learningpack-nightly.log 2>&1
+#   10 4 * * * KEEP=5 $HOME/deploy-scripts/learningpack-nightly.sh >> $HOME/home/personal/personalweb/logs/learningpack-nightly.log 2>&1
 set -Eeuo pipefail
 
-REF="${REF:-main}"                                   # branch that is live
 PROJECT_ROOT="${PROJECT_ROOT:-/home/devops/home/personal/personalweb}"
 DEPLOY="${DEPLOY:-$PROJECT_ROOT/epk/deploy/deploy-static.sh}"
 LIVE="${LIVE:-$PROJECT_ROOT/disributor/out}"
@@ -26,8 +25,12 @@ die() { say "ABORT: $*"; exit 1; }
 exec 9>/tmp/learningpack-nightly.lock
 flock -n 9 || { say "previous run still going, skipping"; exit 0; }
 
+# The live release is a git worktree: its HEAD is the commit it was built from.
+LIVE_OUT="$(readlink -f "$LIVE")"; LIVE_REL="$(dirname "$LIVE_OUT")"
+REF="$(git -C "$LIVE_REL" rev-parse --verify HEAD 2>/dev/null)" || die "cannot read the live release commit from $LIVE_REL"
+[ "${#REF}" -eq 40 ] || die "bad live commit '$REF'"
 LOG="$(mktemp)"; trap 'rm -f "$LOG"' EXIT
-say "stage $REF"
+say "live release $LIVE_REL is commit $REF; rebuilding that exact commit"
 STAGE_ONLY=1 "$DEPLOY" distributor "$REF" 2>&1 | tee "$LOG"
 REL="$(sed -n 's/^STAGED (not live): //p' "$LOG" | tail -1)"
 [ -n "$REL" ] && [ -d "$REL/out" ] || die "no staged build found"

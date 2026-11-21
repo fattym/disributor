@@ -10,10 +10,9 @@ export const DEFAULT_OG_IMAGE = '/og-default.png';
 export const abs = (path: string) => new URL(path, SITE_URL).toString();
 
 /**
- * Public list item. `backorders` and `sku` are not in the public LIST response yet (only in the per-product detail,
- * which the API's anonymous rate limit of 1200/hour makes unusable for a 3,900-product build). They are optional
- * here and picked up automatically once the list serializer exposes them: until then availability is
- * InStock/OutOfStock from real stock and the description has no ISBN.
+ * Public list item. `sku` is not in the public LIST response yet (only in the per-product detail, which the API's
+ * anonymous rate limit of 1200/hour makes unusable for a 3,900-product build); it is picked up automatically once
+ * the list serializer exposes it (ISBN then appears in the description).
  */
 export type SeoProduct = ShopProduct & { backorders?: boolean };
 
@@ -57,12 +56,15 @@ export const productPrice = (p: ShopProduct): number | undefined => {
   return Number.isFinite(base) && base > 0 ? base : undefined;
 };
 
-/** schema.org availability from real stock. Undefined = nothing purchasable (no variants), so no offers block. */
-export function availability(p: SeoProduct): 'InStock' | 'BackOrder' | 'OutOfStock' | undefined {
+/**
+ * schema.org availability. Real stock (variant.stock_quantity, as the public API reports it) > 0 -> InStock.
+ * Variants at zero are orderable on the live site (0 = unlimited until the stock release), so BackOrder, never
+ * OutOfStock: no product is hidden or marked unavailable. No variants -> undefined -> no offers block.
+ */
+export function availability(p: SeoProduct): 'InStock' | 'BackOrder' | undefined {
   const variants = p.variants || [];
   if (variants.length === 0) return undefined;
-  if (variants.some((v) => v.stock_quantity > 0)) return 'InStock';
-  return p.backorders ? 'BackOrder' : 'OutOfStock';
+  return variants.some((v) => v.stock_quantity > 0) ? 'InStock' : 'BackOrder';
 }
 
 export const gradeNames = (p: ShopProduct, all: Grade[]): string[] =>
