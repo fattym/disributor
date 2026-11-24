@@ -14,6 +14,8 @@ export interface CartItem {
   unit_price: number;
   image_url: string | null;
   stock_quantity: number;
+  /** Who sells and packs it; null for the platform's own listings. */
+  seller_name?: string | null;
 }
 
 interface CartContextType {
@@ -95,6 +97,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       unit_price: variant ? parseFloat(variant.effective_price || '0') : server?.effective_price ? parseFloat(server.effective_price) : (ci.unit_price ?? 0),
       image_url: product?.image_url ?? server?.image_url ?? ci.image_url ?? null,
       stock_quantity: variant?.stock_quantity ?? server?.stock_quantity ?? ci.stock_quantity ?? 0,
+      seller_name: ci.seller_name ?? null,
     };
   }), [cartItems, productByVariant, serverLines]);
 
@@ -109,6 +112,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       unit_price: item.unit_price,
       image_url: item.image_url,
       stock_quantity: item.stock_quantity,
+      seller_name: item.seller_name ?? null,
     });
   }, [addToCart]);
 

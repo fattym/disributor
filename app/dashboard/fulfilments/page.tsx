@@ -1,125 +1,114 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { distributorApi } from '@/lib/api';
+import FulfilmentActions from '@/components/seller/FulfilmentActions';
+import PackingList from '@/components/seller/PackingList';
+import { STAGES, errText, itemsText, methodText, stageOf, whenText, whoWhere, type Fulfilment } from '@/lib/fulfilments';
 
-interface Line { id: number; product_name: string; variant_label: string; quantity: number }
-interface Fulfilment {
-  id: number;
-  tracking_ref: string | null;
-  order_ref: string | null;
-  payment_method: string;
-  payment_received: boolean;
-  status: string;
-  created_at: string;
-  lines: Line[];
-  ship_to: { name: string; phone: string; address: string; county: string; notes: string } | null;
-  next_actions: string[];
-  distributor_name: string;
-  stuck: boolean;
-}
-
-const LABEL: Record<string, string> = {
-  pending: 'Pending (awaiting payment)', confirmed: 'Confirmed', packing: 'Processing', packed: 'Ready for dispatch',
-  dispatched: 'Dispatched', delivered: 'Delivered', failed: 'Delivery failed', cancelled: 'Cancelled',
-};
-const FILTERS = ['', 'pending', 'confirmed', 'packing', 'packed', 'dispatched', 'delivered'];
-const BTN = 'px-3 py-1 text-xs bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded hover:opacity-80 disabled:opacity-50';
-
-function errText(e: unknown): string {
-  const data = (e as { response?: { data?: Record<string, unknown> } })?.response?.data;
-  const first = data && Object.values(data)[0];
-  return String(Array.isArray(first) ? first[0] : first || 'Something went wrong.');
-}
+const LIMIT = 200;
+const GHOST = 'inline-flex items-center gap-1.5 h-11 px-3 rounded-[10px] border border-[#CDD3E1] bg-white text-[13px] font-semibold text-[#16213B] cursor-pointer';
 
 export default function FulfilmentsPage() {
   const [rows, setRows] = useState<Fulfilment[]>([]);
-  const [filter, setFilter] = useState('');
+  const [total, setTotal] = useState(0);
+  const [tab, setTab] = useState('confirmed');
+  const [q, setQ] = useState('');
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState<number | null>(null);
   const [error, setError] = useState('');
-  const [carrier, setCarrier] = useState<Record<number, string>>({});
-  const [ref, setRef] = useState<Record<number, string>>({});
 
-  const load = useCallback(async () => {
-    try {
-      const data = await distributorApi.getFulfilments(filter);
-      setRows(data.results || data);
-      setError('');
-    } catch (e) {
-      setError(errText(e));
-    } finally {
-      setLoading(false);
-    }
-  }, [filter]);
+  const [tick, setTick] = useState(0);
+  const load = useCallback(() => setTick((t) => t + 1), []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    let stale = false;
+    distributorApi.getFulfilments('', LIMIT)
+      .then((data) => {
+        if (stale) return;
+        const list: Fulfilment[] = data.results || data;
+        setRows(list);
+        setTotal(typeof data.count === 'number' ? data.count : list.length);
+        setError('');
+      })
+      .catch((e) => { if (!stale) setError(errText(e)); })
+      .finally(() => { if (!stale) setLoading(false); });
+    return () => { stale = true; };
+  }, [tick]);
 
-  const run = async (id: number, fn: () => Promise<unknown>) => {
-    setBusy(id);
-    setError('');
-    try { await fn(); await load(); } catch (e) { setError(errText(e)); } finally { setBusy(null); }
-  };
+  const tabs = useMemo(() => {
+    const base: { status: string; label: string }[] = STAGES.map((s) => ({ status: s.status, label: s.label }));
+    if (rows.some((r) => r.status === 'failed')) base.push({ status: 'failed', label: 'Delivery failed' });
+    return base.map((t) => ({ ...t, n: rows.filter((r) => r.status === t.status).length }));
+  }, [rows]);
+
+  const needle = q.trim().toLowerCase();
+  const shown = rows.filter((r) => r.status === tab).filter((r) => {
+    if (!needle) return true;
+    const w = whoWhere(r);
+    return [r.tracking_ref, r.order_ref, w.customer, w.deliverTo].some((x) => (x || '').toLowerCase().includes(needle));
+  });
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">Fulfilments</h1>
-        <p className="text-zinc-600 dark:text-zinc-400 mt-1">
-          Website orders to pack and ship. A new order waits as &ldquo;Pending&rdquo; until payment is confirmed by Learning Pack.
-        </p>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {FILTERS.map((f) => (
-          <button key={f || 'all'} onClick={() => setFilter(f)}
-            className={`px-3 py-1 text-xs rounded-full border ${filter === f ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900' : 'border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300'}`}>
-            {f ? LABEL[f] : 'All'}
+    <div className="flex flex-col gap-5 font-[family-name:var(--font-body,'DM_Sans')]">
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <h1 className="m-0 !text-[#16213B] text-[28px] font-bold tracking-tight">Fulfilments</h1>
+          <p className="m-0 text-[15px] text-[#5B6683]">Every order line you need to pack and send, by stage.</p>
+        </div>
+        <label className="flex h-11 w-full min-w-0 items-center gap-2 rounded-xl border border-[#E1E5EE] bg-white px-3.5 sm:w-auto sm:min-w-[300px]">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B6683" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3" /></svg>
+          <input type="search" aria-label="Search fulfilments" placeholder="Order number, customer or school" value={q} onChange={(e) => setQ(e.target.value)}
+            className="min-w-0 flex-1 border-0 bg-transparent text-sm text-[#16213B] outline-none" />
+        </label>
+      </header>
+
+      <div role="tablist" aria-label="Stage" className="flex flex-wrap gap-1.5 self-start rounded-[14px] bg-[#E9ECF4] p-1">
+        {tabs.map((t) => (
+          <button key={t.status} type="button" role="tab" aria-selected={tab === t.status} onClick={() => setTab(t.status)}
+            className={`h-11 cursor-pointer rounded-[10px] border-0 px-3.5 text-sm ${tab === t.status ? 'bg-white font-bold text-[#0F1E3D]' : 'bg-transparent font-semibold text-[#3D4865]'}`}>
+            {t.label} <span className="font-medium text-[#5B6683]">{t.n}</span>
           </button>
         ))}
       </div>
-      {error && <div role="alert" className="text-sm text-red-600">{error}</div>}
-      {loading ? <div>Loading...</div> : rows.length === 0 ? (
-        <div className="p-6 text-center text-zinc-500 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">Nothing here yet.</div>
-      ) : rows.map((f) => (
-        <div key={f.id} className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="font-semibold text-zinc-900 dark:text-zinc-100">{f.tracking_ref || `#${f.id}`}</div>
-            <span className="px-2 py-1 text-xs rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
-              {LABEL[f.status] || f.status}{f.stuck ? ' - waiting too long' : ''}
-            </span>
-          </div>
-          <div className="text-xs text-zinc-500">
-            Placed {new Date(f.created_at).toLocaleString()} - paid via {f.payment_method || 'n/a'} - {f.payment_received ? 'payment received' : 'payment not yet received'}
-          </div>
-          <ul className="text-sm text-zinc-800 dark:text-zinc-200 list-disc pl-5">
-            {f.lines.map((l) => <li key={l.id}>{l.product_name}{l.variant_label && l.variant_label !== 'Default' ? ` (${l.variant_label})` : ''} x{l.quantity}</li>)}
-          </ul>
-          {f.ship_to && (
-            <div className="text-sm text-zinc-600 dark:text-zinc-400">
-              Ship to: {f.ship_to.name}, {f.ship_to.phone}{f.ship_to.address ? `, ${f.ship_to.address}` : ' (address to be confirmed on WhatsApp)'}{f.ship_to.county ? `, ${f.ship_to.county}` : ''}
-            </div>
-          )}
-          <div className="flex flex-wrap items-center gap-2">
-            {f.status === 'pending' && <span className="text-xs text-zinc-500">Waiting for payment confirmation. You can&apos;t move this yet.</span>}
-            {f.next_actions.includes('packing') && <button className={BTN} disabled={busy === f.id} onClick={() => run(f.id, () => distributorApi.advanceFulfilment(f.id, 'packing'))}>Start processing</button>}
-            {f.next_actions.includes('packed') && <button className={BTN} disabled={busy === f.id} onClick={() => run(f.id, () => distributorApi.advanceFulfilment(f.id, 'packed'))}>Ready for dispatch</button>}
-            {f.next_actions.includes('dispatch') && (
-              <>
-                <input aria-label="Carrier" placeholder="Carrier / rider" value={carrier[f.id] || ''} onChange={(e) => setCarrier({ ...carrier, [f.id]: e.target.value })} className="border rounded px-2 py-1 text-xs dark:bg-zinc-800" />
-                <input aria-label="Waybill" placeholder="Waybill no. (optional)" value={ref[f.id] || ''} onChange={(e) => setRef({ ...ref, [f.id]: e.target.value })} className="border rounded px-2 py-1 text-xs dark:bg-zinc-800" />
-                <button className={BTN} disabled={busy === f.id || !(carrier[f.id] || '').trim()} onClick={() => run(f.id, () => distributorApi.dispatchFulfilment(f.id, { carrier: carrier[f.id], tracking_number: ref[f.id] || '' }))}>Dispatch</button>
-              </>
-            )}
-            {f.next_actions.includes('mark_delivered') && <button className={BTN} disabled={busy === f.id} onClick={() => run(f.id, () => distributorApi.deliverFulfilment(f.id))}>Mark delivered</button>}
-            {f.next_actions.includes('mark_failed') && (
-              <button className={BTN} disabled={busy === f.id} onClick={() => {
-                const reason = window.prompt('Why did the delivery fail?');
-                if (reason && reason.trim()) run(f.id, () => distributorApi.failFulfilment(f.id, reason.trim()));
-              }}>Delivery failed</button>
-            )}
-          </div>
-        </div>
-      ))}
+
+      {error && <div role="alert" className="text-sm font-semibold text-[#9B1C1C]">{error}</div>}
+      {total > rows.length && <p className="m-0 text-[13px] text-[#5B6683]">Showing the latest {rows.length} of {total} fulfilments.</p>}
+
+      <section className="flex flex-col gap-3 !py-0">
+        {loading ? <div className="text-[#5B6683]">Loading…</div> : shown.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-[#CDD3E1] bg-white p-8 text-center text-[15px] text-[#5B6683]">Nothing in this stage right now.</div>
+        ) : shown.map((f) => {
+          const st = stageOf(f.status);
+          const w = whoWhere(f);
+          return (
+            <article key={f.id} className="flex flex-wrap items-center gap-x-6 gap-y-4 rounded-2xl border border-[#E6E9F1] bg-white px-5 py-[18px]">
+              <div className="flex min-w-[200px] flex-[1_1_200px] flex-col gap-1">
+                <span className="flex flex-wrap items-center gap-2.5">
+                  <span className="text-base font-bold">{f.tracking_ref || `#${f.id}`}</span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-[3px] text-xs font-bold" style={{ background: st.chipBg, color: st.chipFg }}>
+                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: st.chipFg }} />{st.label}{f.stuck ? ' · waiting too long' : ''}
+                  </span>
+                </span>
+                <span className="text-[13px] text-[#5B6683]">{whenText(f.created_at)} · {f.payment_received ? `Paid via ${methodText(f.payment_method)}` : 'Payment not yet received'}</span>
+              </div>
+              <div className="flex min-w-[180px] flex-[1_1_180px] flex-col gap-0.5">
+                <span className="text-sm font-semibold">{w.customer}</span>
+                <span className="text-[13px] text-[#5B6683]">{w.deliverLine}</span>
+              </div>
+              <div className="flex min-w-[160px] flex-[1_1_160px] flex-col gap-0.5">
+                <span className="text-sm text-[#3D4865]">{itemsText(f)}</span>
+                <span className="text-[13px] text-[#5B6683]">{f.lines.map((l) => l.product_name).slice(0, 2).join(', ')}{f.lines.length > 2 ? '…' : ''}</span>
+              </div>
+              <div className="flex flex-[1_1_220px] flex-wrap items-center justify-end gap-2">
+                <PackingList id={f.id} className={GHOST} />
+                <FulfilmentActions f={f} onChanged={load} onError={setError} />
+              </div>
+            </article>
+          );
+        })}
+      </section>
+
+      <p className="m-0 text-[13px] text-[#5B6683]">Orders waiting for payment stay locked until Learning Pack confirms the M-Pesa payment. Dispatch asks for the carrier and an optional waybill number; the parent sees each step on the tracking page.</p>
     </div>
   );
 }

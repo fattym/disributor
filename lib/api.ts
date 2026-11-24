@@ -108,12 +108,13 @@ export const distributorApi = {
   getOrders: () => api.get('/distributor/orders/').then((r) => r.data),
   updateOrderStatus: (id: string, status: string) => api.patch(`/distributor/orders/${id}/`, { status }).then((r) => r.data),
 
-  getFulfilments: (status?: string) =>
-    api.get('/distributor/fulfilments/', { params: status ? { status } : {} }).then((r) => r.data),
+  getFulfilments: (status?: string, pageSize?: number) =>
+    api.get('/distributor/fulfilments/', { params: { ...(status ? { status } : {}), ...(pageSize ? { page_size: pageSize } : {}) } }).then((r) => r.data),
   advanceFulfilment: (id: number, to: string) =>
     api.post(`/distributor/fulfilments/${id}/advance/`, { to }).then((r) => r.data),
   dispatchFulfilment: (id: number, data: { carrier: string; tracking_number?: string }) =>
     api.post(`/distributor/fulfilments/${id}/dispatch/`, data).then((r) => r.data),
+  getPackingList: (id: number) => api.get(`/distributor/fulfilments/${id}/packing-list/`).then((r) => r.data),
   deliverFulfilment: (id: number) => api.post(`/distributor/fulfilments/${id}/mark_delivered/`, {}).then((r) => r.data),
   failFulfilment: (id: number, reason: string) =>
     api.post(`/distributor/fulfilments/${id}/mark_failed/`, { reason }).then((r) => r.data),

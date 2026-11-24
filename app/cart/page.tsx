@@ -2,8 +2,6 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
-import GlobalHeader from '@/components/GlobalHeader';
-import GlobalFooter from '@/components/GlobalFooter';
 import { shopApi, type WhatsAppCheckoutResult } from '@/lib/api';
 import { storefrontApi } from '@/lib/storefrontApi';
 import { useCart } from '@/lib/cart';
@@ -35,26 +33,40 @@ function readError(error: unknown): { message: string; fields: Record<string, st
 function PaymentMethods() {
   return (
     <section className="lp-co__card" aria-label="Payment method">
-      <h2>Payment method</h2>
-      <div className="lp-co__choice">
-        <button type="button" className="lp-co__pay on" aria-pressed="true">
-          <b>WhatsApp checkout</b>
-          <small>We record your order, then you send it to us on WhatsApp to confirm payment and delivery.</small>
-        </button>
-        <button type="button" className="lp-co__pay" disabled aria-disabled="true">
-          <b>M-Pesa <span className="lp-co__soon">Coming soon</span></b>
-          <small>Pay on the site with an M-Pesa prompt.</small>
-        </button>
-      </div>
+      <h2>How you&apos;ll pay</h2>
+      <label className="lp-co__pay on">
+        <input type="radio" name="pay" defaultChecked />
+        <span>
+          <b>Order on WhatsApp, pay by M-Pesa</b>
+          <small>We save your order and open WhatsApp with the details. Our team replies with the M-Pesa payment details and confirms delivery.</small>
+        </span>
+      </label>
+      <button type="button" className="lp-co__pay off" disabled aria-disabled="true">
+        <b>M-Pesa on this page</b>
+        <span className="lp-co__soon">Coming soon</span>
+      </button>
     </section>
   );
+}
+
+const WA_ICON = 'M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z';
+
+/** Group lines by who sells and packs them, keeping the order they were added in. */
+function groupBySeller<T extends { seller_name?: string | null }>(lines: T[]): { seller: string; lines: T[] }[] {
+  const groups: { seller: string; lines: T[] }[] = [];
+  for (const line of lines) {
+    const seller = line.seller_name || 'Learning Pack';
+    const g = groups.find((x) => x.seller === seller);
+    if (g) g.lines.push(line); else groups.push({ seller, lines: [line] });
+  }
+  return groups;
 }
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, clearCart } = useCart();
   const [schools, setSchools] = useState<{ id: number; name: string }[]>([]);
   const [form, setForm] = useState({
-    delivery_name: '', delivery_phone: '', delivery_address: '', delivery_county: '', delivery_notes: '', parent_school: '',
+    delivery_name: '', delivery_phone: '', delivery_notes: '', parent_school: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -66,6 +78,7 @@ export default function CartPage() {
   }, []);
 
   const total = items.reduce((sum, i) => sum + i.unit_price * i.quantity, 0);
+  const count = items.reduce((n, i) => n + i.quantity, 0);
   const set = (key: keyof typeof form) => (value: string) => setForm((f) => ({ ...f, [key]: value }));
 
   const submit = async (event: FormEvent) => {
@@ -81,8 +94,8 @@ export default function CartPage() {
       const result = await shopApi.whatsappCheckout({
         delivery_name: form.delivery_name.trim(),
         delivery_phone: form.delivery_phone.trim(),
-        delivery_address: form.delivery_address.trim(),
-        delivery_county: form.delivery_county.trim(),
+        delivery_address: '',
+        delivery_county: '',
         delivery_notes: form.delivery_notes.trim(),
         parent_school: form.parent_school ? Number(form.parent_school) : null,
         items: items.map((i) => (i.variant_id > 0
@@ -102,115 +115,151 @@ export default function CartPage() {
     }
   };
 
+  const placeButton = (
+    <button className="lp-co__btn lp-co__btn--go" type="submit" disabled={loading}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={WA_ICON} /></svg>
+      {loading ? 'Saving your order…' : 'Place order on WhatsApp'}
+    </button>
+  );
+
   let body;
   if (done) {
     body = (
       <div className="lp-co__done" role="status">
-        <div className="lp-co__ok" aria-hidden="true">✓</div>
-        <h2>Order recorded</h2>
-        <dl className="lp-co__dl">
-          <div><dt>Order number</dt><dd>{done.tracking_ref}</dd></div>
-          <div><dt>Total</dt><dd>{kes(done.total)}</dd></div>
-          <div><dt>Status</dt><dd>Pending (awaiting payment)</dd></div>
-        </dl>
-        <p className="lp-co__hint">
-          Your order is saved, but it is not confirmed until you message us. Tap the button to open WhatsApp and send it.
-          We confirm payment and delivery details there. Keep your order number and phone to track it.
-        </p>
-        <a className="lp-co__btn lp-co__btn--wa" href={done.whatsapp_url} target="_blank" rel="noopener noreferrer">Open WhatsApp</a>
-        <Link className="lp-co__btn lp-co__btn--ghost" href="/track-your-order">Track this order</Link>
+        <div className="lp-co__ok" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5L20 7" /></svg>
+        </div>
+        <h1>Order saved. Now press send on WhatsApp.</h1>
+        <p className="lp-co__lead">WhatsApp should have opened with your order. <strong>Press send</strong> so our team can reply with the M-Pesa payment details.</p>
+        <div className="lp-co__track">
+          <span>Your tracking number</span>
+          <b>{done.tracking_ref}</b>
+          <span>Keep it with your phone number to follow your order.</span>
+        </div>
+        <div className="lp-co__acts">
+          <a className="lp-co__btn lp-co__btn--go" href={done.whatsapp_url} target="_blank" rel="noopener noreferrer">Open WhatsApp again</a>
+          <Link className="lp-co__btn lp-co__btn--ghost" href="/track-your-order">Track this order</Link>
+        </div>
       </div>
     );
   } else if (items.length === 0) {
     body = (
       <div className="lp-co__empty">
-        <h2>Your cart is empty</h2>
+        <h1>Your trolley is empty</h1>
         <p className="lp-co__hint">Add something from the shop to check out.</p>
-        <Link className="lp-co__btn" href="/shop">Browse the shop</Link>
+        <Link className="lp-co__btn lp-co__btn--go" href="/shop">Browse the shop</Link>
       </div>
     );
   } else {
     body = (
       <form className="lp-co__grid" onSubmit={submit} noValidate>
         <div className="lp-co__main">
+          <h1 className="lp-co__h1">Your trolley <small>{count} {count === 1 ? 'item' : 'items'}</small></h1>
+
+          {groupBySeller(items).map((g) => (
+            <section key={g.seller} className="lp-co__card lp-co__group" aria-label={`Sold and packed by ${g.seller}`}>
+              <div className="lp-co__seller">
+                <span>Sold and packed by <strong>{g.seller}</strong></span>
+                <span className="lp-co__n">{g.lines.length} {g.lines.length === 1 ? 'item' : 'items'}</span>
+              </div>
+              <ul className="lp-co__lines">
+                {g.lines.map((i) => {
+                  const backorder = i.stock_quantity <= 0 || i.quantity > i.stock_quantity;
+                  return (
+                    <li key={i.variant_id} className="lp-co__line">
+                      <span className="lp-co__thumb" style={i.image_url ? { backgroundImage: `url(${i.image_url})` } : undefined} aria-hidden="true">
+                        {!i.image_url && (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5" /></svg>
+                        )}
+                      </span>
+                      <span className="lp-co__name">
+                        <b>{i.product_name}</b>
+                        <small>{i.variant_label && i.variant_label !== 'Default' ? `${i.variant_label} · ` : ''}{kes(i.unit_price)} each</small>
+                        <span className={'lp-co__stock' + (backorder ? ' back' : '')}>{backorder ? 'Ships in 3–5 days' : 'In stock'}</span>
+                      </span>
+                      <span className="lp-co__qty">
+                        <button type="button" aria-label={`One fewer ${i.product_name}`} onClick={() => updateQuantity(i.variant_id, i.quantity - 1)}>−</button>
+                        <span aria-live="polite">{i.quantity}</span>
+                        <button type="button" aria-label={`One more ${i.product_name}`} onClick={() => updateQuantity(i.variant_id, i.quantity + 1)}>+</button>
+                      </span>
+                      <span className="lp-co__tot">
+                        <b>{kes(i.unit_price * i.quantity)}</b>
+                        <button type="button" className="lp-co__rm" onClick={() => removeItem(i.variant_id)}>Remove<span className="lp-co__sr"> {i.product_name}</span></button>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+
           <section className="lp-co__card">
             <h2>Your details</h2>
-            <p className="lp-co__hint">No account needed. Name and phone are enough: we confirm delivery details with you on WhatsApp.</p>
+            <p className="lp-co__hint">No account needed. We only use these to reach you about this order.</p>
             <div className="lp-co__two">
-              <label className={'lp-co__fld' + (fieldErrors.delivery_name ? ' bad' : '')}>Full name
+              <label className={'lp-co__fld' + (fieldErrors.delivery_name ? ' bad' : '')}>Your name
                 <input value={form.delivery_name} onChange={(e) => set('delivery_name')(e.target.value)} autoComplete="name" required />
                 {fieldErrors.delivery_name && <em>{fieldErrors.delivery_name}</em>}
               </label>
-              <label className={'lp-co__fld' + (fieldErrors.delivery_phone ? ' bad' : '')}>Phone number
+              <label className={'lp-co__fld' + (fieldErrors.delivery_phone ? ' bad' : '')}>Phone number (M-Pesa / WhatsApp)
                 <input type="tel" inputMode="tel" placeholder="07XX XXX XXX" value={form.delivery_phone}
                   onChange={(e) => set('delivery_phone')(e.target.value)} autoComplete="tel" required />
                 {fieldErrors.delivery_phone && <em>{fieldErrors.delivery_phone}</em>}
               </label>
-            </div>
-            <label className="lp-co__fld">School <span className="lp-co__opt">(optional)</span>
-              <select value={form.parent_school} onChange={(e) => set('parent_school')(e.target.value)}>
-                <option value="">Not sure / not for a school</option>
-                {schools.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-              {fieldErrors.parent_school && <em>{fieldErrors.parent_school}</em>}
-            </label>
-            <div className="lp-co__two">
-              <label className="lp-co__fld">Delivery address <span className="lp-co__opt">(optional)</span>
-                <input value={form.delivery_address} onChange={(e) => set('delivery_address')(e.target.value)} autoComplete="street-address" />
+              <label className="lp-co__fld">Your child&apos;s school <span className="lp-co__opt">(optional, we deliver to the school)</span>
+                <select value={form.parent_school} onChange={(e) => set('parent_school')(e.target.value)}>
+                  <option value="">Choose a school…</option>
+                  {schools.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+                {fieldErrors.parent_school && <em>{fieldErrors.parent_school}</em>}
               </label>
-              <label className="lp-co__fld">County <span className="lp-co__opt">(optional)</span>
-                <input value={form.delivery_county} onChange={(e) => set('delivery_county')(e.target.value)} />
+              <label className="lp-co__fld">Delivery note <span className="lp-co__opt">(optional)</span>
+                <input placeholder="e.g. Grade 4 East, or a home address" value={form.delivery_notes} onChange={(e) => set('delivery_notes')(e.target.value)} />
               </label>
             </div>
-            <label className="lp-co__fld">Notes <span className="lp-co__opt">(optional)</span>
-              <textarea value={form.delivery_notes} onChange={(e) => set('delivery_notes')(e.target.value)} />
-            </label>
           </section>
+
           <PaymentMethods />
+          <p className="lp-co__trust-m">Your order gets a tracking number before WhatsApp opens, and we hold your items for 48 hours while you pay.</p>
         </div>
 
         <aside className="lp-co__card lp-co__sum" aria-label="Order summary">
-          <h2>Your cart</h2>
-          <ul className="lp-co__lines">
-            {items.map((i) => (
-              <li key={i.variant_id} className="lp-co__line">
-                <span className="lp-co__thumb" style={i.image_url ? { backgroundImage: `url(${i.image_url})` } : undefined} aria-hidden="true" />
-                <span className="lp-co__name">{i.product_name}
-                  <small>{i.variant_label && i.variant_label !== 'Default' ? `${i.variant_label} · ` : ''}{kes(i.unit_price)}</small>
-                </span>
-                <span className="lp-co__qty">
-                  <button type="button" aria-label="Fewer" onClick={() => updateQuantity(i.variant_id, i.quantity - 1)}>−</button>
-                  <span>{i.quantity}</span>
-                  <button type="button" aria-label="More" onClick={() => updateQuantity(i.variant_id, i.quantity + 1)}>+</button>
-                </span>
-                <button type="button" className="lp-co__rm" onClick={() => removeItem(i.variant_id)}>Remove</button>
-              </li>
-            ))}
-          </ul>
+          <h2>Order summary</h2>
+          <div className="lp-co__row"><span>Items ({count})</span><span>{kes(total)}</span></div>
+          <div className="lp-co__row"><span>Delivery</span><span>Confirmed on WhatsApp</span></div>
+          <hr />
           <div className="lp-co__row big"><span>Total</span><b>{kes(total)}</b></div>
-          <p className="lp-co__hint">Delivery cost is confirmed in the WhatsApp chat.</p>
           {error && <p className="lp-co__err" role="alert">{error}</p>}
-          <button className="lp-co__btn lp-co__btn--wa" type="submit" disabled={loading}>
-            {loading ? 'Saving your order…' : 'Place order and open WhatsApp'}
-          </button>
+          {placeButton}
+          <ul className="lp-co__trust">
+            <li><span aria-hidden="true">✓</span><p>Your order is saved with a tracking number before WhatsApp opens.</p></li>
+            <li><span aria-hidden="true">✓</span><p>We hold your items for 48 hours while you pay.</p></li>
+            <li><span aria-hidden="true">✓</span><p>Questions? WhatsApp or call <a href="tel:0716815025">0716 815 025</a>.</p></li>
+          </ul>
         </aside>
+
+        <div className="lp-co__bar">
+          <div className="lp-co__row"><span>Total · delivery confirmed on WhatsApp</span><b>{kes(total)}</b></div>
+          {error && <p className="lp-co__err" role="alert">{error}</p>}
+          {placeButton}
+        </div>
       </form>
     );
   }
 
   return (
-    <>
-      <GlobalHeader />
-      <main id="main" className="lp-co">
-        <div className="lp-co__top">
-          <div className="lp-co__top-in">
-            <h1>Checkout</h1>
-            <Link className="lp-co__back" href="/shop">← Keep shopping</Link>
-          </div>
+    <main id="main" className="lp-co">
+      <header className="lp-co__top">
+        <div className="lp-co__top-in">
+          <Link className="lp-co__logo" href="/" aria-label="Learning Pack home"><span aria-hidden="true">LP</span>Learning Pack</Link>
+          <nav className="lp-co__steps" aria-label="Checkout steps">
+            <b>1 Trolley</b><span aria-hidden="true">›</span><b>2 Your details</b><span aria-hidden="true">›</span>
+            <span className={done ? 'on' : ''}>3 Confirm on WhatsApp</span>
+          </nav>
+          <Link className="lp-co__more" href="/shop">Continue shopping</Link>
         </div>
-        {body}
-      </main>
-      <GlobalFooter />
-    </>
+      </header>
+      {body}
+    </main>
   );
 }

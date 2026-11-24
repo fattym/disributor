@@ -71,6 +71,7 @@ export interface CartLine {
   unit_price?: number;
   image_url?: string | null;
   stock_quantity?: number;
+  seller_name?: string | null;
 }
 
 export const useSupermarketStore = create<SupermarketState>()(

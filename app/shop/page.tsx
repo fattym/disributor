@@ -374,6 +374,7 @@ function ShopContent() {
         unit_price: parseFloat(variant.effective_price || product.effective_price || product.price || "0"),
         image_url: product.image_url || null,
         stock_quantity: variant.stock_quantity,
+        seller_name: product.distributor_name || null,
       });
     } else {
       return; // no variant: unavailable, never put a broken line in the cart

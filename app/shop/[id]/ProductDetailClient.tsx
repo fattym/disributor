@@ -97,6 +97,7 @@ import { useAuth } from '@/lib/auth';
         unit_price: parseFloat(selectedVariant.effective_price),
         image_url: product.image_url,
         stock_quantity: selectedVariant.stock_quantity,
+        seller_name: product.distributor_name || null,
       });
     }
     setAdded(true);
