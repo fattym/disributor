@@ -1,77 +1,39 @@
 "use client";
 
-import { FormEvent, Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { FormEvent, Suspense, useState } from "react";
 import Link from "next/link";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
-import { shopApi } from "@/lib/api";
-import { useAuth } from "@/lib/auth";
+import { shopApi, type TrackedOrder } from "@/lib/api";
 import "./track-order.css";
 
-type OrderResult = {
-  id?: string | number;
-  status?: string;
-  created_at?: string;
-  total_amount?: string;
-  delivery_address?: string;
-};
-
+// Tracking needs the order number AND the phone it was placed with: numbers are sequential, so a number alone shows nothing.
 function TrackYourOrderContent() {
-  const { user } = useAuth();
-  const searchParams = useSearchParams();
-  const trackingParam = searchParams.get("tracking");
-  const [order, setOrder] = useState<OrderResult | null>(null);
+  const [order, setOrder] = useState<TrackedOrder | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [orderNumber, setOrderNumber] = useState(trackingParam || "");
 
-  const trackOrder = async (number: string) => {
-    setLoading(true);
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const ref = String(form.get("trackingRef") || "").trim();
+    const phone = String(form.get("phone") || "").trim();
     setError("");
     setOrder(null);
+    if (!ref || !phone) {
+      setError("Enter your order number and the phone number you ordered with.");
+      return;
+    }
+    setLoading(true);
     try {
-      if (user) {
-        const result = await shopApi.getOrder(number);
-        setOrder(result as OrderResult);
-      } else {
-        setOrder({ id: number, status: "submitted" });
-        setSubmitted(true);
-      }
-    } catch {
-      setOrder({ id: number, status: "not_found" });
+      setOrder(await shopApi.trackOrder(ref, phone));
+    } catch (e) {
+      const res = (e as { response?: { status?: number; data?: { detail?: string } } }).response;
+      setError(res?.data?.detail || "We could not look up your order. Please try again.");
     } finally {
       setLoading(false);
     }
   };
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setError("");
-    setOrder(null);
-    setSubmitted(false);
-    const form = new FormData(event.currentTarget);
-    const formData = {
-      orderNumber: String(form.get("orderNumber")),
-      contactName: String(form.get("contactName") || ""),
-      email: String(form.get("email") || ""),
-      phone: String(form.get("phone") || ""),
-    };
-    setOrderNumber(formData.orderNumber);
-    try {
-      await shopApi.submitForm({ form_type: "track_order", data: formData });
-      await trackOrder(formData.orderNumber);
-    } catch (err) {
-      setError("We could not submit your request. Please try again.");
-    }
-  };
-
-  useEffect(() => {
-    if (trackingParam && !order && !submitted) {
-      trackOrder(trackingParam);
-    }
-  }, [trackingParam, order, submitted]);
 
   return (
     <>
@@ -84,38 +46,16 @@ function TrackYourOrderContent() {
             </p>
             <p className="track-kicker">Order updates</p>
             <h1>Track your order</h1>
-            <p>
-              Enter your order number to check its latest status and delivery
-              details.
-            </p>
+            <p>Enter your order number (like LP-2026-000123) and the phone number you ordered with.</p>
           </div>
 
           <div className="track-card">
             <form onSubmit={handleSubmit}>
-              <label htmlFor="orderNumber">Order number</label>
-              <input
-                id="orderNumber"
-                name="orderNumber"
-                type="text"
-                placeholder="e.g. 1042"
-                defaultValue={orderNumber}
-                required
-              />
+              <label htmlFor="trackingRef">Order number</label>
+              <input id="trackingRef" name="trackingRef" type="text" placeholder="LP-2026-000123" autoCapitalize="characters" required />
 
-              <label htmlFor="contactName">
-                Your name <span>(optional)</span>
-              </label>
-              <input id="contactName" name="contactName" type="text" />
-
-              <label htmlFor="email">
-                Email address <span>(optional)</span>
-              </label>
-              <input id="email" name="email" type="email" />
-
-              <label htmlFor="phone">
-                Phone number <span>(optional)</span>
-              </label>
-              <input id="phone" name="phone" type="tel" />
+              <label htmlFor="phone">Phone number</label>
+              <input id="phone" name="phone" type="tel" inputMode="tel" placeholder="07XX XXX XXX" autoComplete="tel" required />
 
               <button className="btn" type="submit" disabled={loading}>
                 {loading ? "Checking..." : "Track order"}
@@ -129,32 +69,41 @@ function TrackYourOrderContent() {
             )}
             {order && (
               <div className="track-result" role="status">
-                <h2>Order #{order.id}</h2>
-                {order.status === 'submitted' && (
-                  <p className="track-status">
-                    Your request has been submitted. We'll email you updates
-                    once we find your order (order #{orderNumber}).
-                  </p>
-                )}
-                {order.status !== 'submitted' && order.status !== 'not_found' && (
-                  <>
-                    <p className="track-status">{order.status || "Status unavailable"}</p>
-                    {order.created_at && (
+                <h2>{order.tracking_ref}</h2>
+                <p className="track-status">{order.status}</p>
+                <p>
+                  Placed {new Date(order.placed_at).toLocaleDateString("en-KE")} · KSh {Number(order.total_amount).toLocaleString("en-KE")}
+                  {order.payment.method ? ` · ${order.payment.method}${order.payment.received ? " (payment received)" : " (payment not yet confirmed)"}` : ""}
+                </p>
+                {order.fulfilments.map((f) => (
+                  <div key={f.tracking_ref || f.seller} className="track-part">
+                    <h3>
+                      {f.seller}
+                      {f.tracking_ref ? ` · ${f.tracking_ref}` : ""}
+                    </h3>
+                    <p className="track-status">{f.status}</p>
+                    <ul>
+                      {f.lines.map((l, i) => (
+                        <li key={i}>
+                          {l.name} × {l.quantity}
+                        </li>
+                      ))}
+                    </ul>
+                    {f.carrier && (
                       <p>
-                        Placed{" "}
-                        {new Date(order.created_at).toLocaleDateString("en-KE")}
+                        Carrier: {f.carrier}
+                        {f.carrier_reference ? ` · reference ${f.carrier_reference}` : ""}
                       </p>
                     )}
-                    {order.delivery_address && (
-                      <p>Delivering to {order.delivery_address}</p>
-                    )}
-                  </>
-                )}
-                {order.status === 'not_found' && (
-                  <p className="track-error">
-                    We could not find that order. Check the number and try again.
-                  </p>
-                )}
+                    <ol className="track-history">
+                      {f.history.map((h, i) => (
+                        <li key={i}>
+                          {h.status} · {new Date(h.at).toLocaleString("en-KE")}
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -165,7 +114,6 @@ function TrackYourOrderContent() {
   );
 }
 
-// useSearchParams needs a Suspense boundary for static prerendering.
 export default function TrackYourOrderPage() {
   return (
     <Suspense fallback={null}>

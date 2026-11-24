@@ -329,6 +329,20 @@ export const shopApi = {
   getPaymentStatus: (orderId: number | string) =>
     api.get<PaymentStatus>(`/shop/orders/${orderId}/payment-status/`).then((r) => r.data),
 
+  /** WhatsApp checkout: the order is recorded first; the response carries the wa.me link. */
+  whatsappCheckout: (data: {
+    delivery_name: string;
+    delivery_phone: string;
+    delivery_address?: string;
+    delivery_county?: string;
+    delivery_notes?: string;
+    parent_school?: number | null;
+    items: Array<{ variant?: number; product?: number; quantity: number }>;
+  }) => api.post<WhatsAppCheckoutResult>('/shop/guest-orders/whatsapp/', data).then((r) => r.data),
+  /** Public tracking: needs the tracking number AND the phone the order was placed with. */
+  trackOrder: (tracking_ref: string, phone: string) =>
+    api.post<TrackedOrder>('/shop/track/', { tracking_ref, phone }).then((r) => r.data),
+
   createGuestOrder: (data: {
     delivery_name: string;
     delivery_phone: string;
@@ -371,3 +385,32 @@ export const shopApi = {
     return api.post(`/shop/orders/${id}/dispute/`, { reason }).then((r) => r.data);
   },
 };
+
+
+export interface WhatsAppCheckoutResult {
+  public_token: string;
+  tracking_ref: string;
+  status: string;
+  total_amount: string;
+  whatsapp_url: string;
+}
+
+export interface TrackedFulfilment {
+  tracking_ref: string | null;
+  seller: string;
+  status: string;
+  carrier: string;
+  carrier_reference: string;
+  lines: Array<{ name: string; quantity: number }>;
+  history: Array<{ status: string; at: string }>;
+}
+
+export interface TrackedOrder {
+  tracking_ref: string;
+  status: string;
+  placed_at: string;
+  total_amount: string;
+  payment: { method: string; received: boolean };
+  items: Array<{ name: string; quantity: number }>;
+  fulfilments: TrackedFulfilment[];
+}

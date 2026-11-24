@@ -20,13 +20,29 @@ test('no order button opens an unrecorded WhatsApp chat', () => {
   assert.ok(read('app/shop/page.tsx').includes('router.push("/cart")'));
 });
 
-test('M-Pesa is shown as Coming soon and cannot be started from the cart page', () => {
+test('M-Pesa is shown as Coming soon and cannot be chosen; WhatsApp checkout records the order first', () => {
   const cart = read('app/cart/page.tsx');
   assert.ok(cart.includes('Coming soon'));
   const m = cart.match(/function PaymentMethods[\s\S]*?\n}\n/);
   assert.ok(m, 'PaymentMethods component');
   assert.ok(!m[0].includes('onClick'));
-  assert.equal((m[0].match(/disabled/g) || []).length >= 2, true);
+  assert.match(m[0], /<button[^>]*disabled[^>]*>\s*<b>M-Pesa/);
+  // the WhatsApp link only exists in the API response, after the order is saved; the cart opens it after the await
+  assert.ok(!/wa\.me/.test(cart));
+  assert.ok(cart.indexOf('await shopApi.whatsappCheckout') < cart.indexOf('window.open(result.whatsapp_url'));
+  assert.ok(cart.indexOf('setDone(') < cart.indexOf('window.open(result.whatsapp_url'));
+});
+
+test('guests check out with name and phone only', () => {
+  const cart = read('app/cart/page.tsx');
+  assert.ok(cart.includes('Enter your name.') && cart.includes('Enter your phone number.'));
+  assert.ok(!/login|useAuth/.test(cart));
+});
+
+test('tracking asks for the number and the phone and no longer pretends to submit a request', () => {
+  const page = read('app/track-your-order/page.tsx');
+  assert.ok(page.includes('trackOrder(ref, phone)'));
+  assert.ok(!page.includes('submitForm') && !page.includes('"submitted"'));
 });
 
 test('cart lines keep a display snapshot so the cart renders without the product store', () => {

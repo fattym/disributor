@@ -139,3 +139,8 @@
     margin-bottom: 1.5rem;
   }
 }
+
+.track-part { margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(128, 128, 128, 0.3); }
+.track-part h3 { font-size: 1rem; margin: 0 0 4px; }
+.track-part ul, .track-history { margin: 6px 0 0; padding-left: 18px; }
+.track-history { font-size: 0.85rem; opacity: 0.85; }

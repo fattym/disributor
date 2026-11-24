@@ -1,501 +1,216 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import axios from 'axios';
 import GlobalHeader from '@/components/GlobalHeader';
 import GlobalFooter from '@/components/GlobalFooter';
-import { shopApi, ShopProduct } from '@/lib/api';
+import { shopApi, type WhatsAppCheckoutResult } from '@/lib/api';
+import { storefrontApi } from '@/lib/storefrontApi';
 import { useCart } from '@/lib/cart';
-import { useAuth } from '@/lib/auth';
+import './cart.css';
 
-interface LearnerUser {
-  id: number;
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-}
+const kes = (n: number) => `KSh ${n.toLocaleString('en-KE')}`;
 
-interface Learner {
-  id: number;
-  // The API nests the learner's user record; older payloads carried just the id.
-  learner: number | LearnerUser;
-  relationship: string;
-}
-
-const learnerId = (l: Learner) => (typeof l.learner === 'object' ? l.learner.id : l.learner);
-const learnerLabel = (l: Learner) => {
-  const u = typeof l.learner === 'object' ? l.learner : null;
-  const name = u ? `${u.first_name ?? ''} ${u.last_name ?? ''}`.trim() || u.email || `#${u.id}` : `#${l.learner}`;
-  return `${name} (${l.relationship})`;
-};
-
-function errorDetail(error: unknown, fallback: string): string {
-  if (axios.isAxiosError(error) && error.response?.data?.detail) {
-    return String(error.response.data.detail);
+/** Turn a DRF error body into one readable sentence plus per-field messages. */
+function readError(error: unknown): { message: string; fields: Record<string, string> } {
+  const data = (error as { response?: { data?: unknown } })?.response?.data;
+  const fields: Record<string, string> = {};
+  let message = 'We could not place your order. Please try again.';
+  if (data && typeof data === 'object') {
+    const body = data as Record<string, unknown>;
+    if (typeof body.detail === 'string') message = body.detail;
+    for (const [key, value] of Object.entries(body)) {
+      if (key === 'detail') continue;
+      const text = Array.isArray(value) ? value.map(String).join(' ') : typeof value === 'string' ? value : '';
+      if (text) {
+        if (key === 'items') message = text;
+        else fields[key] = text;
+      }
+    }
   }
-  if (error instanceof Error) return error.message;
-  return fallback;
+  return { message, fields };
 }
 
-// Payment methods. M-Pesa (Daraja) is not live in production, so it is shown but never offered.
-// WhatsApp checkout records the order first; it is connected in the next step of the plan.
-function PaymentMethods({ total }: { total: number }) {
+// Payment methods. M-Pesa (Daraja) is not live in production, so it is shown but cannot be chosen.
+function PaymentMethods() {
   return (
-    <div className="space-y-2 pt-2" aria-label="Payment method">
-      <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Payment method (KSh {total.toLocaleString()})</p>
-      <button type="button" disabled className="w-full flex items-center justify-between px-5 py-3 rounded-md border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 cursor-not-allowed">
-        <span>WhatsApp checkout</span>
-        <span className="text-xs font-semibold uppercase tracking-wide">Being connected</span>
-      </button>
-      <button type="button" disabled aria-disabled="true" className="w-full flex items-center justify-between px-5 py-3 rounded-md border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 cursor-not-allowed">
-        <span>M-Pesa</span>
-        <span className="text-xs font-semibold uppercase tracking-wide">Coming soon</span>
-      </button>
-    </div>
+    <section className="lp-co__card" aria-label="Payment method">
+      <h2>Payment method</h2>
+      <div className="lp-co__choice">
+        <button type="button" className="lp-co__pay on" aria-pressed="true">
+          <b>WhatsApp checkout</b>
+          <small>We record your order, then you send it to us on WhatsApp to confirm payment and delivery.</small>
+        </button>
+        <button type="button" className="lp-co__pay" disabled aria-disabled="true">
+          <b>M-Pesa <span className="lp-co__soon">Coming soon</span></b>
+          <small>Pay on the site with an M-Pesa prompt.</small>
+        </button>
+      </div>
+    </section>
   );
 }
 
 export default function CartPage() {
-  const { user, loading: authLoading } = useAuth();
-  const { items, removeItem, updateQuantity, getTotal, clearCart } = useCart();
-  const router = useRouter();
-  const [learners, setLearners] = useState<Learner[]>([]);
-  const [selectedLearner, setSelectedLearner] = useState<number | ''>('');
-  const phoneRef = useRef<HTMLInputElement>(null);
-  const [step, setStep] = useState<'cart' | 'delivery' | 'checkout' | 'payment' | 'success'>('cart');
-  const [order, setOrder] = useState<{ id: number; total_amount: string; status: string; public_token?: string } | null>(null);
-  const [pollCount, setPollCount] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  const [guestMode, setGuestMode] = useState(false);
-  const [delivery, setDelivery] = useState({
-    delivery_name: '',
-    delivery_phone: '',
-    delivery_address: '',
-    delivery_county: '',
-    delivery_notes: '',
+  const { items, removeItem, updateQuantity, clearCart } = useCart();
+  const [schools, setSchools] = useState<{ id: number; name: string }[]>([]);
+  const [form, setForm] = useState({
+    delivery_name: '', delivery_phone: '', delivery_address: '', delivery_county: '', delivery_notes: '', parent_school: '',
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [done, setDone] = useState<(WhatsAppCheckoutResult & { total: number }) | null>(null);
 
   useEffect(() => {
-    if (!user) return;
-    shopApi.getLearners().then((data) => {
-      const list = Array.isArray(data) ? data : (data.results || []);
-      setLearners(list);
-    }).catch(() => setLearners([]));
-  }, [user]);
+    storefrontApi.getSchools().then((list) => setSchools(list)).catch(() => setSchools([]));
+  }, []);
 
-  const handleCheckout = async () => {
-    if (items.length === 0) return;
-    if (!user) {
-      if (!guestMode) {
-        router.push('/login');
-        return;
-      }
-      setStep('delivery');
-      return;
-    }
-    if (!selectedLearner) {
-      setMessage('Please select a learner for this order.');
-      return;
-    }
-    setMessage('');
+  const total = items.reduce((sum, i) => sum + i.unit_price * i.quantity, 0);
+  const set = (key: keyof typeof form) => (value: string) => setForm((f) => ({ ...f, [key]: value }));
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    const errors: Record<string, string> = {};
+    if (!form.delivery_name.trim()) errors.delivery_name = 'Enter your name.';
+    if (!form.delivery_phone.trim()) errors.delivery_phone = 'Enter your phone number.';
+    setFieldErrors(errors);
+    setError('');
+    if (Object.keys(errors).length || items.length === 0) return;
     setLoading(true);
     try {
-      const payload = {
-        learner: Number(selectedLearner),
-        items: items.map((i) =>
-          i.variant_id > 0
-            ? { variant: i.variant_id, quantity: i.quantity }
-            : { product: i.product_id, quantity: i.quantity },
-        ),
-      };
-      const data = await shopApi.createOrder(payload);
-      setOrder(data);
-      setStep('checkout');
-    } catch (error) {
-      setMessage(errorDetail(error, 'Failed to create order.'));
+      const result = await shopApi.whatsappCheckout({
+        delivery_name: form.delivery_name.trim(),
+        delivery_phone: form.delivery_phone.trim(),
+        delivery_address: form.delivery_address.trim(),
+        delivery_county: form.delivery_county.trim(),
+        delivery_notes: form.delivery_notes.trim(),
+        parent_school: form.parent_school ? Number(form.parent_school) : null,
+        items: items.map((i) => (i.variant_id > 0
+          ? { variant: i.variant_id, quantity: i.quantity }
+          : { product: i.product_id, quantity: i.quantity })),
+      });
+      // The order is saved. Only now is the cart emptied and WhatsApp opened.
+      setDone({ ...result, total });
+      clearCart();
+      window.open(result.whatsapp_url, '_blank', 'noopener,noreferrer');
+    } catch (e) {
+      const { message, fields } = readError(e);
+      setError(message);
+      setFieldErrors(fields);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGuestOrder = async () => {
-    if (
-      !delivery.delivery_name ||
-      !delivery.delivery_phone ||
-      !delivery.delivery_address ||
-      !delivery.delivery_county
-    ) {
-      setMessage('Please fill in all required delivery fields.');
-      return;
-    }
-    setMessage('');
-    setLoading(true);
-    try {
-      const payload = {
-        ...delivery,
-        items: items.map((i) =>
-          i.variant_id > 0
-            ? { variant: i.variant_id, quantity: i.quantity }
-            : { product: i.product_id, quantity: i.quantity },
-        ),
-      };
-      const data = await shopApi.createGuestOrder(payload);
-      setOrder(data);
-      setStep('checkout');
-      setMessage('Order placed. Enter your M-Pesa number below to receive an STK push.');
-    } catch (error) {
-      setMessage(errorDetail(error, 'Failed to create order.'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePay = async () => {
-    if (!order) return;
-    const phone = phoneRef.current?.value || delivery.delivery_phone || user?.phone || '';
-    if (!phone) {
-      setMessage('A phone number is required to pay via M-Pesa.');
-      return;
-    }
-    setLoading(true);
-    setMessage('');
-    try {
-      const response: { detail?: string } = guestMode
-        ? await shopApi.payGuestMpesa(order.public_token as string, phone)
-        : await shopApi.payMpesa(order.id, phone);
-      setStep('payment');
-      setPollCount(0);
-      setMessage(response?.detail || 'STK push sent. Enter your M-Pesa PIN on your phone.');
-    } catch (error) {
-      setMessage(errorDetail(error, 'Failed to initiate payment.'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Payment is confirmed by M-Pesa (server-side), never by this page.
-  // Poll the read-only status endpoint until it is confirmed or failed.
-  const checkStatus = async (manual = false) => {
-    if (!order) return;
-    if (manual) setLoading(true);
-    try {
-      const data = guestMode && order.public_token
-        ? await shopApi.getGuestPaymentStatus(order.public_token)
-        : await shopApi.getPaymentStatus(order.id);
-      if (data.payment_status === 'confirmed') {
-        setOrder({ ...order, status: data.order_status });
-        setStep('success');
-        clearCart();
-        setMessage(`Payment received${data.mpesa_receipt_number ? ` (M-Pesa ref ${data.mpesa_receipt_number})` : ''}. Thank you!`);
-      } else if (data.payment_status === 'failed') {
-        setStep('checkout');
-        setMessage(`Payment was not completed${data.result_desc ? `: ${data.result_desc}` : ''}. You can try again.`);
-      } else if (manual) {
-        setMessage('Still waiting for M-Pesa to confirm. This can take up to a minute.');
-      }
-    } catch (error) {
-      if (manual) setMessage(errorDetail(error, 'Could not check payment status.'));
-    } finally {
-      if (manual) setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (step !== 'payment' || pollCount >= 30) return;
-    const timer = setTimeout(() => {
-      setPollCount((n) => n + 1);
-      void checkStatus();
-    }, 4000);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, pollCount]);
-
-  if (authLoading) {
-    return (
-      <div>
-        <GlobalHeader />
-        <main className="max-w-4xl mx-auto px-4 py-8">
-          <p className="text-lg text-zinc-600 dark:text-zinc-400">Loading...</p>
-        </main>
+  let body;
+  if (done) {
+    body = (
+      <div className="lp-co__done" role="status">
+        <div className="lp-co__ok" aria-hidden="true">✓</div>
+        <h2>Order recorded</h2>
+        <dl className="lp-co__dl">
+          <div><dt>Order number</dt><dd>{done.tracking_ref}</dd></div>
+          <div><dt>Total</dt><dd>{kes(done.total)}</dd></div>
+          <div><dt>Status</dt><dd>Pending (awaiting payment)</dd></div>
+        </dl>
+        <p className="lp-co__hint">
+          Your order is saved, but it is not confirmed until you message us. Tap the button to open WhatsApp and send it.
+          We confirm payment and delivery details there. Keep your order number and phone to track it.
+        </p>
+        <a className="lp-co__btn lp-co__btn--wa" href={done.whatsapp_url} target="_blank" rel="noopener noreferrer">Open WhatsApp</a>
+        <Link className="lp-co__btn lp-co__btn--ghost" href="/track-your-order">Track this order</Link>
       </div>
+    );
+  } else if (items.length === 0) {
+    body = (
+      <div className="lp-co__empty">
+        <h2>Your cart is empty</h2>
+        <p className="lp-co__hint">Add something from the shop to check out.</p>
+        <Link className="lp-co__btn" href="/shop">Browse the shop</Link>
+      </div>
+    );
+  } else {
+    body = (
+      <form className="lp-co__grid" onSubmit={submit} noValidate>
+        <div className="lp-co__main">
+          <section className="lp-co__card">
+            <h2>Your details</h2>
+            <p className="lp-co__hint">No account needed. Name and phone are enough: we confirm delivery details with you on WhatsApp.</p>
+            <div className="lp-co__two">
+              <label className={'lp-co__fld' + (fieldErrors.delivery_name ? ' bad' : '')}>Full name
+                <input value={form.delivery_name} onChange={(e) => set('delivery_name')(e.target.value)} autoComplete="name" required />
+                {fieldErrors.delivery_name && <em>{fieldErrors.delivery_name}</em>}
+              </label>
+              <label className={'lp-co__fld' + (fieldErrors.delivery_phone ? ' bad' : '')}>Phone number
+                <input type="tel" inputMode="tel" placeholder="07XX XXX XXX" value={form.delivery_phone}
+                  onChange={(e) => set('delivery_phone')(e.target.value)} autoComplete="tel" required />
+                {fieldErrors.delivery_phone && <em>{fieldErrors.delivery_phone}</em>}
+              </label>
+            </div>
+            <label className="lp-co__fld">School <span className="lp-co__opt">(optional)</span>
+              <select value={form.parent_school} onChange={(e) => set('parent_school')(e.target.value)}>
+                <option value="">Not sure / not for a school</option>
+                {schools.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+              {fieldErrors.parent_school && <em>{fieldErrors.parent_school}</em>}
+            </label>
+            <div className="lp-co__two">
+              <label className="lp-co__fld">Delivery address <span className="lp-co__opt">(optional)</span>
+                <input value={form.delivery_address} onChange={(e) => set('delivery_address')(e.target.value)} autoComplete="street-address" />
+              </label>
+              <label className="lp-co__fld">County <span className="lp-co__opt">(optional)</span>
+                <input value={form.delivery_county} onChange={(e) => set('delivery_county')(e.target.value)} />
+              </label>
+            </div>
+            <label className="lp-co__fld">Notes <span className="lp-co__opt">(optional)</span>
+              <textarea value={form.delivery_notes} onChange={(e) => set('delivery_notes')(e.target.value)} />
+            </label>
+          </section>
+          <PaymentMethods />
+        </div>
+
+        <aside className="lp-co__card lp-co__sum" aria-label="Order summary">
+          <h2>Your cart</h2>
+          <ul className="lp-co__lines">
+            {items.map((i) => (
+              <li key={i.variant_id} className="lp-co__line">
+                <span className="lp-co__thumb" style={i.image_url ? { backgroundImage: `url(${i.image_url})` } : undefined} aria-hidden="true" />
+                <span className="lp-co__name">{i.product_name}
+                  <small>{i.variant_label && i.variant_label !== 'Default' ? `${i.variant_label} · ` : ''}{kes(i.unit_price)}</small>
+                </span>
+                <span className="lp-co__qty">
+                  <button type="button" aria-label="Fewer" onClick={() => updateQuantity(i.variant_id, i.quantity - 1)}>−</button>
+                  <span>{i.quantity}</span>
+                  <button type="button" aria-label="More" onClick={() => updateQuantity(i.variant_id, i.quantity + 1)}>+</button>
+                </span>
+                <button type="button" className="lp-co__rm" onClick={() => removeItem(i.variant_id)}>Remove</button>
+              </li>
+            ))}
+          </ul>
+          <div className="lp-co__row big"><span>Total</span><b>{kes(total)}</b></div>
+          <p className="lp-co__hint">Delivery cost is confirmed in the WhatsApp chat.</p>
+          {error && <p className="lp-co__err" role="alert">{error}</p>}
+          <button className="lp-co__btn lp-co__btn--wa" type="submit" disabled={loading}>
+            {loading ? 'Saving your order…' : 'Place order and open WhatsApp'}
+          </button>
+        </aside>
+      </form>
     );
   }
 
-  const total = getTotal();
-  const trackingId = order ? `LP-${String(order.id).padStart(6, '0')}` : null;
-
   return (
-    <div>
+    <>
       <GlobalHeader />
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-6">Your Cart</h1>
-
-        {message && (
-          <div className="mb-4 p-3 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-sm">
-            {message}
+      <main id="main" className="lp-co">
+        <div className="lp-co__top">
+          <div className="lp-co__top-in">
+            <h1>Checkout</h1>
+            <Link className="lp-co__back" href="/shop">← Keep shopping</Link>
           </div>
-        )}
-
-        {step === 'success' && order && (
-          <div className="mb-6 p-4 rounded-md bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300">
-            <h2 className="font-bold">Order placed!</h2>
-            <p className="mt-1">Order #{order.id} — Status: {order.status}</p>
-            <p className="mt-1">
-              Tracking ID: <span className="font-mono font-bold">{trackingId}</span>
-              <br />
-              <span className="text-sm opacity-90">Use this on the Track your order page.</span>
-            </p>
-            <Link
-              href={`/track-your-order?tracking=${encodeURIComponent(trackingId!)}`}
-              className="underline"
-            >
-              Track your order
-            </Link>{' '}
-            <Link href="/shop" className="underline">Continue shopping</Link>
-          </div>
-        )}
-
-        {step === 'cart' && (
-          <>
-            {items.length === 0 ? (
-              <p className="text-zinc-500">
-                Your cart is empty. <Link href="/shop" className="underline">Browse products</Link>.
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {items.map((item) => (
-                  <div key={item.variant_id} className="flex items-center gap-4 p-4 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
-                    <div className="flex-1">
-                      <p className="font-medium text-zinc-900 dark:text-zinc-100">{item.product_name}</p>
-                      <p className="text-sm text-zinc-500">{item.variant_label}</p>
-                    </div>
-                    <div className="w-20 text-right">
-                      <input
-                        type="number"
-                        min={1}
-                        max={item.stock_quantity}
-                        value={item.quantity}
-                        onChange={(e) => updateQuantity(item.variant_id, Number(e.target.value))}
-                        className="w-16 text-center px-1 py-0.5 border border-zinc-300 dark:border-zinc-700 rounded bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
-                      />
-                      <p className="text-xs text-zinc-500 mt-1">KSh {(item.unit_price * item.quantity).toLocaleString()}</p>
-                    </div>
-                    <button
-                      onClick={() => removeItem(item.variant_id)}
-                      className="text-red-600 dark:text-red-400 text-sm"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
-
-                <div className="flex justify-between items-center pt-4 border-t border-zinc-200 dark:border-zinc-800">
-                  <span className="text-zinc-700 dark:text-zinc-300">Total</span>
-                  <span className="text-2xl font-bold text-[#0B1F3A] dark:text-[#E63B00]">
-                    KSh {total.toLocaleString()}
-                  </span>
-                </div>
-
-                {!user ? (
-                  <div className="pt-2 space-y-3">
-                    <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                      Sign in to complete your purchase, or continue as a guest.
-                    </p>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => router.push('/login')}
-                        className="flex-1 px-5 py-2.5 bg-[#0B1F3A] dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-md font-medium hover:bg-[#E63B00] dark:hover:bg-[#E63B00]/90 transition-colors"
-                      >
-                        Sign in
-                      </button>
-                      <button
-                        onClick={() => {
-                          setGuestMode(true);
-                          setStep('delivery');
-                        }}
-                        className="flex-1 px-5 py-2.5 border border-[#0B1F3A] dark:border-zinc-100 rounded-md text-[#0B1F3A] dark:text-zinc-100 font-medium hover:bg-[#E63B00]/10 dark:hover:bg-zinc-800 transition-colors"
-                      >
-                        Checkout as guest
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="space-y-3 pt-2">
-                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                        Deliver to (learner)
-                      </label>
-                      <select
-                        value={selectedLearner}
-                        onChange={(e) => setSelectedLearner(Number(e.target.value))}
-                        className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#0B1F3A]"
-                      >
-                        <option value="">Select a learner</option>
-                        {learners.map((l) => (
-                          <option key={l.id} value={learnerId(l)}>{learnerLabel(l)}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <PaymentMethods total={total} />
-                  </>
-                )}
-              </div>
-            )}
-          </>
-        )}
-
-         {step === 'delivery' && (
-           <div className="space-y-4">
-             <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-               Delivery details
-             </h2>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <div>
-                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                   Full name *
-                 </label>
-                 <input
-                   type="text"
-                   value={delivery.delivery_name}
-                   onChange={(e) => setDelivery({ ...delivery, delivery_name: e.target.value })}
-                   placeholder="Jane Doe"
-                   className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#0B1F3A]"
-                 />
-               </div>
-               <div>
-                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                   Phone number *
-                 </label>
-                 <input
-                   type="tel"
-                   value={delivery.delivery_phone}
-                   onChange={(e) => setDelivery({ ...delivery, delivery_phone: e.target.value })}
-                   placeholder="07XX XXX XXX"
-                   className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#0B1F3A]"
-                 />
-               </div>
-               <div className="md:col-span-2">
-                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                   Delivery address *
-                 </label>
-                 <input
-                   type="text"
-                   value={delivery.delivery_address}
-                   onChange={(e) => setDelivery({ ...delivery, delivery_address: e.target.value })}
-                   placeholder="Street, building, landmark"
-                   className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#0B1F3A]"
-                 />
-               </div>
-               <div>
-                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                   County *
-                 </label>
-                 <input
-                   type="text"
-                   value={delivery.delivery_county}
-                   onChange={(e) => setDelivery({ ...delivery, delivery_county: e.target.value })}
-                   placeholder="e.g. Nairobi"
-                   className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#0B1F3A]"
-                 />
-               </div>
-               <div className="md:col-span-2">
-                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                   Delivery notes (optional)
-                 </label>
-                 <input
-                   type="text"
-                   value={delivery.delivery_notes}
-                   onChange={(e) => setDelivery({ ...delivery, delivery_notes: e.target.value })}
-                   placeholder="e.g. Gate fees, nearest bus stop"
-                   className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#0B1F3A]"
-                 />
-               </div>
-             </div>
-             <PaymentMethods total={total} />
-             <div className="flex gap-3">
-               <button
-                 onClick={() => setStep('cart')}
-                 className="px-5 py-2.5 border border-zinc-300 dark:border-zinc-700 rounded-md text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-               >
-                 Back
-               </button>
-             </div>
-           </div>
-         )}
-
-         {step === 'checkout' && order && (
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-              Pay for order #{order.id}
-            </h2>
-            <p className="text-zinc-700 dark:text-zinc-300">
-              Total: <span className="font-bold">KSh {parseFloat(order.total_amount).toLocaleString()}</span>
-            </p>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                M-Pesa phone number
-              </label>
-              <input
-                type="tel"
-                ref={phoneRef}
-                defaultValue={guestMode ? delivery.delivery_phone : (user?.phone || '')}
-                placeholder="07XX XXX XXX"
-                className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#0B1F3A]"
-              />
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={handlePay}
-                disabled={loading}
-                className="px-5 py-2.5 bg-[#0B1F3A] dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-md font-medium hover:bg-[#E63B00] dark:hover:bg-[#E63B00]/90 transition-colors disabled:opacity-50"
-              >
-                {loading ? 'Sending...' : 'Pay with M-Pesa'}
-              </button>
-              <button
-                onClick={() => { clearCart(); setStep('cart'); }}
-                className="px-5 py-2.5 border border-zinc-300 dark:border-zinc-700 rounded-md text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
-
-        {step === 'payment' && order && (
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-              Waiting for M-Pesa — order #{order.id}
-            </h2>
-            <p className="text-zinc-700 dark:text-zinc-300">
-              An M-Pesa STK push has been sent for KSh {parseFloat(order.total_amount).toLocaleString()}.
-            </p>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400" aria-live="polite">
-              Enter your M-Pesa PIN on your phone. This page updates automatically once M-Pesa confirms
-              the payment{pollCount >= 30 ? ' — automatic checking has stopped, use the button below' : ''}.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => checkStatus(true)}
-                disabled={loading}
-                className="px-5 py-2.5 bg-green-600 text-white rounded-md font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
-              >
-                {loading ? 'Checking...' : 'Check payment status'}
-              </button>
-              <button
-                onClick={() => setStep('checkout')}
-                className="px-5 py-2.5 border border-zinc-300 dark:border-zinc-700 rounded-md text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-              >
-                Back
-              </button>
-            </div>
-          </div>
-        )}
+        </div>
+        {body}
       </main>
       <GlobalFooter />
-    </div>
+    </>
   );
 }
