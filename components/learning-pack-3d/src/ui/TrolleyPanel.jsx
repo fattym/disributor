@@ -58,7 +58,7 @@ export default function TrolleyPanel() {
         <p className="note"><Icon name="truck" /> Collect free in store, or delivery in Nairobi within 1–2 days (KES 300). Delivery is added at checkout.</p>
         <div className="p-actions">
           <button className="lp-btn ghost" onClick={closeAll}>Continue Shopping</button>
-          <button className="lp-btn" disabled={!cart.lines.length} onClick={() => setPanel("checkout")}>Proceed to Checkout</button>
+          <button className="lp-btn" disabled={!cart.lines.length} onClick={() => window.location.assign("/cart/")}>Proceed to Checkout</button>
         </div>
       </footer>
     </aside>

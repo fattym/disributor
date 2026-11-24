@@ -102,7 +102,9 @@ export const useShop = create(
         const cart = useSupermarketStore.getState();
         const items = (product.isBundle ? product.items : [product]).filter((p) => !p.unavailable && p.variantId != null);
         if (!items.length || (product.isBundle && items.length !== product.items.length)) return false;
-        items.forEach((p) => cart.addToCart(p.variantId, quantity));
+        items.forEach((p) => cart.addToCart(p.variantId, quantity, {
+          product_id: p.id, product_name: p.name, variant_label: "", unit_price: p.price, image_url: p.image || null, stock_quantity: p.stock,
+        }));
       },
       addMissing: () => {
         const have = new Set(useSupermarketStore.getState().cartItems.map((c) => c.variant_id));

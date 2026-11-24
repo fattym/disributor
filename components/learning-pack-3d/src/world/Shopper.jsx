@@ -132,7 +132,7 @@ export default function Shopper() {
         const dist = Math.hypot(dx, dz);
         if (dist < 0.3) {
           if (wp.say !== undefined) {
-            store.say(wp.say === "checkout" ? "Checkout · pay with M-Pesa or collect in store" : `Aisle ${wp.say + 1} · ${AISLES[wp.say].long}`);
+            store.say(wp.say === "checkout" ? "Checkout · order via the one Learning Pack checkout" : `Aisle ${wp.say + 1} · ${AISLES[wp.say].long}`);
             ts.pause = 1.6;
           }
           if (++ts.i >= TOUR.length) store.stopTour();

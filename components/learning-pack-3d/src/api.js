@@ -1,7 +1,5 @@
 const RAW_API = typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_URL ? process.env.NEXT_PUBLIC_API_URL : "http://localhost:8000/api";
 export const API = RAW_API.replace(/\/+$/, "");
-// Checkout is a simulation unless live checkout is explicitly switched on (needs an authenticated parent account).
-export const DEMO = process.env.NEXT_PUBLIC_LP_LIVE_CHECKOUT !== "true";
 
 const COVER_HOST = "https://image.codingclubskenya.com/";
 
@@ -72,20 +70,4 @@ export async function fetchSchools() {
   } catch {
     return null;
   }
-}
-
-export async function checkout(payload) {
-  if (DEMO) return { demo: true, order_id: "LP-DEMO-" + Math.floor(1000 + Math.random() * 9000) };
-  const r = await fetch(`${API}/shop/orders/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || "Checkout failed");
-  return r.json();
-}
-
-export async function orderStatus(id) {
-  const r = await fetch(`${API}/shop/orders/${id}/`);
-  return r.json();
 }

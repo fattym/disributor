@@ -6,7 +6,6 @@ import ProductCard from "./ui/ProductCard.jsx";
 import TrolleyPanel from "./ui/TrolleyPanel.jsx";
 import BooklistPanel from "./ui/BooklistPanel.jsx";
 import FeaturedPanel from "./ui/FeaturedPanel.jsx";
-import Checkout from "./ui/Checkout.jsx";
 import BottomNav from "./ui/BottomNav.jsx";
 import Joystick from "./ui/Joystick.jsx";
 import Toast from "./ui/Toast.jsx";
@@ -46,7 +45,6 @@ export default function App() {
       <TrolleyPanel />
       <BooklistPanel />
       <FeaturedPanel />
-      <Checkout />
       <BottomNav />
       <Joystick />
       <Tooltip />

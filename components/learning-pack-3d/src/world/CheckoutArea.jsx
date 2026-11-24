@@ -132,7 +132,6 @@ function Counter({ x, live, index }) {
 }
 
 export default function CheckoutArea() {
-  const setPanel = useShop((s) => s.setPanel);
   const say = useShop((s) => s.say);
   const tex = useMemo(() => textSign("PROCEED TO CHECKOUT  ▼", 4.6, 1.0, { bg: BRAND.orange, accent: BRAND.navy }), []);
   const open = (e) => {
@@ -142,7 +141,7 @@ export default function CheckoutArea() {
       say("Add something to your trolley first");
       return;
     }
-    setPanel("checkout");
+    window.location.assign("/cart/"); // the one checkout
   };
   const pointer = (on) => () => (document.body.style.cursor = on ? "pointer" : "");
   return (

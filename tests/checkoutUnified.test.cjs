@@ -36,3 +36,14 @@ test('cart lines keep a display snapshot so the cart renders without the product
   assert.ok(store.includes('...snapshot'));
   assert.ok(cart.includes('ci.product_name') && cart.includes('ci.unit_price'));
 });
+
+test('the 3D bookshop has no demo checkout: its checkout goes to /cart and the live-checkout switch is gone', () => {
+  const base = 'components/learning-pack-3d/src/';
+  assert.ok(!fs.existsSync(path.join(root, base + 'ui/Checkout.jsx')));
+  const api = read(base + 'api.js');
+  assert.ok(!/DEMO|LIVE_CHECKOUT|LP-DEMO|export async function checkout/.test(api));
+  assert.ok(!read(base + 'App.jsx').includes('Checkout'));
+  assert.ok(read(base + 'ui/TrolleyPanel.jsx').includes('window.location.assign("/cart/")'));
+  assert.ok(read(base + 'world/CheckoutArea.jsx').includes('window.location.assign("/cart/")'));
+  assert.ok(read(base + 'store/useShop.js').includes('unit_price: p.price'));
+});
