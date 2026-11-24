@@ -47,3 +47,9 @@ test('the 3D bookshop has no demo checkout: its checkout goes to /cart and the l
   assert.ok(read(base + 'world/CheckoutArea.jsx').includes('window.location.assign("/cart/")'));
   assert.ok(read(base + 'store/useShop.js').includes('unit_price: p.price'));
 });
+
+test('robots.txt keeps cart and checkout private and no longer names the removed route', () => {
+  const robots = read('app/robots.ts');
+  assert.ok(!robots.includes('/supermarket/checkout'));
+  assert.ok(robots.includes("'/cart'") && robots.includes("'/checkout'"));
+});

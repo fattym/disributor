@@ -9,16 +9,24 @@ import { shopApi, ShopProduct } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
   import { useCart } from '@/lib/cart';
 
-  export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  export default function ProductDetailPage({ params, initialProduct = null, grades = [], autoDescription = '', crumbs = [] }: {
+  params: Promise<{ id: string }>;
+  // Build-time snapshot, pre-rendered into the HTML so crawlers see the product. Price/stock are refreshed live below.
+  initialProduct?: ShopProduct | null;
+  grades?: string[];
+  autoDescription?: string; // built from real fields at build time; shown when the product has no description
+  crumbs?: Array<{ name: string; href: string }>;
+}) {
   const { user } = useAuth();
   const { addItem, getItemCount } = useCart();
   const router = useRouter();
   const pathname = usePathname();
-  const [product, setProduct] = useState<ShopProduct | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [variantId, setVariantId] = useState<number | ''>('');
+  const [product, setProduct] = useState<ShopProduct | null>(initialProduct);
+  const [loading, setLoading] = useState(!initialProduct);
+  const [variantId, setVariantId] = useState<number | ''>(initialProduct?.variants?.[0]?.id ?? '');
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -27,10 +35,18 @@ import { useAuth } from '@/lib/auth';
       const resolved = await params;
       const fromUrl = (pathname || '').split('/').filter(Boolean)[1];
       const id = fromUrl && fromUrl !== 'placeholder' ? decodeURIComponent(fromUrl) : resolved.id;
-      const data = await shopApi.getPublicProduct(id);
-      setProduct(data);
-      if (data.variants && data.variants.length > 0) {
-        setVariantId(data.variants[0].id);
+      try {
+        const data = await shopApi.getPublicProduct(id);
+        setProduct(data);
+        document.title = `${data.name} | Learning Pack`;
+        setVariantId((cur) => (data.variants?.some((v) => v.id === cur) ? cur : data.variants?.[0]?.id ?? ''));
+      } catch (e) {
+        // 404 for an id that does not exist (only reachable through the placeholder shell, which is noindex).
+        if (!initialProduct && (e as { response?: { status?: number } })?.response?.status === 404) {
+          document.title = 'Product not found | Learning Pack';
+          setNotFound(true);
+        }
+        // otherwise keep the pre-rendered snapshot if the live refresh fails
       }
       setLoading(false);
     };
@@ -48,7 +64,19 @@ import { useAuth } from '@/lib/auth';
     );
   }
 
-  if (!product) return null;
+  if (notFound || !product) {
+    return (
+      <div>
+        <GlobalHeader />
+        <main className="max-w-6xl mx-auto px-4 py-16 text-center">
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Product not found</h1>
+          <p className="mt-2 text-zinc-600 dark:text-zinc-400">This product does not exist or is no longer available.</p>
+          <Link href="/shop/" className="mt-6 inline-block px-5 py-2.5 bg-[#0B1F3A] text-white rounded-md font-medium hover:bg-[#E63B00] transition-colors">Browse the shop</Link>
+        </main>
+        <GlobalFooter />
+      </div>
+    );
+  }
 
   const hasVariants = product.variants && product.variants.length > 0;
   const selectedVariant = hasVariants ? product.variants.find((v) => v.id === variantId) : null;
@@ -78,7 +106,20 @@ import { useAuth } from '@/lib/auth';
     <div>
       <GlobalHeader />
       <main className="max-w-6xl mx-auto px-4 py-8">
-        <Link href="/shop" className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200">&larr; Back to shop</Link>
+        {crumbs.length > 0 ? (
+          <nav aria-label="Breadcrumb" className="text-sm text-zinc-600 dark:text-zinc-400">
+            <ol className="flex flex-wrap gap-x-2">
+              {crumbs.map((c, i) => (
+                <li key={c.href}>
+                  {i < crumbs.length - 1 ? <Link href={c.href} className="hover:text-zinc-900 dark:hover:text-zinc-200">{c.name}</Link> : <span aria-current="page">{c.name}</span>}
+                  {i < crumbs.length - 1 && <span aria-hidden="true"> /</span>}
+                </li>
+              ))}
+            </ol>
+          </nav>
+        ) : (
+          <Link href="/shop" className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200">&larr; Back to shop</Link>
+        )}
 
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
           <div className="aspect-[4/3] overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
@@ -98,8 +139,14 @@ import { useAuth } from '@/lib/auth';
               KSh {unitPrice.toLocaleString()}
             </p>
 
-            {product.description && (
-              <p className="text-zinc-700 dark:text-zinc-300">{product.description}</p>
+            {(product.category_name || grades.length > 0) && (
+              <p className="text-sm text-zinc-500">
+                {product.category_name}{product.category_name && grades.length > 0 ? ' · ' : ''}{grades.length > 0 && `For ${grades.join(', ')}`}
+              </p>
+            )}
+
+            {(product.description || autoDescription) && (
+              <p className="text-zinc-700 dark:text-zinc-300">{product.description || autoDescription}</p>
             )}
 
             {hasVariants && (
