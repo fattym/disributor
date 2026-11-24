@@ -43,6 +43,7 @@
   --color-foreground: var(--foreground);
   --color-navy: var(--navy);
   --color-orange: var(--orange);
+  --color-coral: #c2410c; /* darker than --coral so white text and text-coral on white pass 4.5:1 */
   --font-sans: var(--font-body);
   --font-mono: var(--font-geist-mono);
 }

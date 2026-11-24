@@ -483,6 +483,10 @@ ul {
 section {
   padding-block: clamp(3.5rem, 7vw, 6rem);
 }
+/* App shells (seller centre, admin) lay their own sections out with Tailwind: opt out of the storefront section padding. */
+.lp-app section {
+  padding-block: 0;
+}
 .section-head {
   max-width: 40rem;
   margin-bottom: 2.2rem;
@@ -1250,7 +1254,7 @@ section {
   margin-bottom: 1.2rem;
 }
 
-.grid {
+.product-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.6rem 1.3rem;
@@ -1371,7 +1375,7 @@ section {
 }
 
 @media (max-width: 900px) {
-  .grid {
+  .product-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
@@ -1388,7 +1392,7 @@ section {
   .shop {
     padding-block: 1.8rem 2.8rem;
   }
-  .grid {
+  .product-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.1rem 0.8rem;
   }
@@ -1433,7 +1437,7 @@ section {
 }
 
 @media (max-width: 420px) {
-  .grid {
+  .product-grid {
     grid-template-columns: 1fr;
   }
   .product__img {
@@ -3001,5 +3005,53 @@ html.dark-mode .lp-home .hero--cbc .book li {
   .lp-home .hero--cbc .hero__grades a,
   .home-whatsapp {
     transition: none;
+  }
+}
+
+/* Phones: every tap target at least 44px (WCAG 2.5.5), without changing the desktop look. */
+@media (max-width: 820px) {
+  .menu-btn,
+  .theme-toggle,
+  .header .cart,
+  .shop-nav__trigger,
+  .shop-card__btn,
+  .shop-sort-bar select,
+  .search input,
+  .search button,
+  .skip:focus {
+    min-height: 44px;
+  }
+  .menu-btn,
+  .theme-toggle,
+  .header .cart {
+    min-width: 44px;
+  }
+  .header .cart,
+  .header .logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+  }
+  .shop-breadcrumb a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 4px;
+  }
+  .shop-card .shop-card__btn,
+  .shop-card .shop-card__title {
+    min-height: 44px !important;
+  }
+  .shop-card .shop-card__title {
+    display: block;
+    padding-block: 6px;
+  }
+  .shop-breadcrumb a {
+    min-width: 44px;
+    justify-content: center;
+  }
+  .shop-active-filter {
+    min-height: 44px;
   }
 }

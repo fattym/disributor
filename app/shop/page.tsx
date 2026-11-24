@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, Suspense } from "react";
+import { sellerHref, sellerOf, sellerOptions } from "@/lib/shopSeller";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import GlobalHeader from "@/components/GlobalHeader";
@@ -187,6 +188,14 @@ function ShopContent() {
     return combined.sort((a, b) => a.localeCompare(b));
   }, [products]);
 
+  const sellers = useMemo(() => sellerOptions(products), [products]);
+  const sellerParam = searchParams?.get("seller") || "";
+  const query = searchParams?.toString() || "";
+  const goSeller = (name: string | null) => {
+    router.push(sellerHref(query, name));
+    setCurrentPage(1);
+  };
+
   const priceBounds = useMemo(() => {
     if (products.length === 0) return { min: 0, max: 50000 };
     const prices = products.map((p) => parseFloat(p.effective_price || p.price || "0"));
@@ -261,6 +270,11 @@ function ShopContent() {
       );
     }
 
+    // 2b. Seller (?seller=Name)
+    if (sellerParam) {
+      list = list.filter((p) => sellerOf(p) === sellerParam);
+    }
+
     // 3. Selected Publishers filter
     if (selectedPublishers.length > 0) {
       list = list.filter((p) => {
@@ -328,6 +342,7 @@ function ShopContent() {
     products,
     activeNavLeaf,
     searchParams,
+    sellerParam,
     selectedGrades,
     selectedPublishers,
     selectedTags,
@@ -439,6 +454,7 @@ function ShopContent() {
 
   const hasActiveFilters =
     Boolean(activeNavLeaf) ||
+    Boolean(sellerParam) ||
     selectedGrades.length > 0 ||
     selectedSubjects.length > 0 ||
     selectedPublishers.length > 0 ||
@@ -591,6 +607,24 @@ function ShopContent() {
                       </label>
                     ))}
                   </div>
+                </div>
+
+                <div className="shop-filter__body">
+                  <h3>Sold by</h3>
+                  <ul className="shop-sellers">
+                    <li>
+                      <a href={sellerHref(query, null)} aria-current={sellerParam ? undefined : "true"}
+                        onClick={(e) => { e.preventDefault(); goSeller(null); }}>All sellers</a>
+                    </li>
+                    {sellers.map((s) => (
+                      <li key={s.name}>
+                        <a href={sellerHref(query, s.name)} aria-current={sellerParam === s.name ? "true" : undefined}
+                          onClick={(e) => { e.preventDefault(); goSeller(s.name); }}>
+                          {s.name} <span>({s.count})</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
 
                 <div className="shop-filter__body">
@@ -753,7 +787,16 @@ function ShopContent() {
                 <span className="count">
                   {loading ? "Loading..." : `${sorted.length} product${sorted.length === 1 ? "" : "s"} found`}
                 </span>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
+                  {sellers.length > 1 && (
+                    <>
+                      <label htmlFor="seller">Sold by</label>
+                      <select id="seller" value={sellerParam} onChange={(e) => goSeller(e.target.value || null)}>
+                        <option value="">All sellers</option>
+                        {sellers.map((s) => <option key={s.name} value={s.name}>{s.name} ({s.count})</option>)}
+                      </select>
+                    </>
+                  )}
                   <label htmlFor="sort">Sort by</label>
                   <select
                     id="sort"

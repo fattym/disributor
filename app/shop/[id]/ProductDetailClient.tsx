@@ -156,7 +156,7 @@ import { useAuth } from '@/lib/auth';
                 <select
                   value={variantId}
                   onChange={(e) => setVariantId(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#0B1F3A]"
+                  className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#0B1F3A] min-h-11"
                 >
                   {product.variants.map((v) => (
                     <option key={v.id} value={v.id} disabled={v.stock_quantity <= 0}>
@@ -173,7 +173,7 @@ import { useAuth } from '@/lib/auth';
                 <button
                   type="button"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="px-3 py-1 border border-zinc-300 dark:border-zinc-700 rounded-md text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  className="px-4 py-2 min-h-11 min-w-11 border border-zinc-300 dark:border-zinc-700 rounded-md text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                 >
                   −
                 </button>
@@ -181,7 +181,7 @@ import { useAuth } from '@/lib/auth';
                 <button
                   type="button"
                   onClick={() => setQuantity(Math.min(quantity + 1, maxQty))}
-                  className="px-3 py-1 border border-zinc-300 dark:border-zinc-700 rounded-md text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  className="px-4 py-2 min-h-11 min-w-11 border border-zinc-300 dark:border-zinc-700 rounded-md text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                   disabled={quantity >= maxQty}
                 >
                   +

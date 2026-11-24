@@ -58,7 +58,7 @@ export default function FulfilmentsPage() {
         <label className="flex h-11 w-full min-w-0 items-center gap-2 rounded-xl border border-[#E1E5EE] bg-white px-3.5 sm:w-auto sm:min-w-[300px]">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B6683" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3" /></svg>
           <input type="search" aria-label="Search fulfilments" placeholder="Order number, customer or school" value={q} onChange={(e) => setQ(e.target.value)}
-            className="min-w-0 flex-1 border-0 bg-transparent text-sm text-[#16213B] outline-none" />
+            className="h-11 min-w-0 flex-1 border-0 bg-transparent text-sm text-[#16213B] outline-none" />
         </label>
       </header>
 

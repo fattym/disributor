@@ -1,4 +1,6 @@
-* {
+/* Scoped: an unscoped reset leaks into every page reached by client-side navigation after sign-in and wipes Tailwind padding/margins. */
+:where(.login-page-container),
+:where(.login-page-container) * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;

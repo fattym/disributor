@@ -28,7 +28,7 @@ const FLOW = [
 ];
 
 const CARD = 'rounded-2xl border border-[#E6E9F1] bg-white';
-const LINK = 'text-sm font-semibold text-[#1E3A8A]';
+const LINK = 'inline-flex min-h-11 items-center text-sm font-semibold text-[#1E3A8A]';
 
 /** Products worth a look: owing stock on backorder, or at/below their own low-stock level. */
 function stockToWatch(products: Product[]) {
@@ -136,7 +136,7 @@ export default function DashboardPage() {
             <h2 className="m-0 !text-[#16213B] text-[17px] font-bold">Orders that need you</h2>
             <Link href="/dashboard/fulfilments" className={LINK}>All fulfilments</Link>
           </div>
-          <div className="overflow-x-auto">
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[760px] border-collapse text-sm">
               <thead>
                 <tr className="bg-[#F7F8FC] text-left text-xs uppercase tracking-[0.06em] text-[#5B6683]">
@@ -164,6 +164,23 @@ export default function DashboardPage() {
               </tbody>
             </table>
           </div>
+          <ul className="m-0 list-none p-0 md:hidden">
+            {orders.map((f) => {
+              const st = stageOf(f.status);
+              const w = whoWhere(f);
+              return (
+                <li key={f.id} className="flex flex-col gap-2.5 border-t border-[#EEF0F6] p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <b>{f.tracking_ref || `#${f.id}`}</b>
+                    <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-bold" style={{ background: st.chipBg, color: st.chipFg }}><span className="h-1.5 w-1.5 rounded-full" style={{ background: st.chipFg }} />{st.label}</span>
+                  </div>
+                  <div className="text-sm"><span className="font-semibold">{w.customer}</span> · <span className="text-[#3D4865]">{itemsText(f)}</span></div>
+                  <div className="text-[13px] text-[#5B6683]">{w.deliverTo} · {whenText(f.created_at)}</div>
+                  <div className="flex flex-wrap items-center gap-2"><FulfilmentActions f={f} onChanged={load} onError={setError} /></div>
+                </li>
+              );
+            })}
+          </ul>
         </section>
       )}
 

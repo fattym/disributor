@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { distributorApi } from '@/lib/api';
+import { parseApiError } from '@/lib/apiError';
 import {
   navigationData,
   getFlatTaxonomy,
@@ -163,10 +164,16 @@ const DEFAULT_CATEGORIES: CategoryOption[] = [
 ];
 
 const inputCls =
-  'w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-coral dark:focus:ring-coral text-sm';
+  'w-full min-h-11 px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-coral dark:focus:ring-coral text-sm';
 const labelCls = 'block text-xs font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wide mb-1.5';
 const cardCls =
   'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm p-5 space-y-4';
+
+const FIELD_LABELS: Record<string, string> = {
+  name: 'Product name', category: 'Category', unit_price: 'Selling price', cost_price: 'Cost price',
+  available_stock: 'Available stock', sku: 'SKU', description: 'Description', min_order_quantity: 'Minimum order quantity',
+  low_stock_threshold: 'Low-stock level', tags: 'Tags', variants: 'Variants', distributor: 'Seller', image: 'Image', images: 'Images',
+};
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -178,6 +185,9 @@ export default function ProductsPage() {
   const [statusTab, setStatusTab] = useState<'all' | 'published' | 'draft'>('all');
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
+  const [formError, setFormError] = useState('');
+  const [formFieldErrors, setFormFieldErrors] = useState<Record<string, string>>({});
+  const formErrorRef = useRef<HTMLDivElement>(null);
   const [saving, setSaving] = useState(false);
 
   // Form State
@@ -484,6 +494,8 @@ export default function ProductsPage() {
   };
 
   const resetForm = () => {
+    setFormError('');
+    setFormFieldErrors({});
     setEditingProduct(null);
     setFormData({
       name: '',
@@ -620,11 +632,22 @@ export default function ProductsPage() {
     setShowForm(true);
   };
 
+  const showFormError = (summary: string, fields: Record<string, string>) => {
+    setFormError(summary);
+    setFormFieldErrors(fields);
+    setTimeout(() => formErrorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage('');
+    setFormError('');
+    setFormFieldErrors({});
     if (!formData.name.trim() || !formData.unit_price) {
-      alert('Product name and selling price are required.');
+      const missing: Record<string, string> = {};
+      if (!formData.name.trim()) missing.name = 'Enter the product name.';
+      if (!formData.unit_price) missing.unit_price = 'Enter the selling price.';
+      showFormError('Please fix the highlighted details and try again.', missing);
       return;
     }
 
@@ -736,6 +759,7 @@ export default function ProductsPage() {
       };
 
       let saved: Product;
+      let imageWarning = '';
       if (editingProduct) {
         await distributorApi.updateProduct(editingProduct.id.toString(), payload);
         saved = { ...editingProduct, ...payload } as unknown as Product;
@@ -746,8 +770,8 @@ export default function ProductsPage() {
       if (images.length > 0 && saved?.id) {
         try {
           await distributorApi.uploadProductImages(saved.id, images);
-        } catch {
-          console.warn('Product saved but image upload endpoint returned error.');
+        } catch (imgErr) {
+          imageWarning = parseApiError(imgErr, 'The image upload failed.').message;
         }
       }
 
@@ -757,13 +781,17 @@ export default function ProductsPage() {
           : `Product "${formData.name}" created successfully (${formData.is_active ? 'Published on /shop' : 'Saved as Draft'})`
       );
       setMessageType('success');
+      if (imageWarning) {
+        setMessage((m) => `${m}. The product is saved, but its images were not uploaded: ${imageWarning} Open it with Edit to add them again.`);
+        setMessageType('error');
+      }
       setShowForm(false);
       resetForm();
       fetchProducts();
     } catch (error) {
       console.error('Failed to save product:', error);
-      setMessage(error instanceof Error ? error.message : 'Failed to save product');
-      setMessageType('error');
+      const parsed = parseApiError(error, 'Failed to save product.');
+      showFormError(parsed.message, parsed.fields);
     } finally {
       setSaving(false);
     }
@@ -860,7 +888,7 @@ export default function ProductsPage() {
           <Link
             href="/shop"
             target="_blank"
-            className="px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition"
+            className="px-3.5 min-h-11 inline-flex items-center text-xs sm:text-sm font-semibold rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition"
           >
             Preview /shop ↗
           </Link>
@@ -869,7 +897,7 @@ export default function ProductsPage() {
               resetForm();
               setShowForm(true);
             }}
-            className="px-4 py-2 text-sm font-bold text-white bg-coral hover:bg-orange-600 rounded-lg shadow-sm transition-all flex items-center gap-1.5"
+            className="px-4 min-h-11 text-sm font-bold text-white bg-[#C2410C] hover:bg-[#9A3412] rounded-lg shadow-sm transition-all flex items-center gap-1.5"
           >
             <span>+ Add New Product</span>
           </button>
@@ -883,7 +911,7 @@ export default function ProductsPage() {
           <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
             <button
               onClick={() => setStatusTab('all')}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${
+              className={`px-3 min-h-11 text-xs font-semibold rounded-md transition ${
                 statusTab === 'all'
                   ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm'
                   : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900'
@@ -893,7 +921,7 @@ export default function ProductsPage() {
             </button>
             <button
               onClick={() => setStatusTab('published')}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${
+              className={`px-3 min-h-11 text-xs font-semibold rounded-md transition ${
                 statusTab === 'published'
                   ? 'bg-white dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 shadow-sm'
                   : 'text-zinc-600 dark:text-zinc-400 hover:text-emerald-600'
@@ -903,7 +931,7 @@ export default function ProductsPage() {
             </button>
             <button
               onClick={() => setStatusTab('draft')}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${
+              className={`px-3 min-h-11 text-xs font-semibold rounded-md transition ${
                 statusTab === 'draft'
                   ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm'
                   : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900'
@@ -925,7 +953,7 @@ export default function ProductsPage() {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="px-2.5 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs font-medium"
+                className="px-2.5 min-h-11 border border-zinc-300 dark:border-zinc-700 rounded-md bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs font-medium"
               >
                 <option value="">All Categories</option>
                 {categories.map((c) => (
@@ -1785,6 +1813,19 @@ export default function ProductsPage() {
               </div>
             </div>
 
+            {formError && (
+              <div ref={formErrorRef} role="alert" className="mt-6 rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-900">
+                <p className="m-0 font-semibold">{formError}</p>
+                {Object.keys(formFieldErrors).length > 0 && (
+                  <ul className="mt-2 list-disc pl-5">
+                    {Object.entries(formFieldErrors).map(([field, msg]) => (
+                      <li key={field}><b>{FIELD_LABELS[field.split('.')[0]] || field}:</b> {msg}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+
             {/* Bottom Actions Bar */}
             <div className="mt-6 pt-4 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-end gap-3">
               <button
@@ -1800,7 +1841,7 @@ export default function ProductsPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2.5 text-sm font-bold text-white bg-coral hover:bg-orange-600 disabled:opacity-50 rounded-lg shadow transition flex items-center gap-2"
+                className="px-6 py-2.5 text-sm font-bold text-white bg-[#C2410C] hover:bg-[#9A3412] disabled:opacity-50 rounded-lg shadow transition flex items-center gap-2"
               >
                 {saving && <span className="animate-spin">⏳</span>}
                 <span>
@@ -1952,7 +1993,7 @@ export default function ProductsPage() {
                           type="button"
                           onClick={() => toggleActive(product)}
                           title="Click to instantly toggle Published/Draft status on /shop"
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition shadow-xs cursor-pointer ${
+                          className={`inline-flex items-center gap-1.5 px-3 min-h-11 rounded-full text-xs font-bold transition shadow-xs cursor-pointer ${
                             product.is_active
                               ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
                               : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
@@ -1973,7 +2014,7 @@ export default function ProductsPage() {
                           <Link
                             href={`/shop/${product.id}`}
                             target="_blank"
-                            className="text-xs text-zinc-500 hover:text-coral transition font-medium"
+                            className="text-xs text-zinc-500 hover:text-coral transition font-medium inline-flex items-center justify-center min-h-11 min-w-11 px-2"
                             title="View on /shop"
                           >
                             View
@@ -1981,14 +2022,14 @@ export default function ProductsPage() {
                           <button
                             type="button"
                             onClick={() => handleEdit(product)}
-                            className="text-xs font-semibold text-navy dark:text-zinc-200 hover:underline"
+                            className="text-xs font-semibold text-navy dark:text-zinc-200 hover:underline inline-flex items-center justify-center min-h-11 min-w-11 px-2"
                           >
                             Edit
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDelete(product.id.toString(), product.name)}
-                            className="text-xs font-semibold text-red-600 hover:text-red-800"
+                            className="text-xs font-semibold text-red-600 hover:text-red-800 inline-flex items-center justify-center min-h-11 min-w-11 px-2"
                           >
                             Delete
                           </button>

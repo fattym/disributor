@@ -847,6 +847,11 @@
 }
 
 .shop-card__btn--buy {
+  background: #fff;
+  color: #0b1f3a;
+  border: 1.5px solid #5b6575;
+}
+html.dark-mode .shop-card__btn--buy {
   background: transparent;
   color: var(--shop-text, #e8eefc);
   border: 1px solid rgba(255, 255, 255, 0.28);
@@ -854,7 +859,7 @@
 
 .shop-card__btn--buy:hover {
   border-color: #e53900;
-  color: #fff;
+  color: #0b1f3a;
   background: rgba(229, 57, 0, 0.18);
   transform: translateY(-1px);
 }
@@ -1150,3 +1155,10 @@ html.dark-mode .shop-active-filter--cat .remove,
   background: rgba(11, 31, 58, 0.14);
   color: #0b1f3a;
 }
+
+/* Sold by: crawlable links, one per seller */
+.shop-sellers { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.shop-sellers a { display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 10px; color: #16213b; text-decoration: none; font-weight: 600; }
+.shop-sellers a span { margin-left: 6px; color: #5b6683; font-weight: 500; }
+.shop-sellers a[aria-current="true"] { background: #0f1e3d; color: #fff; }
+.shop-sellers a[aria-current="true"] span { color: #c9d1e6; }

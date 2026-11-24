@@ -81,7 +81,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   if (denied || !user) return null;
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#F5F6FA] text-[#16213B]">
+    <div className="lp-app flex h-screen w-full overflow-hidden bg-[#F5F6FA] text-[#16213B]">
       {sidebarOpen && (
         <div className="fixed inset-0 z-30 bg-black/40 md:hidden" onClick={() => setSidebarOpen(false)} aria-hidden="true" />
       )}

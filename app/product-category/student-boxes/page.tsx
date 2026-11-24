@@ -104,7 +104,7 @@ export default function StudentBoxesPage() {
                 </Link>
               </div>
             ) : (
-              <div className="grid">
+              <div className="product-grid">
                 {packs.map((product) => {
                   const isAdded = addedIds[product.id];
                   return (
