@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { distributorApi } from '@/lib/api';
 
 interface Order {
@@ -16,20 +16,17 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchOrders = async () => {
-    try {
-      const data = await distributorApi.getOrders();
-      setOrders(data.results || data);
-    } catch (error) {
-      console.error('Failed to fetch orders:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [tick, setTick] = useState(0);
+  const fetchOrders = useCallback(() => setTick((t) => t + 1), []);
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    let stale = false;
+    distributorApi.getOrders()
+      .then((data) => { if (!stale) setOrders(data.results || data); })
+      .catch((error) => { console.error('Failed to fetch orders:', error); })
+      .finally(() => { if (!stale) setLoading(false); });
+    return () => { stale = true; };
+  }, [tick]);
 
   const updateStatus = async (orderId: number, newStatus: string) => {
     try {

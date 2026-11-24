@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { distributorApi } from '@/lib/api';
 
 interface Delivery {
@@ -19,20 +19,17 @@ export default function DeliveriesPage() {
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchDeliveries = async () => {
-    try {
-      const data = await distributorApi.getDeliveries();
-      setDeliveries(data.results || data);
-    } catch (error) {
-      console.error('Failed to fetch deliveries:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [tick, setTick] = useState(0);
+  const fetchDeliveries = useCallback(() => setTick((t) => t + 1), []);
 
   useEffect(() => {
-    fetchDeliveries();
-  }, []);
+    let stale = false;
+    distributorApi.getDeliveries()
+      .then((data) => { if (!stale) setDeliveries(data.results || data); })
+      .catch((error) => { console.error('Failed to fetch deliveries:', error); })
+      .finally(() => { if (!stale) setLoading(false); });
+    return () => { stale = true; };
+  }, [tick]);
 
   const updateDelivery = async (id: number, data: { status?: string; tracking_number?: string; carrier?: string; estimated_delivery?: string; notes?: string }) => {
     try {
