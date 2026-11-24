@@ -44,9 +44,9 @@ interface SupermarketState {
   grades: Grade[];
   setGrades: (g: Grade[]) => void;
 
-  cartItems: Array<{ variant_id: number; quantity: number }>;
-  setCartItems: (items: Array<{ variant_id: number; quantity: number }>) => void;
-  addToCart: (variantId: number, quantity?: number) => void;
+  cartItems: CartLine[];
+  setCartItems: (items: CartLine[]) => void;
+  addToCart: (variantId: number, quantity?: number, snapshot?: Omit<CartLine, 'variant_id' | 'quantity'>) => void;
   removeFromCart: (variantId: number) => void;
   clearCart: () => void;
 
@@ -58,6 +58,19 @@ interface SupermarketState {
   categoryFilter: string;
   setCategoryFilter: (category: string) => void;
    updateCartQuantity: (variantId: number, quantity: number) => void;
+}
+
+// A cart line keeps a display snapshot so the cart renders after a page load or from pages that
+// never fill `products` (the shop page). Checkout always re-prices on the server.
+export interface CartLine {
+  variant_id: number;
+  quantity: number;
+  product_id?: number;
+  product_name?: string;
+  variant_label?: string;
+  unit_price?: number;
+  image_url?: string | null;
+  stock_quantity?: number;
 }
 
 export const useSupermarketStore = create<SupermarketState>()(
@@ -94,7 +107,7 @@ export const useSupermarketStore = create<SupermarketState>()(
       setGrades: (g) => set({ grades: g }),
 
       cartItems: [],
-      setCartItems: (items: Array<{ variant_id: number; quantity: number }>) => set({ cartItems: items }),
+      setCartItems: (items) => set({ cartItems: items }),
       trolleyOpen: false,
       setTrolleyOpen: (open) => set({ trolleyOpen: open }),
       searchQuery: '',
@@ -114,16 +127,16 @@ export const useSupermarketStore = create<SupermarketState>()(
         });
         storefrontApi.updateCartItem(variantId, quantity).catch(() => {});
       },
-      addToCart: (variantId, quantity = 1) => {
+      addToCart: (variantId, quantity = 1, snapshot) => {
         const existing = get().cartItems.find((i) => i.variant_id === variantId);
         if (existing) {
           set({
             cartItems: get().cartItems.map((i) =>
-              i.variant_id === variantId ? { ...i, quantity: i.quantity + quantity } : i,
+              i.variant_id === variantId ? { ...i, ...snapshot, quantity: i.quantity + quantity } : i,
             ),
           });
         } else {
-          set({ cartItems: [...get().cartItems, { variant_id: variantId, quantity }] });
+          set({ cartItems: [...get().cartItems, { ...snapshot, variant_id: variantId, quantity }] });
         }
         storefrontApi.addToCart(variantId, quantity).catch(() => {});
       },

@@ -846,15 +846,16 @@
   transform: translateY(-1px);
 }
 
-.shop-card__btn--whatsapp {
-  background: rgba(37, 211, 102, 0.12);
-  color: #128c4a;
+.shop-card__btn--buy {
+  background: transparent;
+  color: var(--shop-text, #e8eefc);
+  border: 1px solid rgba(255, 255, 255, 0.28);
 }
 
-.shop-card__btn--whatsapp:hover {
-  background: var(--shop-whatsapp);
+.shop-card__btn--buy:hover {
+  border-color: #e53900;
   color: #fff;
-  box-shadow: 0 8px 20px -6px rgba(37, 211, 102, 0.5);
+  background: rgba(229, 57, 0, 0.18);
   transform: translateY(-1px);
 }
 

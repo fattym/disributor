@@ -39,6 +39,24 @@ function errorDetail(error: unknown, fallback: string): string {
   return fallback;
 }
 
+// Payment methods. M-Pesa (Daraja) is not live in production, so it is shown but never offered.
+// WhatsApp checkout records the order first; it is connected in the next step of the plan.
+function PaymentMethods({ total }: { total: number }) {
+  return (
+    <div className="space-y-2 pt-2" aria-label="Payment method">
+      <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Payment method (KSh {total.toLocaleString()})</p>
+      <button type="button" disabled className="w-full flex items-center justify-between px-5 py-3 rounded-md border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 cursor-not-allowed">
+        <span>WhatsApp checkout</span>
+        <span className="text-xs font-semibold uppercase tracking-wide">Being connected</span>
+      </button>
+      <button type="button" disabled aria-disabled="true" className="w-full flex items-center justify-between px-5 py-3 rounded-md border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 cursor-not-allowed">
+        <span>M-Pesa</span>
+        <span className="text-xs font-semibold uppercase tracking-wide">Coming soon</span>
+      </button>
+    </div>
+  );
+}
+
 export default function CartPage() {
   const { user, loading: authLoading } = useAuth();
   const { items, removeItem, updateQuantity, getTotal, clearCart } = useCart();
@@ -281,15 +299,6 @@ export default function CartPage() {
                   </span>
                 </div>
 
-                <a
-                  href={`https://wa.me/254716815025?text=${encodeURIComponent('Hello, I would like to order:\n' + items.map(i => `${i.product_name} (${i.variant_label}) x${i.quantity} - KSh ${(i.unit_price * i.quantity).toLocaleString()}`).join('\n') + '\nTotal: KSh ' + total.toLocaleString())}`}
-                  target="_blank"
-                  rel="noopener"
-                  className="block w-full text-center px-5 py-3 bg-[#25D366] text-white rounded-md font-medium hover:opacity-90 transition-opacity"
-                >
-                  Order via WhatsApp
-                </a>
-
                 {!user ? (
                   <div className="pt-2 space-y-3">
                     <p className="text-sm text-zinc-600 dark:text-zinc-400">
@@ -331,13 +340,7 @@ export default function CartPage() {
                       </select>
                     </div>
 
-                    <button
-                      onClick={handleCheckout}
-                      disabled={loading || !selectedLearner}
-                      className="w-full px-5 py-3 bg-[#0B1F3A] dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-md font-medium hover:bg-[#E63B00] dark:hover:bg-[#E63B00]/90 transition-colors disabled:opacity-50"
-                    >
-                      {loading ? 'Placing order...' : 'Proceed to pay'}
-                    </button>
+                    <PaymentMethods total={total} />
                   </>
                 )}
               </div>
@@ -412,19 +415,13 @@ export default function CartPage() {
                  />
                </div>
              </div>
+             <PaymentMethods total={total} />
              <div className="flex gap-3">
                <button
                  onClick={() => setStep('cart')}
                  className="px-5 py-2.5 border border-zinc-300 dark:border-zinc-700 rounded-md text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                >
                  Back
-               </button>
-               <button
-                 onClick={handleGuestOrder}
-                 disabled={loading}
-                 className="px-5 py-2.5 bg-[#0B1F3A] dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-md font-medium hover:bg-[#E63B00] dark:hover:bg-[#E63B00]/90 transition-colors disabled:opacity-50"
-               >
-                 {loading ? 'Placing order...' : `Pay KSh ${total.toLocaleString()}`}
                </button>
              </div>
            </div>

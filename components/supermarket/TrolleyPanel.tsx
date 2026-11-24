@@ -136,7 +136,7 @@ export function TrolleyPanel({ open, onClose }: { open: boolean; onClose: () => 
                 <button type="button" className="lp-btn lp-btn--outline lp-btn--continue" onClick={onClose}>
                   Continue shopping
                 </button>
-                <button type="button" className="lp-btn lp-btn--primary lp-btn--checkout" onClick={() => window.location.href = '/supermarket/checkout'}>
+                <button type="button" className="lp-btn lp-btn--primary lp-btn--checkout" onClick={() => window.location.href = '/cart'}>
                   Proceed to checkout
                 </button>
               </div>

@@ -37,7 +37,7 @@ export function CheckoutBar() {
       <button
         type="button"
         className="lp-conveyor-checkout"
-        onClick={() => (window.location.href = '/supermarket/checkout')}
+        onClick={() => (window.location.href = '/cart')}
         aria-label="Proceed to checkout"
       >
         <span dangerouslySetInnerHTML={{ __html: CHECKOUT_ICON }} />

@@ -87,14 +87,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const variant = entry?.variant;
     const server = serverLines.get(ci.variant_id);
     return {
-      product_id: product?.id ?? server?.product_id ?? 0,
-      product_name: product?.name ?? server?.product_name ?? '',
+      product_id: product?.id ?? server?.product_id ?? ci.product_id ?? 0,
+      product_name: product?.name ?? server?.product_name ?? ci.product_name ?? '',
       variant_id: ci.variant_id,
-      variant_label: variant?.label ?? server?.variant_label ?? '',
+      variant_label: variant?.label ?? server?.variant_label ?? ci.variant_label ?? '',
       quantity: ci.quantity,
-      unit_price: variant ? parseFloat(variant.effective_price || '0') : parseFloat(server?.effective_price || '0'),
-      image_url: product?.image_url ?? server?.image_url ?? null,
-      stock_quantity: variant?.stock_quantity ?? server?.stock_quantity ?? 0,
+      unit_price: variant ? parseFloat(variant.effective_price || '0') : server?.effective_price ? parseFloat(server.effective_price) : (ci.unit_price ?? 0),
+      image_url: product?.image_url ?? server?.image_url ?? ci.image_url ?? null,
+      stock_quantity: variant?.stock_quantity ?? server?.stock_quantity ?? ci.stock_quantity ?? 0,
     };
   }), [cartItems, productByVariant, serverLines]);
 
@@ -102,7 +102,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const getItemCount = useCallback(() => items.reduce((sum, item) => sum + item.quantity, 0), [items]);
 
   const addItem = useCallback((item: CartItem) => {
-    addToCart(item.variant_id, item.quantity);
+    addToCart(item.variant_id, item.quantity, {
+      product_id: item.product_id,
+      product_name: item.product_name,
+      variant_label: item.variant_label,
+      unit_price: item.unit_price,
+      image_url: item.image_url,
+      stock_quantity: item.stock_quantity,
+    });
   }, [addToCart]);
 
   const removeItem = useCallback((variantId: number) => {
