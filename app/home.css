@@ -2610,18 +2610,19 @@ html.dark-mode .lp-home .hero--cbc {
   background: #081024;
 }
 
-.lp-home .hero-carousel {
-  max-width: 1200px;
+/* Picture first, text below it; side by side from 1024px. Nothing is drawn over a picture. */
+.lp-home .hero-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  max-width: 1280px;
   margin-inline: auto;
 }
 
-/* The ratio fixes the height before any picture loads (no layout shift). */
+/* The pictures are 16:9. The ratio reserves their height before they load (no layout shift). */
 .lp-home .hero-carousel__frame {
   position: relative;
-  display: grid;
-  aspect-ratio: 3 / 4;
-  align-items: center;
-  justify-items: center;
+  aspect-ratio: 16 / 9;
   width: 100%;
   overflow: hidden;
   touch-action: pan-y;
@@ -2652,22 +2653,13 @@ html.dark-mode .lp-home .hero--cbc {
 .lp-home .hero-carousel__slide img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: var(--focus, 50%) center;
+  object-fit: contain;
 }
 
-/* One flat overlay: at 0.72, white text stays above 4.5:1 even over a white picture. */
-.lp-home .hero-carousel__slides::after {
-  position: absolute;
-  inset: 0;
-  background: rgba(8, 16, 36, 0.72);
-  content: "";
-}
-
-.lp-home .hero-carousel__content {
-  position: relative;
-  width: 100%;
-  padding: 1rem;
+.lp-home .hero-split__content {
+  display: flex;
+  justify-content: center;
+  padding-inline: 1rem;
 }
 
 .lp-home .hero-carousel__controls {
@@ -2926,14 +2918,6 @@ html.dark-mode .lp-home .hero--cbc .hero__cta-secondary:hover {
 }
 
 @media (min-width: 641px) {
-  .lp-home .hero-carousel__frame {
-    aspect-ratio: 16 / 9;
-  }
-
-  .lp-home .hero-carousel__slide img {
-    object-position: center;
-  }
-
   .lp-home .hero-carousel__dots {
     order: 0;
     width: auto;
@@ -2993,6 +2977,47 @@ html.dark-mode .lp-home .hero--cbc .hero__cta-secondary:hover {
     bottom: max(1.25rem, env(safe-area-inset-bottom));
     width: 3.5rem;
     height: 3.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .lp-home .hero-split {
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 1.5rem;
+    padding-inline: 1rem;
+  }
+
+  .lp-home .hero-split__content {
+    padding: 0;
+  }
+
+  .lp-home .hero--cbc .hero__copy {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .lp-home .hero--cbc h1,
+  html.dark-mode .lp-home .hero--cbc h1 {
+    font-size: clamp(1.9rem, 2.7vw, 2.6rem);
+    text-align: left;
+  }
+
+  .lp-home .hero--cbc p.lead,
+  html.dark-mode .lp-home .hero--cbc p.lead {
+    font-size: 1rem;
+    text-align: left;
+  }
+
+  .lp-home .hero--cbc .actions {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+
+  .lp-home .hero--cbc .actions .btn {
+    width: 100%;
   }
 }
 
@@ -3071,4 +3096,26 @@ html.dark-mode .cart-count-badge,
   border-color: #0b1f3a;
   background: #ffd7c2;
   color: #0b1f3a;
+}
+
+/* The eight-item menu must fit narrow desktops (it ran 4px past the edge at 1024px). */
+@media (min-width: 901px) and (max-width: 1100px) {
+  .lp-home .nav ul {
+    gap: 0.1rem;
+  }
+  .lp-home .nav a {
+    padding-inline: 0.6rem;
+  }
+}
+
+/* The school finder normally overlaps the hero's lower edge; here that would hide the grade links. */
+.lp-home .hero--cbc + .finder {
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .lp-home .hero--cbc,
+  html.dark-mode .lp-home .hero--cbc {
+    padding-block: 1.5rem;
+  }
 }

@@ -13,7 +13,7 @@ test('every carousel picture has one slide, in numeric order, with alt text', ()
   for (const s of slides) assert.ok(s.alt.length > 30, `slide ${s.n} alt`);
 });
 
-test('home hero: one h1 and the main buttons sit on the carousel; the checklist card is gone', () => {
+test('home hero: one h1 and the three main buttons; the checklist card is gone', () => {
   const page = read('app/page.tsx');
   assert.strictEqual(page.match(/<h1/g).length, 1);
   const inside = page.slice(page.indexOf('<HeroCarousel>'), page.indexOf('</HeroCarousel>'));
@@ -21,14 +21,23 @@ test('home hero: one h1 and the main buttons sit on the carousel; the checklist 
   assert.ok(!page.includes('Your school list, all in one place'));
 });
 
-test('only the first slide is eager and preloaded; the overlay keeps white text above 4.5:1', () => {
+test('only the first slide is eager and preloaded', () => {
   const c = read('components/HeroCarousel.tsx');
   assert.match(c, /loading=\{i === 0 \? 'eager' : 'lazy'\}/);
   assert.match(c, /rel="preload"/);
-  const alpha = Number(read('app/home.css').match(/hero-carousel__slides::after[^}]*rgba\(8, 16, 36, ([\d.]+)\)/)[1]);
-  // Worst case: the overlay on a pure white picture.
-  const lum = [8, 16, 36].map((v) => (v * alpha + 255 * (1 - alpha)) / 255)
-    .map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
-  const ratio = 1.05 / (0.2126 * lum[0] + 0.7152 * lum[1] + 0.0722 * lum[2] + 0.05);
-  assert.ok(ratio >= 4.5, `contrast ${ratio}`);
+});
+
+test('pictures are shown whole: 16:9 sources and frame, no crop, no overlay, text outside the picture', async () => {
+  const sharp = require('sharp');
+  for (const s of slides) {
+    const { width, height } = await sharp(path.join(__dirname, '..', 'assets/image/carousel', `${s.n}.jpg`)).metadata();
+    assert.ok(Math.abs(width / height - 16 / 9) < 0.01, `slide ${s.n} is ${width}x${height}`);
+  }
+  const css = read('app/home.css');
+  const rules = css.match(/\.hero-carousel__[^{}]*\{[^}]*\}/g).join('\n');
+  assert.match(rules, /aspect-ratio: 16 \/ 9/);
+  assert.match(rules, /object-fit: contain/);
+  assert.doesNotMatch(rules, /object-fit: cover|::after/);
+  const c = read('components/HeroCarousel.tsx');
+  assert.ok(c.indexOf('hero-split__content') > c.indexOf('hero-carousel__controls'));
 });
