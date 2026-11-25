@@ -4,6 +4,7 @@ import Image from "next/image";
 import Script from "next/script";
 import ThemeToggle from "@/components/ThemeToggle";
 import CartCount from "@/components/CartCount";
+import HeroCarousel from "@/components/HeroCarousel";
 import prePrimaryImage from "@/assets/image/pre-primary.jpeg";
 import primaryImage from "@/assets/image/cbc primary.jpeg";
 import juniorSecondaryImage from "@/assets/image/cbc junior secondary.jpeg";
@@ -147,7 +148,7 @@ export default function HomePage() {
 
         <main id="main">
           <section className="hero hero--cbc">
-            <div className="wrap">
+            <HeroCarousel>
               <div className="hero__copy">
                 <p className="hero__badge">
                   <span aria-hidden="true">★</span> Kenya&apos;s CBC Learning
@@ -181,7 +182,15 @@ export default function HomePage() {
                     </svg>
                     Browse by Grade
                   </Link>
+                  <Link
+                    className="btn btn--ghost hero__cta-secondary"
+                    href="/find-my-school-list/"
+                  >
+                    Find my school list
+                  </Link>
                 </div>
+              </div>
+            </HeroCarousel>
                 <nav
                   className="hero__grades"
                   id="hero-grades"
@@ -198,73 +207,6 @@ export default function HomePage() {
                     Form 1–4
                   </Link>
                 </nav>
-              </div>
-
-              <div className="hero__visual">
-                <div
-                  className="book"
-                  role="img"
-                  aria-label="Example school list with items ticked off: exercise books, pencils, geometry set, ruler, eraser and scissors"
-                >
-                  <p className="book__title">
-                    Your school list, all in one place
-                  </p>
-                  <ul aria-hidden="true">
-                    <li>
-                      <span className="tick">
-                        <svg viewBox="0 0 24 24">
-                          <path d="M4 12.5l5 5L20 6.5" />
-                        </svg>
-                      </span>
-                      Exercise books
-                    </li>
-                    <li>
-                      <span className="tick">
-                        <svg viewBox="0 0 24 24">
-                          <path d="M4 12.5l5 5L20 6.5" />
-                        </svg>
-                      </span>
-                      HB pencils
-                    </li>
-                    <li>
-                      <span className="tick">
-                        <svg viewBox="0 0 24 24">
-                          <path d="M4 12.5l5 5L20 6.5" />
-                        </svg>
-                      </span>
-                      Geometry set
-                    </li>
-                    <li>
-                      <span className="tick">
-                        <svg viewBox="0 0 24 24">
-                          <path d="M4 12.5l5 5L20 6.5" />
-                        </svg>
-                      </span>
-                      Ruler and eraser
-                    </li>
-                    <li>
-                      <span className="tick">
-                        <svg viewBox="0 0 24 24">
-                          <path d="M4 12.5l5 5L20 6.5" />
-                        </svg>
-                      </span>
-                      Scissors and glue
-                    </li>
-                    <li>
-                      <span className="tick">
-                        <svg viewBox="0 0 24 24">
-                          <path d="M4 12.5l5 5L20 6.5" />
-                        </svg>
-                      </span>
-                      Colouring pencils
-                    </li>
-                  </ul>
-                  <p className="book__note">
-                    Choose a school and we’ll take it from here.
-                  </p>
-                </div>
-              </div>
-            </div>
           </section>
 
           <div className="finder" style={{ padding: "0" }}>

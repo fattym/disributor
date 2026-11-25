@@ -46,3 +46,6 @@ components/learning-pack-3d/dist/
 *.sqlite3
 .kilo/
 graphify-out/
+
+# built from assets/image/carousel by scripts/build-carousel.mjs
+/public/carousel/

@@ -6,7 +6,9 @@
     "node": ">=20.11.0"
   },
   "scripts": {
+    "predev": "node scripts/build-carousel.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/build-carousel.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
