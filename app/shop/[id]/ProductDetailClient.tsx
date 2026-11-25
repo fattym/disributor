@@ -127,7 +127,7 @@ import { useAuth } from '@/lib/auth';
             {product.image_url ? (
               <img src={product.image_url} alt={product.name} className="h-full w-full object-cover object-center" />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-zinc-400">No image</div>
+              <div className="flex h-full w-full items-center justify-center text-zinc-500">No photo yet</div>
             )}
           </div>
 

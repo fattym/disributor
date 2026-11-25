@@ -1162,3 +1162,18 @@ html.dark-mode .shop-active-filter--cat .remove,
 .shop-sellers a span { margin-left: 6px; color: #5b6683; font-weight: 500; }
 .shop-sellers a[aria-current="true"] { background: #0f1e3d; color: #fff; }
 .shop-sellers a[aria-current="true"] span { color: #c9d1e6; }
+
+/* Phones: filters are full-width stacked controls, nothing overflows, 44px targets. */
+@media (max-width: 640px) {
+  .shop-layout, .shop-layout * { min-width: 0; }
+  .shop-filters-panel, .shop-filter__body { width: 100%; max-width: 100%; box-sizing: border-box; }
+  .shop-audience { grid-template-columns: 1fr; border-radius: 14px; gap: 4px; }
+  .shop-audience button { min-height: 44px; border-radius: 10px; font-size: 0.9rem; }
+  .shop-checklist { max-height: none; overflow: visible; margin-right: 0; padding-right: 0; }
+  .shop-checklist label { min-height: 44px; margin-inline: 0; }
+  .shop-filters-panel button,
+  .shop-filters-panel input:not([type='checkbox']):not([type='radio']),
+  .shop-filters-panel label { min-height: 44px; box-sizing: border-box; }
+  .shop-price-inputs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .shop-price-inputs input { flex: 1 1 96px; width: auto; min-height: 44px; box-sizing: border-box; }
+}

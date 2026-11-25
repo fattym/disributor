@@ -297,7 +297,7 @@ export default function DiscoveryPage() {
                       />
                     ) : (
                       <div className="flex h-48 items-center justify-center bg-gray-100 text-gray-400 dark:bg-gray-700">
-                        No image
+                        No photo yet
                       </div>
                     )}
                   </Link>

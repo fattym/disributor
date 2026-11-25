@@ -480,7 +480,7 @@ export default function ProductsPage() {
     );
     try {
       await distributorApi.updateProduct(product.id.toString(), { is_active: newActive });
-      setMessage(`"${product.name}" is now ${newActive ? 'Published (Live on /shop)' : 'Draft (Hidden)'}`);
+      setMessage(`"${product.name}" is now ${newActive ? 'Published ' : 'Draft'}`);
       setMessageType('success');
     } catch (error) {
       // Revert on error
@@ -777,8 +777,8 @@ export default function ProductsPage() {
 
       setMessage(
         editingProduct
-          ? `Product "${formData.name}" updated successfully (${formData.is_active ? 'Published' : 'Draft'})`
-          : `Product "${formData.name}" created successfully (${formData.is_active ? 'Published on /shop' : 'Saved as Draft'})`
+          ? `Product "${formData.name}" updated (${formData.is_active ? 'active' : 'draft'}). Seller products are not shown on /shop yet.`
+          : `Product "${formData.name}" saved (${formData.is_active ? 'active' : 'draft'}). Seller products are not shown on /shop yet.`
       );
       setMessageType('success');
       if (imageWarning) {
@@ -1847,10 +1847,10 @@ export default function ProductsPage() {
                 <span>
                   {editingProduct
                     ? formData.is_active
-                      ? 'Update & Publish to /shop'
+                      ? 'Update product'
                       : 'Update Draft'
                     : formData.is_active
-                    ? 'Publish Product to /shop'
+                    ? 'Save product'
                     : 'Save as Draft'}
                 </span>
               </button>
@@ -2004,21 +2004,15 @@ export default function ProductsPage() {
                               product.is_active ? 'bg-emerald-500' : 'bg-zinc-400'
                             }`}
                           />
-                          <span>{product.is_active ? 'Published ✓' : 'Draft ✕'}</span>
+                          <span>{product.is_active ? 'Active ✓' : 'Draft ✕'}</span>
                         </button>
                       </td>
 
                       {/* Actions */}
                       <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Link
-                            href={`/shop/${product.id}`}
-                            target="_blank"
-                            className="text-xs text-zinc-500 hover:text-coral transition font-medium inline-flex items-center justify-center min-h-11 min-w-11 px-2"
-                            title="View on /shop"
-                          >
-                            View
-                          </Link>
+                          {/* No "View" link: this id is the seller product's, not a shop listing's, so /shop/<id>/ showed another product. */}
+                          <span className="text-xs text-zinc-500">Not in shop yet</span>
                           <button
                             type="button"
                             onClick={() => handleEdit(product)}

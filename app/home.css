@@ -3055,3 +3055,24 @@ html.dark-mode .lp-home .hero--cbc .book li {
     min-height: 44px;
   }
 }
+
+/* Cart count: a readable badge on light and dark headers. */
+.header .cart-count-badge,
+.cart-count-badge {
+  top: -11px;
+  right: -13px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  border: 2px solid #ffffff;
+  background: #0b1f3a;
+  color: #ffffff;
+  font: 800 12px/18px var(--font-body, system-ui), sans-serif;
+  box-sizing: border-box;
+}
+html.dark-mode .cart-count-badge,
+.dark .cart-count-badge {
+  border-color: #0b1f3a;
+  background: #ffd7c2;
+  color: #0b1f3a;
+}

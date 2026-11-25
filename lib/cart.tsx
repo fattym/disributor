@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useCallback, useState, ReactNode } from 'react';
 import { useSupermarketStore } from '@/lib/store/supermarketStore';
 import { storefrontApi } from '@/lib/storefrontApi';
+import { cleanPhoto } from '@/lib/productPhoto';
 import type { StorefrontProduct, StorefrontProductVariant } from '@/lib/types/storefront';
 
 export interface CartItem {
@@ -95,7 +96,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       variant_label: variant?.label ?? server?.variant_label ?? ci.variant_label ?? '',
       quantity: ci.quantity,
       unit_price: variant ? parseFloat(variant.effective_price || '0') : server?.effective_price ? parseFloat(server.effective_price) : (ci.unit_price ?? 0),
-      image_url: product?.image_url ?? server?.image_url ?? ci.image_url ?? null,
+      image_url: cleanPhoto(product?.image_url ?? server?.image_url ?? ci.image_url),
       stock_quantity: variant?.stock_quantity ?? server?.stock_quantity ?? ci.stock_quantity ?? 0,
       seller_name: ci.seller_name ?? null,
     };

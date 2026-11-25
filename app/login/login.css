@@ -265,3 +265,30 @@ form {
     padding: 30px 25px;
   }
 }
+
+/* A clear way back to the store */
+.login-back {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px !important;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #0b1f3a;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+}
+@media (max-width: 900px) {
+  /* room for the back link and theme button above the card, so neither covers the logo */
+  .login-page-container { padding-top: 76px !important; align-items: flex-start; }
+}
+.login-page-container .banner-side .logo {
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 12px;
+  padding: 8px 12px !important;
+}

@@ -124,7 +124,7 @@ export default function StudentBoxesPage() {
                           />
                         ) : (
                           <div className="product__img-placeholder">
-                            No image
+                            No photo yet
                           </div>
                         )}
                       </Link>

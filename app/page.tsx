@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MAIN_NAV } from "@/lib/nav";
 import Image from "next/image";
 import Script from "next/script";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -130,18 +131,11 @@ export default function HomePage() {
           <nav className="nav" id="nav" aria-label="Main">
             <div className="wrap">
               <ul>
-                <li>
-                  <Link href="/shop">Shop</Link>
-                </li>
-                <li>
-                  <a href="/find-my-school-list/">Find my school list</a>
-                </li>
-                <li>
-                  <a href="/upload-my-list/">Upload my list</a>
-                </li>
-                <li>
-                  <a href="/contact/">Contact us</a>
-                </li>
+                {MAIN_NAV.map((item) => (
+                  <li key={item.href}>
+                    <Link href={item.href}>{item.label}</Link>
+                  </li>
+                ))}
               </ul>
             </div>
           </nav>

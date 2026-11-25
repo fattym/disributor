@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { cleanProduct } from './productPhoto';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -301,10 +302,10 @@ export const shopApi = {
     type Page = ShopProduct[] | { results?: ShopProduct[]; count?: number };
     const pageSize = 200;
     const first = await api.get<Page>('/shop/public/', { params: { page_size: pageSize, page: 1, ...params } }).then((r) => r.data);
-    if (Array.isArray(first)) return first;
+    if (Array.isArray(first)) return first.map(cleanProduct);
     const results: ShopProduct[] = [...(first.results || [])];
     const count = first.count || results.length;
-    if (count <= results.length) return results;
+    if (count <= results.length) return results.map(cleanProduct);
     const totalPages = Math.ceil(count / pageSize);
     const pageNums: number[] = [];
     for (let p = 2; p <= totalPages; p++) pageNums.push(p);
@@ -316,14 +317,14 @@ export const shopApi = {
       );
       for (const pg of pages) results.push(...(Array.isArray(pg) ? pg : pg.results || []));
     }
-    return results;
+    return results.map(cleanProduct);
   },
   getHeroItems: () =>
     api.get<ShopProduct[] | { results: ShopProduct[] }>('/shop/public/hero_items/').then((r) => {
       const data = r.data;
-      return Array.isArray(data) ? data : (data.results || []);
+      return (Array.isArray(data) ? data : (data.results || [])).map(cleanProduct);
     }),
-  getPublicProduct: (id: number | string) => api.get<ShopProduct>(`/shop/public/${id}/`).then((r) => r.data),
+  getPublicProduct: (id: number | string) => api.get<ShopProduct>(`/shop/public/${id}/`).then((r) => cleanProduct(r.data)),
   getPublicGrades: () =>
     api.get<Grade[] | { results: Grade[] }>('/academics/grades/').then((r) => r.data),
 

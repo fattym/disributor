@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { shopApi, type WhatsAppCheckoutResult } from '@/lib/api';
 import { storefrontApi } from '@/lib/storefrontApi';
 import { useCart } from '@/lib/cart';
+import { LOGO_SVG } from '@/components/logo';
 import './cart.css';
 
 const kes = (n: number) => `KSh ${n.toLocaleString('en-KE')}`;
@@ -168,9 +169,7 @@ export default function CartPage() {
                   return (
                     <li key={i.variant_id} className="lp-co__line">
                       <span className="lp-co__thumb" style={i.image_url ? { backgroundImage: `url(${i.image_url})` } : undefined} aria-hidden="true">
-                        {!i.image_url && (
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5" /></svg>
-                        )}
+                        {!i.image_url && <span className="lp-co__nophoto">No photo yet</span>}
                       </span>
                       <span className="lp-co__name">
                         <b>{i.product_name}</b>
@@ -251,7 +250,7 @@ export default function CartPage() {
     <main id="main" className="lp-co">
       <header className="lp-co__top">
         <div className="lp-co__top-in">
-          <Link className="lp-co__logo" href="/" aria-label="Learning Pack home"><span aria-hidden="true">LP</span>Learning Pack</Link>
+          <Link className="lp-co__logo" href="/" aria-label="Learning Pack home"><span dangerouslySetInnerHTML={{ __html: LOGO_SVG }} /></Link>
           <nav className="lp-co__steps" aria-label="Checkout steps">
             <b>1 Trolley</b><span aria-hidden="true">›</span><b>2 Your details</b><span aria-hidden="true">›</span>
             <span className={done ? 'on' : ''}>3 Confirm on WhatsApp</span>

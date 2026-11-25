@@ -860,7 +860,7 @@ function ShopContent() {
                           {product.image_url ? (
                             <img src={product.image_url} alt={product.name} loading="lazy" />
                           ) : (
-                            <div className="shop-card__img-placeholder">No image available</div>
+                            <div className="shop-card__img-placeholder">No photo yet</div>
                           )}
                         </Link>
                         <div className="shop-card__body">

@@ -65,13 +65,14 @@ export default function LoginPage() {
 
   return (
     <div className="login-page-container">
+      <Link href="/shop/" className="login-back">← Back to shop</Link>
       <div className="fixed top-4 right-4 z-20">
         <ThemeToggle />
       </div>
       <div className="card-container">
         {/* Left Side with Image Banner & Logo */}
         <div className="banner-side">
-          <div className="logo" style={{ width: "240px" }}>
+          <Link href="/" className="logo" aria-label="Learning Pack home" style={{ width: "240px", display: "block" }}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 344.1 64"
@@ -108,7 +109,7 @@ export default function LoginPage() {
                 fill="#E63B00"
               />
             </svg>
-          </div>
+          </Link>
         </div>
 
         {/* Right Side with Sign Up Form */}
