@@ -60,3 +60,8 @@ test('shop filters stack full width on phones', () => {
   assert.match(block, /\.shop-audience \{ grid-template-columns: 1fr/);
   assert.match(block, /\.shop-checklist label \{ min-height: 44px/);
 });
+
+test('the home page header shows the cart count too', () => {
+  assert.ok(read('app/page.tsx').includes('<CartCount />'));
+  assert.ok(read('components/CartCount.tsx').includes('cart-count-badge'));
+});

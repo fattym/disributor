@@ -3,6 +3,7 @@ import { MAIN_NAV } from "@/lib/nav";
 import Image from "next/image";
 import Script from "next/script";
 import ThemeToggle from "@/components/ThemeToggle";
+import CartCount from "@/components/CartCount";
 import prePrimaryImage from "@/assets/image/pre-primary.jpeg";
 import primaryImage from "@/assets/image/cbc primary.jpeg";
 import juniorSecondaryImage from "@/assets/image/cbc junior secondary.jpeg";
@@ -109,6 +110,7 @@ export default function HomePage() {
             <div className="header__right">
               <ThemeToggle />
               <Link className="cart" href="/cart">
+                <span className="cart-icon-wrap">
                 <svg
                   width="22"
                   height="22"
@@ -124,6 +126,8 @@ export default function HomePage() {
                   <circle cx="18" cy="20" r="1.4" />
                   <path d="M2 3h3l2.6 12.2a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L20.5 8H6" />
                 </svg>
+                  <CartCount />
+                </span>
                 <span className="cart-label">Cart</span>
               </Link>
             </div>
