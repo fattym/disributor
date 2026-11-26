@@ -45,3 +45,16 @@ test('pictures are shown whole: 16:9 sources and frame, no crop, no overlay, tex
   assert.match(rules, /object-fit: contain/);
   assert.doesNotMatch(rules, /object-fit: cover|::after/);
 });
+
+test('orange hero: small text and controls keep their contrast', () => {
+  const lum = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+    .map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
+    .reduce((s, v, i) => s + v * [0.2126, 0.7152, 0.0722][i], 0);
+  const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
+  const orange = read('app/globals.css').match(/--orange: (#[0-9a-f]{6})/i)[1];
+  const hero = read('components/home-hero.css');
+  assert.ok(hero.includes('background: var(--orange)') && !/#fdb813|#ffca45/.test(hero));
+  assert.ok(ratio(hero.match(/--hero-ink: (#[0-9a-f]{6})/i)[1], orange) >= 4.5);
+  assert.ok(ratio('#ffffff', orange) >= 3); // headline and control fills
+  assert.ok(ratio(hero.match(/--hero-navy: (#[0-9a-f]{6})/i)[1], orange) >= 3);
+});

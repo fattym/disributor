@@ -2545,9 +2545,10 @@ html.dark-mode .lp-home .footer {
   touch-action: pan-y;
 }
 
+/* Outside the frame, so the ring never covers the picture. */
 .lp-home .hero-carousel__frame:focus-visible {
-  outline: 3px solid #fdb813;
-  outline-offset: -3px;
+  outline: 3px solid #1a0b08;
+  outline-offset: 3px;
 }
 
 .lp-home .hero-carousel__slides,
@@ -2610,17 +2611,17 @@ html.dark-mode .lp-home .footer {
 
 .lp-home .hero-carousel__dot[aria-current="true"]::before {
   width: 28px;
-  border-color: #fdb813;
-  background: #fdb813;
+  border-color: #1a0b08;
+  background: #1a0b08;
 }
 
 .lp-home .hero-carousel__button {
   min-width: 44px;
   min-height: 44px;
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid #fff;
   border-radius: 999px;
-  background: transparent;
-  color: #fff;
+  background: #fff;
+  color: #1a0b08;
   font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;

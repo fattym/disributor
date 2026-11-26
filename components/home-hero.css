@@ -1,4 +1,5 @@
-.home-hero { padding-block: 1.5rem 2rem; background: #081024; color: #fff; }
+/* On the orange: only the large headline is white (4.2:1). Small text is --hero-ink (4.6:1). */
+.home-hero { --hero-ink: #1a0b08; --hero-navy: #0b1f3a; padding-block: 1.5rem 2rem; background: var(--orange); color: var(--hero-ink); }
 .home-hero__split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.75rem; }
 .home-hero__copy { min-width: 0; }
 .lp-home .home-hero h1 {
@@ -10,13 +11,13 @@
   line-height: 1.08;
   text-wrap: balance;
 }
-.home-hero__lead { max-width: 44ch; margin-top: 0.8rem; color: #d7e0ee; font-size: 1.05rem; line-height: 1.55; }
+.home-hero__lead { max-width: 44ch; margin-top: 0.8rem; color: var(--hero-ink); font-size: 1.05rem; line-height: 1.55; }
 
 /* Class buttons: a labelled row per school stage. */
 .grades { display: grid; gap: 0.6rem; margin-top: 1.5rem; }
 .grades__title { font-weight: 700; }
 .grades__row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.3rem; }
-.grades__group { font-size: 0.85rem; color: #b9c6da; }
+.grades__group { font-size: 0.85rem; font-weight: 500; }
 .grades ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 0.4rem; margin: 0; padding: 0; list-style: none; }
 /* Fixed columns so the numbers break evenly (6 then 5) where all eleven do not fit on one line. */
 .grades__row:not([data-group="Pre-primary"]) ul { grid-template-columns: repeat(6, minmax(44px, 1fr)); }
@@ -25,25 +26,27 @@
   display: grid;
   min-height: 44px;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid #fff;
   border-radius: 10px;
-  background: #14213d;
-  color: #fff;
+  background: #fff;
+  color: #0b1f3a;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   text-decoration: none;
 }
-.grades li a:hover { border-color: #fdb813; background: #fdb813; color: #0b1f3a; }
-.home-hero :focus-visible, .grade-bar :focus-visible { outline: 3px solid #fdb813; outline-offset: 2px; }
+.grades li a:hover { border-color: #0b1f3a; background: #0b1f3a; color: #fff; }
+.home-hero :focus-visible { outline: 3px solid var(--hero-ink); outline-offset: 2px; }
+.grade-bar :focus-visible { outline: 3px solid #0b1f3a; outline-offset: 2px; }
+html.dark .grade-bar :focus-visible { outline-color: #fff; }
 
-.home-hero__upload { display: flex; flex-wrap: wrap; align-items: center; column-gap: 0.4rem; margin-top: 0.75rem; color: #d7e0ee; }
-.home-hero__upload a { display: inline-flex; min-height: 44px; align-items: center; color: #fdb813; font-weight: 700; text-decoration: underline; text-underline-offset: 4px; }
+.home-hero__upload { display: flex; flex-wrap: wrap; align-items: center; column-gap: 0.4rem; margin-top: 0.75rem; }
+.home-hero__upload a { display: inline-flex; min-height: 44px; align-items: center; color: var(--hero-ink); font-weight: 700; text-decoration: underline; text-underline-offset: 4px; }
 
 .home-hero__finder { display: grid; gap: 0.6rem; margin-top: 1.5rem; }
 .home-hero__finder select, .home-hero__finder button { min-height: 52px; border-radius: 12px; font: 700 1rem var(--font-body); }
 .home-hero__finder select { min-width: 0; width: 100%; padding: 0 0.9rem; border: 2px solid #fff; background: #fff; color: #0b1f3a; }
-.home-hero__finder button { padding: 0 1.4rem; border: 0; background: #fdb813; color: #0b1f3a; white-space: nowrap; cursor: pointer; }
-.home-hero__finder button:hover { background: #ffca45; }
+.home-hero__finder button { padding: 0 1.4rem; border: 0; background: var(--hero-navy); color: #fff; white-space: nowrap; cursor: pointer; }
+.home-hero__finder button:hover { background: var(--hero-ink); }
 
 /* State with school lists: the class buttons sit under the hero. */
 .grade-bar { padding-block: 0.25rem 1.5rem; background: #f4f5f7; color: #0b1f3a; }
