@@ -46,9 +46,6 @@ export default function GlobalHeader() {
       </a>
       <header>
         <div className="lph__wrap lph__top">
-          <button type="button" className="lph__icon lph__menu" aria-label="Open menu" aria-haspopup="dialog" onClick={() => drawer.current?.showModal()}>
-            <Icon d={MENU} />
-          </button>
           <Link href="/" className="lph__logo" aria-label="Learning Pack home">
             <span dangerouslySetInnerHTML={{ __html: LOGO_SVG }} />
           </Link>
@@ -69,6 +66,9 @@ export default function GlobalHeader() {
                 <CartCount />
               </span>
             </Link>
+            <button type="button" className="lph__icon lph__menu" aria-label="Open menu" aria-haspopup="dialog" onClick={() => drawer.current?.showModal()}>
+              <Icon d={MENU} />
+            </button>
           </div>
         </div>
         <nav className="lph__nav" aria-label="Main">

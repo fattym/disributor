@@ -5,6 +5,7 @@ import { sellerHref, sellerOf, sellerOptions } from "@/lib/shopSeller";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import GlobalHeader from "@/components/GlobalHeader";
+import { findClass } from "@/lib/gradeClasses";
 import GlobalFooter from "@/components/GlobalFooter";
 import ShopNavBar from "@/components/ShopNavBar";
 import { shopApi, ShopProduct, Grade } from "@/lib/api";
@@ -38,6 +39,7 @@ function ShopContent() {
   const [products, setProducts] = useState<ShopProduct[]>([]);
   const [grades, setGrades] = useState<Grade[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(true);
 
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -45,8 +47,9 @@ function ShopContent() {
   const [selectedGrades, setSelectedGrades] = useState<number[]>([]);
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [selectedPublishers, setSelectedPublishers] = useState<string[]>([]);
-  const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(50000);
+  // null = not chosen by the shopper: the range then follows every product loaded so far.
+  const [minChoice, setMinPrice] = useState<number | null>(null);
+  const [maxChoice, setMaxPrice] = useState<number | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sort, setSort] = useState<SortOption>("popularity");
   const [currentPage, setCurrentPage] = useState(1);
@@ -138,11 +141,6 @@ function ShopContent() {
           : (gradeData as { results?: Grade[] })?.results || [];
         setProducts(firstList);
         setGrades(gradeList);
-        const prices = firstList.map((p: ShopProduct) => parseFloat(p.effective_price || p.price || "0"));
-        if (prices.length > 0) {
-          setMinPrice(Math.floor(Math.min(...prices) / 100) * 100 || 0);
-          setMaxPrice(Math.ceil(Math.max(...prices) / 100) * 100 || 50000);
-        }
         setLoading(false);
         // load remaining pages in background
         const count = Array.isArray(firstRes) ? firstList.length : (firstRes.count || firstList.length);
@@ -166,6 +164,8 @@ function ShopContent() {
       } catch (err) {
         console.error("Failed to load shop:", err);
         if (!cancelled) setLoading(false);
+      } finally {
+        if (!cancelled) setLoadingMore(false);
       }
     };
     fetchData();
@@ -204,6 +204,11 @@ function ShopContent() {
       max: Math.ceil(Math.max(...prices) / 100) * 100 || 50000,
     };
   }, [products]);
+  const minPrice = minChoice ?? priceBounds.min;
+  const maxPrice = maxChoice ?? priceBounds.max;
+
+  // /shop?class=grade-4 (the home page class buttons).
+  const gradeClass = findClass(searchParams?.get("class"));
 
   const filtered = useMemo(() => {
     let list = products;
@@ -262,6 +267,9 @@ function ShopContent() {
         });
       }
     }
+
+    // 1b. Class picked on the home page
+    if (gradeClass) list = list.filter((p) => gradeClass.pattern.test(p.name || ""));
 
     // 2. Selected Grades filter
     if (selectedGrades.length > 0) {
@@ -343,6 +351,7 @@ function ShopContent() {
     activeNavLeaf,
     searchParams,
     sellerParam,
+    gradeClass,
     selectedGrades,
     selectedPublishers,
     selectedTags,
@@ -444,8 +453,8 @@ function ShopContent() {
     setSelectedPublishers([]);
     setSelectedTags([]);
     setAudience("all");
-    setMinPrice(priceBounds.min);
-    setMaxPrice(priceBounds.max);
+    setMinPrice(null);
+    setMaxPrice(null);
     setCurrentPage(1);
     if (activeNavLeaf || (searchParams && searchParams.size > 0)) {
       router.push("/shop");
@@ -455,6 +464,7 @@ function ShopContent() {
   const hasActiveFilters =
     Boolean(activeNavLeaf) ||
     Boolean(sellerParam) ||
+    Boolean(gradeClass) ||
     selectedGrades.length > 0 ||
     selectedSubjects.length > 0 ||
     selectedPublishers.length > 0 ||
@@ -467,6 +477,7 @@ function ShopContent() {
     if (activeNavLeaf) {
       return null;
     }
+    if (gradeClass) return gradeClass.label;
     if (selectedGrades.length === 1) {
       return gradeMap.get(selectedGrades[0])?.name || null;
     }
@@ -483,7 +494,7 @@ function ShopContent() {
       return "Filtered Products";
     }
     return null;
-  }, [activeNavLeaf, selectedGrades, selectedSubjects, selectedPublishers, audience, hasActiveFilters, gradeMap]);
+  }, [activeNavLeaf, gradeClass, selectedGrades, selectedSubjects, selectedPublishers, audience, hasActiveFilters, gradeMap]);
 
   return (
     <>
@@ -731,6 +742,14 @@ function ShopContent() {
                       </button>
                     </span>
                   )}
+                  {gradeClass && (
+                    <span className="shop-active-filter">
+                      {gradeClass.label}
+                      <button type="button" className="remove" onClick={() => router.push("/shop")} aria-label="Remove class filter">
+                        ×
+                      </button>
+                    </span>
+                  )}
                   {selectedGrades.map((gid) => {
                     const g = gradeMap.get(gid);
                     return (
@@ -815,7 +834,7 @@ function ShopContent() {
                 </div>
               </div>
 
-              {loading ? (
+              {loading || (loadingMore && paginated.length === 0) ? (
                 <div className="shop-grid">
                   <div className="shop-empty">
                     <p>Loading products...</p>

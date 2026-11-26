@@ -5,8 +5,8 @@ import slides from '@/lib/heroSlides.json';
 
 const DELAY = 6000;
 const WIDTHS = [480, 960, 1600];
-// Full width below 1024px; beside the headline above that (see .hero-split in home.css).
-const SIZES = '(min-width: 1280px) 780px, (min-width: 1024px) 62vw, 100vw';
+// Full width below 1024px; the right half above that (see .home-hero__split).
+const SIZES = '(min-width: 1240px) 570px, (min-width: 1024px) 46vw, 100vw';
 const srcSet = (n: number, ext: string) => WIDTHS.map((w) => `/carousel/${n}-${w}.${ext} ${w}w`).join(', ');
 
 const QUERY = '(prefers-reduced-motion: reduce)';
@@ -16,7 +16,7 @@ const subscribe = (notify: () => void) => {
   return () => media.removeEventListener('change', notify);
 };
 
-export default function HeroCarousel({ children }: { children: React.ReactNode }) {
+export default function HeroCarousel() {
   const [index, setIndex] = useState(0);
   const [seen, setSeen] = useState<number[]>([0]);
   const [warm, setWarm] = useState(false);
@@ -51,94 +51,91 @@ export default function HeroCarousel({ children }: { children: React.ReactNode }
   }, [running, index, go]);
 
   return (
-    <div className="hero-split">
+    <div
+      className="hero-carousel"
+      role="group"
+      aria-roledescription="carousel"
+      aria-label="Learning Pack highlights"
+      onPointerEnter={(e) => { if (e.pointerType === 'mouse') { setHover(true); pauseOnAttention(); } }}
+      onPointerLeave={(e) => { if (e.pointerType === 'mouse') setHover(false); }}
+      onFocus={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) { setFocus(true); pauseOnAttention(); } }}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setFocus(false); }}
+      onKeyDown={(e) => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        e.preventDefault();
+        go(index + (e.key === 'ArrowRight' ? 1 : -1));
+      }}
+    >
+      <link rel="preload" as="image" type="image/avif" imageSrcSet={srcSet(slides[0].n, 'avif')} imageSizes={SIZES} fetchPriority="high" />
       <div
-        className="hero-carousel"
-        role="group"
-        aria-roledescription="carousel"
-        aria-label="Learning Pack highlights"
-        onPointerEnter={(e) => { if (e.pointerType === 'mouse') { setHover(true); pauseOnAttention(); } }}
-        onPointerLeave={(e) => { if (e.pointerType === 'mouse') setHover(false); }}
-        onFocus={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) { setFocus(true); pauseOnAttention(); } }}
-        onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setFocus(false); }}
-        onKeyDown={(e) => {
-          if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-          e.preventDefault();
-          go(index + (e.key === 'ArrowRight' ? 1 : -1));
+        className="hero-carousel__frame"
+        tabIndex={0}
+        aria-label="Slides: use the left and right arrow keys"
+        onTouchStart={(e) => { touchX.current = e.touches[0].clientX; setChoice(false); }}
+        onTouchEnd={(e) => {
+          const start = touchX.current;
+          touchX.current = null;
+          if (start === null) return;
+          const moved = e.changedTouches[0].clientX - start;
+          if (Math.abs(moved) > 40) go(index + (moved < 0 ? 1 : -1));
         }}
       >
-        <link rel="preload" as="image" type="image/avif" imageSrcSet={srcSet(slides[0].n, 'avif')} imageSizes={SIZES} fetchPriority="high" />
-        <div
-          className="hero-carousel__frame"
-          tabIndex={0}
-          aria-label="Slides: use the left and right arrow keys"
-          onTouchStart={(e) => { touchX.current = e.touches[0].clientX; setChoice(false); }}
-          onTouchEnd={(e) => {
-            const start = touchX.current;
-            touchX.current = null;
-            if (start === null) return;
-            const moved = e.changedTouches[0].clientX - start;
-            if (Math.abs(moved) > 40) go(index + (moved < 0 ? 1 : -1));
-          }}
-        >
-          <div className="hero-carousel__slides" aria-live={running ? 'off' : 'polite'}>
-            {slides.map((slide, i) => (
-              <div
-                key={slide.n}
-                className="hero-carousel__slide"
-                role="group"
-                aria-roledescription="slide"
-                aria-label={`${i + 1} of ${total}`}
-                aria-hidden={i !== index}
-                data-active={i === index}
-              >
-                {(seen.includes(i) || i === index || (warm && isNear(i))) && (
-                  <picture>
-                    <source type="image/avif" srcSet={srcSet(slide.n, 'avif')} sizes={SIZES} />
-                    <source type="image/webp" srcSet={srcSet(slide.n, 'webp')} sizes={SIZES} />
-                    <img
-                      src={`/carousel/${slide.n}-960.jpg`}
-                      srcSet={srcSet(slide.n, 'jpg')}
-                      sizes={SIZES}
-                      width={1600}
-                      height={900}
-                      alt={slide.alt}
-                      // Only near slides are in the page, so each one loads at once; far slides have no <img> yet.
-                      loading="eager"
-                      fetchPriority={i === 0 ? 'high' : 'auto'}
-                    />
-                  </picture>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="hero-carousel__controls">
-          <button type="button" className="hero-carousel__button" aria-label="Previous slide" onClick={() => go(index - 1)}>‹</button>
-          <div className="hero-carousel__dots">
-            {slides.map((slide, i) => (
-              <button
-                key={slide.n}
-                type="button"
-                className="hero-carousel__dot"
-                aria-label={`Show slide ${i + 1} of ${total}`}
-                aria-current={i === index}
-                onClick={() => go(i)}
-              />
-            ))}
-          </div>
-          <button type="button" className="hero-carousel__button" aria-label="Next slide" onClick={() => go(index + 1)}>›</button>
-          <button
-            type="button"
-            className="hero-carousel__button hero-carousel__pause"
-            aria-label={playing ? 'Pause slideshow' : 'Play slideshow'}
-            onClick={() => setChoice(!playing)}
-          >
-            {playing ? 'Pause' : 'Play'}
-          </button>
+        <div className="hero-carousel__slides" aria-live={running ? 'off' : 'polite'}>
+          {slides.map((slide, i) => (
+            <div
+              key={slide.n}
+              className="hero-carousel__slide"
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`${i + 1} of ${total}`}
+              aria-hidden={i !== index}
+              data-active={i === index}
+            >
+              {(seen.includes(i) || i === index || (warm && isNear(i))) && (
+                <picture>
+                  <source type="image/avif" srcSet={srcSet(slide.n, 'avif')} sizes={SIZES} />
+                  <source type="image/webp" srcSet={srcSet(slide.n, 'webp')} sizes={SIZES} />
+                  <img
+                    src={`/carousel/${slide.n}-960.jpg`}
+                    srcSet={srcSet(slide.n, 'jpg')}
+                    sizes={SIZES}
+                    width={1600}
+                    height={900}
+                    alt={slide.alt}
+                    // Only near slides are in the page, so each one loads at once; far slides have no <img> yet.
+                    loading="eager"
+                    fetchPriority={i === 0 ? 'high' : 'auto'}
+                  />
+                </picture>
+              )}
+            </div>
+          ))}
         </div>
       </div>
-      <div className="hero-split__content">{children}</div>
+      <div className="hero-carousel__controls">
+        <button type="button" className="hero-carousel__button" aria-label="Previous slide" onClick={() => go(index - 1)}>‹</button>
+        <div className="hero-carousel__dots">
+          {slides.map((slide, i) => (
+            <button
+              key={slide.n}
+              type="button"
+              className="hero-carousel__dot"
+              aria-label={`Show slide ${i + 1} of ${total}`}
+              aria-current={i === index}
+              onClick={() => go(i)}
+            />
+          ))}
+        </div>
+        <button type="button" className="hero-carousel__button" aria-label="Next slide" onClick={() => go(index + 1)}>›</button>
+        <button
+          type="button"
+          className="hero-carousel__button hero-carousel__pause"
+          aria-label={playing ? 'Pause slideshow' : 'Play slideshow'}
+          onClick={() => setChoice(!playing)}
+        >
+          {playing ? 'Pause' : 'Play'}
+        </button>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,74 @@
+.home-hero { padding-block: 1.5rem 2rem; background: #081024; color: #fff; }
+.home-hero__split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.75rem; }
+.home-hero__copy { min-width: 0; }
+.lp-home .home-hero h1 {
+  max-width: 19ch;
+  color: #fff;
+  font-size: clamp(1.9rem, 7.6vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+.home-hero__lead { max-width: 44ch; margin-top: 0.8rem; color: #d7e0ee; font-size: 1.05rem; line-height: 1.55; }
+
+/* Class buttons: a labelled row per school stage. */
+.grades { display: grid; gap: 0.6rem; margin-top: 1.5rem; }
+.grades__title { font-weight: 700; }
+.grades__row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.3rem; }
+.grades__group { font-size: 0.85rem; color: #b9c6da; }
+.grades ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 0.4rem; margin: 0; padding: 0; list-style: none; }
+/* Fixed columns so the numbers break evenly (6 then 5) where all eleven do not fit on one line. */
+.grades__row:not([data-group="Pre-primary"]) ul { grid-template-columns: repeat(6, minmax(44px, 1fr)); }
+.grades__row[data-group="Pre-primary"] ul { grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr)); }
+.grades li a {
+  display: grid;
+  min-height: 44px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 10px;
+  background: #14213d;
+  color: #fff;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+}
+.grades li a:hover { border-color: #fdb813; background: #fdb813; color: #0b1f3a; }
+.home-hero :focus-visible, .grade-bar :focus-visible { outline: 3px solid #fdb813; outline-offset: 2px; }
+
+.home-hero__upload { display: flex; flex-wrap: wrap; align-items: center; column-gap: 0.4rem; margin-top: 0.75rem; color: #d7e0ee; }
+.home-hero__upload a { display: inline-flex; min-height: 44px; align-items: center; color: #fdb813; font-weight: 700; text-decoration: underline; text-underline-offset: 4px; }
+
+.home-hero__finder { display: grid; gap: 0.6rem; margin-top: 1.5rem; }
+.home-hero__finder select, .home-hero__finder button { min-height: 52px; border-radius: 12px; font: 700 1rem var(--font-body); }
+.home-hero__finder select { min-width: 0; width: 100%; padding: 0 0.9rem; border: 2px solid #fff; background: #fff; color: #0b1f3a; }
+.home-hero__finder button { padding: 0 1.4rem; border: 0; background: #fdb813; color: #0b1f3a; white-space: nowrap; cursor: pointer; }
+.home-hero__finder button:hover { background: #ffca45; }
+
+/* State with school lists: the class buttons sit under the hero. */
+.grade-bar { padding-block: 0.25rem 1.5rem; background: #f4f5f7; color: #0b1f3a; }
+.grade-bar .grades { display: flex; flex-wrap: wrap; align-items: end; gap: 0.9rem 1.5rem; margin-top: 1rem; }
+.grade-bar .grades__title { width: 100%; }
+.grade-bar .grades__row { flex: 1 1 100%; }
+.grade-bar .grades__row[data-group] ul { grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); }
+.grade-bar .grades__row[data-group="Pre-primary"] ul { grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr)); }
+.grade-bar .grades__group { color: #44546c; }
+.grade-bar .grades li a { border-color: #c8d0dc; background: #fff; color: #0b1f3a; }
+.grade-bar .grades li a:hover { border-color: #0b1f3a; background: #0b1f3a; color: #fff; }
+html.dark .grade-bar { background: #0b1f3a; color: #f4f5f7; }
+html.dark .grade-bar .grades__group { color: #b9c6da; }
+html.dark .grade-bar .grades li a { border-color: rgba(255, 255, 255, 0.35); background: #14213d; color: #fff; }
+
+@media (min-width: 640px) and (max-width: 1023px), (min-width: 1240px) {
+  .grades__row:not([data-group="Pre-primary"]) ul { grid-template-columns: repeat(11, minmax(44px, 1fr)); }
+}
+
+@media (min-width: 1024px) {
+  .home-hero { padding-block: 2.5rem; }
+  .home-hero__split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 2.5rem; }
+  .lp-home .home-hero h1 { font-size: clamp(2.25rem, 3.4vw, 2.75rem); }
+  .home-hero__finder { grid-template-columns: minmax(0, 1fr) auto; }
+  .grade-bar .grades__row[data-group="Pre-primary"] { flex: 0 1 20rem; }
+  .grade-bar .grades__row[data-group="Grade"] { flex: 1 1 34rem; }
+  .grade-bar .grades__row[data-group="Form"] { flex: 0 1 13rem; }
+}

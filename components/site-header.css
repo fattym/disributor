@@ -25,8 +25,8 @@ html.dark .lph {
 
 .lph__top {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) 44px;
-  grid-template-areas: "menu logo cart" "search search search";
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "logo actions" "search search";
   align-items: center;
   gap: 0.5rem 0.75rem;
   padding-block: 0.6rem;
@@ -44,10 +44,9 @@ html.dark .lph {
   cursor: pointer;
 }
 .lph__icon:hover { background: var(--lph-field); }
-.lph__menu { grid-area: menu; }
-.lph__logo { grid-area: logo; justify-self: center; display: flex; align-items: center; min-height: 44px; line-height: 0; }
+.lph__logo { grid-area: logo; justify-self: start; display: flex; align-items: center; min-height: 44px; line-height: 0; }
 .lph__logo svg { display: block; height: 34px; width: auto; max-width: 100%; }
-.lph__actions { grid-area: cart; display: flex; align-items: center; justify-content: flex-end; gap: 0.35rem; }
+.lph__actions { grid-area: actions; display: flex; align-items: center; justify-content: flex-end; gap: 0.35rem; }
 .lph__track, .lph__theme { display: none; }
 .lph .cart-icon-wrap { position: relative; display: inline-flex; }
 .lph .cart-icon-wrap .cart-count-badge {
@@ -146,7 +145,7 @@ html:has(.lph__drawer[open]) { overflow: hidden; }
   .lph__wrap { width: min(100% - 2.5rem, var(--wrap, 1180px)); }
   .lph__top {
     grid-template-columns: auto minmax(0, 1fr) auto;
-    grid-template-areas: "logo search cart";
+    grid-template-areas: "logo search actions";
     column-gap: 2rem;
     padding-block: 0.85rem;
   }
@@ -164,7 +163,7 @@ html:has(.lph__drawer[open]) { overflow: hidden; }
   .lph__theme { display: inline-grid; }
   .lph__nav { display: block; border-top: 1px solid var(--lph-line); }
   .lph__nav .lph__wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-  .lph__nav ul { display: flex; gap: 2rem; margin: 0; padding: 0; list-style: none; }
+  .lph__nav ul { display: flex; gap: 1.75rem; margin: 0; padding: 0; list-style: none; }
   .lph__nav a {
     justify-content: center;
     min-width: 44px;

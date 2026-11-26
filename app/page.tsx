@@ -3,107 +3,25 @@ import Image from "next/image";
 import Script from "next/script";
 import GlobalHeader from "@/components/GlobalHeader";
 import WhatsAppBubble from "@/components/WhatsAppBubble";
-import HeroCarousel from "@/components/HeroCarousel";
+import HomeHero from "@/components/HomeHero";
+import { getBuildProducts } from "@/lib/seo";
+import { classesIn } from "@/lib/gradeClasses";
+import { getPublishedLists, schoolsWithLists } from "@/lib/booklistSchools";
 import prePrimaryImage from "@/assets/image/pre-primary.jpeg";
 import primaryImage from "@/assets/image/cbc primary.jpeg";
 import juniorSecondaryImage from "@/assets/image/cbc junior secondary.jpeg";
 import seniorSecondaryImage from "@/assets/image/cbc senior secondary.jpeg";
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Read at build time: the hero changes on the next rebuild after a school publishes its first list.
+  const [products, lists] = await Promise.all([getBuildProducts(), getPublishedLists()]);
   return (
     <div className="lp-home-html">
       <div className="lp-home">
         <GlobalHeader />
 
         <main id="main">
-          <section className="hero hero--cbc">
-            <HeroCarousel>
-              <div className="hero__copy">
-                <h1>
-                  CBC textbooks, set books and stationery for your child&apos;s
-                  class
-                </h1>
-                <p className="lead">
-                  Order online and we deliver to your child&apos;s school, your
-                  shop or your home.
-                </p>
-                <div className="actions">
-                  <Link className="btn hero__cta-primary" href="#hero-grades">
-                    Shop by grade
-                  </Link>
-                  <Link
-                    className="btn btn--ghost hero__cta-secondary"
-                    href="/upload-my-list/"
-                  >
-                    Upload my list
-                  </Link>
-                  <Link
-                    className="btn btn--ghost hero__cta-secondary"
-                    href="/find-my-school-list/"
-                  >
-                    Find my school list
-                  </Link>
-                </div>
-              </div>
-            </HeroCarousel>
-                <nav
-                  className="hero__grades"
-                  id="hero-grades"
-                  aria-label="Shop by grade"
-                >
-                  <span className="hero__grades-label">Shop by grade</span>
-                  <Link href="/shop?level=pre-primary">Pre-Primary</Link>
-                  <Link href="/shop?level=primary">Grade 1–6</Link>
-                  <Link href="/shop?level=junior-secondary">Grade 7–9</Link>
-                  <Link href="/shop?level=senior-secondary&grades=10-12">
-                    Grade 10–12
-                  </Link>
-                  <Link href="/shop?level=senior-secondary&form=1-4">
-                    Form 1–4
-                  </Link>
-                </nav>
-          </section>
-
-          <div className="finder" style={{ padding: "0" }}>
-            <div className="wrap">
-              <div className="finder__card">
-                <div>
-                  <h2>Which school does your child attend?</h2>
-                  <p>You’ll choose the grade on the next page.</p>
-                </div>
-                <form action="/find-my-school-list/" method="get">
-                  <label htmlFor="school">School</label>
-                  <select id="school" name="school">
-                    <option value="">Select your school</option>
-                    <option>Kigwa Ridge School</option>
-                    <option>Lukenya International School</option>
-                    <option>Brighton International School</option>
-                    <option>Makini School Ngong Road</option>
-                    <option>Makini School Runda</option>
-                    <option>Crawford International School</option>
-                    <option>Shadel International School</option>
-                    <option>Mountain View School</option>
-                    <option>Nova Pioneer Tatu International</option>
-                    <option>Busy Bee School</option>
-                    <option>Chantilly School</option>
-                    <option>The Marion School</option>
-                    <option>All Saints Cathedral School</option>
-                    <option>Thika Road Academy</option>
-                    <option>Safari Brooks Academy</option>
-                    <option>Kiota School</option>
-                    <option>Regis School</option>
-                    <option>The Children’s House School</option>
-                    <option>The Learning Academy</option>
-                    <option>School of the Nations</option>
-                    <option>Noblegate International Academy</option>
-                  </select>
-                  <button className="btn" type="submit">
-                    Find my list
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
+          <HomeHero classes={classesIn(products)} schools={schoolsWithLists(lists)} />
 
           <section
             className="home-shortcuts"

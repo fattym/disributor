@@ -128,3 +128,11 @@
     margin-bottom: 1.5rem;
   }
 }
+
+/* The school picked on the home page: its published lists. */
+.published-lists { width: min(100% - 2rem, 1040px); margin: 2rem auto 0; color: #0b1f3a; }
+.published-lists article { margin-bottom: 1rem; padding: 1.25rem; border: 1px solid #dde2e9; border-radius: 14px; background: #fff; }
+.published-lists h2 { margin: 0; color: #0b1f3a; font-size: 1.5rem; font-weight: 800; }
+.published-lists ul { margin: 0.75rem 0 0; padding: 0; list-style: none; }
+.published-lists li { padding: 0.65rem 0; border-top: 1px solid #dde2e9; }
+.published-lists li a { text-decoration: underline; text-underline-offset: 3px; }

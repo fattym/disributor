@@ -18,12 +18,12 @@ test('every carousel picture has one slide, in numeric order, with alt text', ()
   for (const s of slides) assert.ok(s.alt.length > 30, `slide ${s.n} alt`);
 });
 
-test('home hero: one h1 and the three main buttons; the checklist card is gone', () => {
-  const page = read('app/page.tsx');
-  assert.strictEqual(page.match(/<h1/g).length, 1);
-  const inside = page.slice(page.indexOf('<HeroCarousel>'), page.indexOf('</HeroCarousel>'));
-  for (const text of ['<h1', 'Shop by grade', 'Upload my list', 'Find my school list']) assert.ok(inside.includes(text), text);
-  assert.ok(!page.includes('Your school list, all in one place'));
+test('home hero: one h1, words before pictures, no stats or badge', () => {
+  const hero = read('components/HomeHero.tsx');
+  assert.strictEqual((hero + read('app/page.tsx')).match(/<h1/g).length, 1);
+  assert.ok(hero.indexOf('<h1') < hero.indexOf('<HeroCarousel />'));
+  for (const text of ['Have a printed list?', 'Select your school', 'Find my school list']) assert.ok(hero.includes(text), text);
+  assert.ok(!/14,000|4\.9|250\+|KICD|same-day|badge/i.test(hero));
 });
 
 test('the active slide and its neighbours have a picture; only the first is preloaded', () => {
@@ -44,6 +44,4 @@ test('pictures are shown whole: 16:9 sources and frame, no crop, no overlay, tex
   assert.match(rules, /aspect-ratio: 16 \/ 9/);
   assert.match(rules, /object-fit: contain/);
   assert.doesNotMatch(rules, /object-fit: cover|::after/);
-  const c = read('components/HeroCarousel.tsx');
-  assert.ok(c.indexOf('hero-split__content') > c.indexOf('hero-carousel__controls'));
 });

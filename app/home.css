@@ -2602,21 +2602,8 @@ html.dark-mode .lp-home .footer {
   }
 }
 
-/* Keep the CBC campaign hero above legacy homepage theme rules. */
-.lp-home .hero--cbc,
-html.dark-mode .lp-home .hero--cbc {
-  padding: 0 0 1rem;
-  background: #081024;
-}
-
-/* Picture first, text below it; side by side from 1024px. Nothing is drawn over a picture. */
-.lp-home .hero-split {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 1rem;
-  max-width: 1280px;
-  margin-inline: auto;
-}
+/* Home carousel: pictures shown whole, controls underneath. Hero layout is in components/home-hero.css. */
+.lp-home .hero-carousel { min-width: 0; }
 
 /* The pictures are 16:9. The ratio reserves their height before they load (no layout shift). */
 .lp-home .hero-carousel__frame {
@@ -2624,6 +2611,7 @@ html.dark-mode .lp-home .hero--cbc {
   aspect-ratio: 16 / 9;
   width: 100%;
   overflow: hidden;
+  border-radius: 20px;
   touch-action: pan-y;
 }
 
@@ -2653,12 +2641,6 @@ html.dark-mode .lp-home .hero--cbc {
   width: 100%;
   height: 100%;
   object-fit: contain;
-}
-
-.lp-home .hero-split__content {
-  display: flex;
-  justify-content: center;
-  padding-inline: 1rem;
 }
 
 .lp-home .hero-carousel__controls {
@@ -2720,162 +2702,6 @@ html.dark-mode .lp-home .hero--cbc {
   font-weight: 700;
 }
 
-.lp-home .hero--cbc .hero__copy {
-  display: flex;
-  width: 100%;
-  max-width: 56rem;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.lp-home .hero--cbc .hero__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  margin-bottom: 0.9rem;
-  padding: 0.48rem 0.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  font-size: 0.74rem;
-  font-weight: 650;
-  backdrop-filter: blur(8px);
-}
-
-.lp-home .hero--cbc .hero__badge span {
-  color: #ffd46b;
-}
-
-.lp-home .hero--cbc h1,
-html.dark-mode .lp-home .hero--cbc h1 {
-  width: 100%;
-  max-width: 18ch;
-  color: #fff;
-  font-size: clamp(1.65rem, 7.4vw, 2.5rem);
-  font-weight: 800;
-  letter-spacing: -0.05em;
-  line-height: 1.06;
-  text-align: center;
-  text-wrap: balance;
-}
-
-.lp-home .hero--cbc p.lead,
-html.dark-mode .lp-home .hero--cbc p.lead {
-  max-width: 65ch;
-  margin-top: 0.8rem;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.96rem;
-  line-height: 1.55;
-  text-align: center;
-}
-
-.lp-home .hero--cbc .actions {
-  display: grid;
-  width: 100%;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.lp-home .hero--cbc .actions .btn {
-  width: 100%;
-  min-height: 44px;
-  padding-inline: 0.5rem;
-  text-align: center;
-}
-
-.lp-home .hero--cbc .actions .hero__cta-primary {
-  grid-column: 1 / -1;
-}
-
-.lp-home .hero--cbc .hero__cta-primary,
-html.dark-mode .lp-home .hero--cbc .hero__cta-primary {
-  gap: 0.65rem;
-  border-color: #fdb813;
-  background: #fdb813;
-  color: #0f172a;
-}
-
-.lp-home .hero--cbc .hero__cta-primary:hover,
-html.dark-mode .lp-home .hero--cbc .hero__cta-primary:hover {
-  border-color: #ffca45;
-  background: #ffca45;
-  color: #0f172a;
-}
-
-.lp-home .hero--cbc .hero__cta-secondary,
-html.dark-mode .lp-home .hero--cbc .hero__cta-secondary {
-  gap: 0.65rem;
-  border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(15, 23, 42, 0.35);
-  color: #fff;
-  box-shadow: none;
-}
-
-.lp-home .hero--cbc .hero__cta-secondary:hover,
-html.dark-mode .lp-home .hero--cbc .hero__cta-secondary:hover {
-  border-color: rgba(255, 255, 255, 0.8);
-  background: rgba(15, 23, 42, 0.65);
-  color: #fff;
-}
-
-.lp-home .hero--cbc .hero__cta-primary svg,
-.lp-home .hero--cbc .hero__cta-secondary svg {
-  width: 1.15rem;
-  height: 1.15rem;
-  flex: none;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.8;
-}
-
-.lp-home .hero--cbc .hero__grades {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  margin-top: 1rem;
-  padding-inline: 1rem;
-}
-
-.lp-home .hero--cbc .hero__grades-label {
-  width: 100%;
-  margin: 0 0 0.1rem;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-align: center;
-}
-
-.lp-home .hero--cbc .hero__grades a {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  justify-content: center;
-  padding: 0.45rem 0.7rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.94);
-  font-size: 0.72rem;
-  font-weight: 550;
-  transition:
-    background-color 180ms ease,
-    border-color 180ms ease,
-    transform 180ms ease;
-}
-
-.lp-home .hero--cbc .hero__grades a:hover {
-  transform: translateY(-1px);
-  border-color: rgba(255, 255, 255, 0.75);
-  background: rgba(255, 255, 255, 0.18);
-}
-
 .home-whatsapp {
   position: fixed;
   z-index: 80;
@@ -2889,13 +2715,11 @@ html.dark-mode .lp-home .hero--cbc .hero__cta-secondary:hover {
   border-radius: 50%;
   background: #25d366;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
-  transition:
-    transform 180ms ease,
-    box-shadow 180ms ease;
+  /* No transform transition: WhatsAppBubble moves it and reads its position straight back. */
+  transition: box-shadow 180ms ease;
 }
 
 .home-whatsapp:hover {
-  transform: translateY(-2px) scale(1.04);
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.3);
 }
 
@@ -2916,52 +2740,14 @@ html.dark-mode .lp-home .hero--cbc .hero__cta-secondary:hover {
   background: #fdb813;
 }
 
-@media (min-width: 641px) {
+@media (min-width: 641px) and (max-width: 1023px), (min-width: 1240px) {
   .lp-home .hero-carousel__dots {
     order: 0;
     width: auto;
   }
+}
 
-  .lp-home .hero--cbc .hero__badge {
-    margin-bottom: 1.1rem;
-    padding: 0.55rem 1rem;
-    font-size: 0.82rem;
-  }
-
-  .lp-home .hero--cbc h1,
-  html.dark-mode .lp-home .hero--cbc h1 {
-    max-width: 24ch;
-    font-size: clamp(2.25rem, 4.2vw, 3.5rem);
-    line-height: 1.04;
-  }
-
-  .lp-home .hero--cbc p.lead,
-  html.dark-mode .lp-home .hero--cbc p.lead {
-    margin-top: 1rem;
-    font-size: 1.1rem;
-    line-height: 1.6;
-  }
-
-  .lp-home .hero--cbc .actions {
-    max-width: 34rem;
-    margin-top: 1.5rem;
-  }
-
-  .lp-home .hero--cbc .hero__grades {
-    gap: 0.55rem;
-    margin-top: 1.25rem;
-  }
-
-  .lp-home .hero--cbc .hero__grades-label {
-    width: auto;
-    margin: 0 0.25rem 0 0;
-  }
-
-  .lp-home .hero--cbc .hero__grades a {
-    padding-inline: 0.85rem;
-    font-size: 0.78rem;
-  }
-
+@media (min-width: 641px) {
   .home-whatsapp {
     right: max(1.25rem, env(safe-area-inset-right));
     bottom: max(1.25rem, env(safe-area-inset-bottom));
@@ -2970,39 +2756,7 @@ html.dark-mode .lp-home .hero--cbc .hero__cta-secondary:hover {
   }
 }
 
-@media (min-width: 1024px) {
-  .lp-home .hero-split {
-    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
-    align-items: center;
-    gap: 1.5rem;
-    padding-inline: 1rem;
-  }
-
-  .lp-home .hero-split__content {
-    padding: 0;
-  }
-
-  .lp-home .hero--cbc .hero__copy {
-    align-items: flex-start;
-    text-align: left;
-  }
-
-  .lp-home .hero--cbc h1,
-  html.dark-mode .lp-home .hero--cbc h1 {
-    font-size: clamp(1.9rem, 2.7vw, 2.6rem);
-    text-align: left;
-  }
-
-  .lp-home .hero--cbc p.lead,
-  html.dark-mode .lp-home .hero--cbc p.lead {
-    font-size: 1rem;
-    text-align: left;
-  }
-
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .lp-home .hero--cbc .hero__grades a,
   .lp-home .hero-carousel__slide,
   .home-whatsapp {
     transition: none;
@@ -3087,19 +2841,6 @@ html.dark-mode .cart-count-badge,
     padding-inline: 0.6rem;
   }
 }
-
-/* The school finder normally overlaps the hero's lower edge; here that would hide the grade links. */
-.lp-home .hero--cbc + .finder {
-  margin-top: 1.25rem;
-}
-
-@media (min-width: 1024px) {
-  .lp-home .hero--cbc,
-  html.dark-mode .lp-home .hero--cbc {
-    padding-block: 1.5rem;
-  }
-}
-
 /* Room under the last footer line for the floating WhatsApp link. */
 .lp-home .footer {
   padding-bottom: 5.5rem;

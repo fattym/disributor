@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import GlobalHeader from "@/components/GlobalHeader";
 import GlobalFooter from "@/components/GlobalFooter";
+import PublishedLists from "@/components/PublishedLists";
 import { shopApi } from "@/lib/api";
 import "./school-list.css";
 
@@ -126,6 +127,7 @@ export default function FindMySchoolListPage() {
     <>
       <GlobalHeader />
       <main className="school-list-page" id="main">
+        <PublishedLists />
         <div className="school-list-shell">
           <div className="school-list-copy">
             <p className="crumbs">

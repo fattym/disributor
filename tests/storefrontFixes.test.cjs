@@ -37,7 +37,7 @@ test('wrong or missing catalogue photos become "No photo yet"; good ones are kep
 
 test('one main menu, same items and order, on the shared header and the home page', () => {
   const { MAIN_NAV } = load('lib/nav.ts');
-  assert.deepEqual(MAIN_NAV.map((i) => i.label), ['Shop', 'School lists', 'Discovery', 'Signature pack', 'Contact us']);
+  assert.deepEqual(MAIN_NAV.map((i) => i.label), ['Shop', 'School lists', 'Discovery', 'Signature pack', 'Contact us', '3D Bookshop']);
   for (const i of MAIN_NAV) assert.ok(fs.existsSync(path.join(root, 'app', i.href, 'page.tsx')), `${i.href} is a real page`);
   assert.ok(read('components/GlobalHeader.tsx').includes('MAIN_NAV'));
   assert.ok(read('app/page.tsx').includes('<GlobalHeader />'));

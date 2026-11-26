@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 
 const GAP = 8;
 // Things the bubble must never sit on: everything tappable, the slide picture and the hero words.
-const KEEP_CLEAR = "a[href], button, input, select, textarea, .hero-carousel__frame, .hero__copy h1, .hero__copy p";
+const KEEP_CLEAR = "a[href], button, input, select, textarea, .hero-carousel__frame, .home-hero h1, .home-hero p, .grades__title, .grades__group";
 
 /** Floating WhatsApp link: stays in the corner, moves up past anything tappable, hides if there is no free spot. */
 export default function WhatsAppBubble() {
@@ -23,7 +23,7 @@ export default function WhatsAppBubble() {
         .filter((el) => el !== bubble && getComputedStyle(el).visibility !== "hidden")
         .map((el) => el.getBoundingClientRect())
         .filter((b) => b.width > 0 && b.right > home.left - GAP && b.left < home.right + GAP)
-        .sort((a, b) => b.top - a.top);
+        .sort((a, b) => b.bottom - a.bottom); // lowest first, so one upward pass is enough
       let top = home.top;
       for (const b of boxes) {
         if (b.top < top + home.height + GAP && b.bottom > top - GAP) top = b.top - GAP - home.height;
