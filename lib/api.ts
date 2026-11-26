@@ -260,28 +260,28 @@ export const booklistApi = {
   getAcademicYears: () =>
     api.get<AcademicYear[] | { results: AcademicYear[] }>('/booklists/academic-years/').then((r) => r.data),
   getBooklists: (params?: Record<string, string | number>) =>
-    api.get<Booklist[] | { results: Booklist[] }>('/booklists/', { params: { page_size: 20, ...params } }).then((r) => r.data),
+    api.get<Booklist[] | { results: Booklist[] }>('/booklists/booklists/', { params: { page_size: 20, ...params } }).then((r) => r.data),
   getBooklist: (id: number | string) =>
-    api.get<Booklist>(`/booklists/${id}/`).then((r) => r.data),
+    api.get<Booklist>(`/booklists/booklists/${id}/`).then((r) => r.data),
   getBooklistItems: (id: number | string) =>
-    api.get<BooklistItem[]>(`/booklists/${id}/items/`).then((r) => r.data),
+    api.get<BooklistItem[]>(`/booklists/booklists/${id}/items/`).then((r) => r.data),
   createBooklist: (data: {
     grade: number;
     academic_year: number;
     name: string;
     version?: string;
     status?: 'draft' | 'published' | 'archived';
-  }) => api.post<Booklist>('/booklists/', data).then((r) => r.data),
+  }) => api.post<Booklist>('/booklists/booklists/', data).then((r) => r.data),
   updateBooklist: (id: number | string, data: Partial<Booklist>) =>
-    api.patch<Booklist>(`/booklists/${id}/`, data).then((r) => r.data),
+    api.patch<Booklist>(`/booklists/booklists/${id}/`, data).then((r) => r.data),
   addItems: (id: number | string, items: BooklistItemCreate[]) =>
-    api.post<BooklistItem[]>(`/booklists/${id}/add_items/`, { items }).then((r) => r.data),
+    api.post<BooklistItem[]>(`/booklists/booklists/${id}/add_items/`, { items }).then((r) => r.data),
   publishBooklist: (id: number | string) =>
-    api.post(`/booklists/${id}/publish/`).then((r) => r.data),
+    api.post(`/booklists/booklists/${id}/publish/`).then((r) => r.data),
   archiveBooklist: (id: number | string) =>
-    api.post(`/booklists/${id}/archive/`).then((r) => r.data),
+    api.post(`/booklists/booklists/${id}/archive/`).then((r) => r.data),
   deleteBooklist: (id: number | string) =>
-    api.delete(`/booklists/${id}/`).then((r) => r.data),
+    api.delete(`/booklists/booklists/${id}/`).then((r) => r.data),
 };
 
 export interface PaymentStatus {

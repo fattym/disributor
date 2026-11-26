@@ -34,3 +34,22 @@ test('the shop price range follows all loaded products until the shopper sets it
   assert.ok(page.includes('minChoice ?? priceBounds.min') && page.includes('maxChoice ?? priceBounds.max'));
   assert.ok(!/setM(in|ax)Price\(Math\./.test(page));
 });
+
+const src = (p) => fs.readFileSync(path.join(__dirname, '..', p), 'utf8');
+
+test('no unbacked bulk-order claims and no hard-coded school names', () => {
+  assert.ok(!/10,000|48 ?hrs|300\+|home-bulk__stats/.test(src('app/page.tsx')));
+  const find = src('app/find-my-school-list/page.tsx') + src('components/SchoolPicker.tsx');
+  assert.ok(!/Makini|Kigwa|Crawford|const schools = \[/.test(find));
+  assert.ok(find.includes('schoolsWithLists') && find.includes('href="/upload-my-list/"'));
+});
+
+test('booklist calls use /booklists/booklists/ and class pages link to all books', () => {
+  const api = src('lib/api.ts');
+  const block = api.slice(api.indexOf('export const booklistApi'), api.indexOf('export interface PaymentStatus'));
+  const urls = block.match(/['`]\/booklists\/[^'`]*['`]/g);
+  assert.equal(urls.length, 10);
+  for (const u of urls) assert.match(u, /^.\/booklists\/(booklists|academic-years)\//);
+  assert.ok(!src('app/school/booklists/page.tsx').includes("status: 'all'"));
+  assert.ok(src('app/shop/page.tsx').includes('Browse all books'));
+});

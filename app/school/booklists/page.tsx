@@ -45,7 +45,7 @@ export default function SchoolBooklistsPage() {
   async function load() {
     try {
       const [blRes, yrRes, gdRes] = await Promise.all([
-        booklistApi.getBooklists({ status: 'all' }),
+        booklistApi.getBooklists(),
         booklistApi.getAcademicYears(),
         distributorApi.getGrades(),
       ]);

@@ -802,9 +802,15 @@ function ShopContent() {
                 </div>
               )}
 
+              {gradeClass && (
+                <p className="shop-browse-all">
+                  Not finding it? <Link href="/shop/" onClick={clearFilters}>Browse all books</Link>
+                </p>
+              )}
+
               <div className="shop-sort-bar">
                 <span className="count">
-                  {loading ? "Loading..." : `${sorted.length} product${sorted.length === 1 ? "" : "s"} found`}
+                  {loading || (loadingMore && sorted.length === 0) ? "Loading..." : `${sorted.length} product${sorted.length === 1 ? "" : "s"} found`}
                 </span>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
                   {sellers.length > 1 && (

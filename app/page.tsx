@@ -88,15 +88,7 @@ export default async function HomePage() {
 
               <aside className="home-bulk">
                 <div className="home-bulk__content">
-                  <p className="home-bulk__badge">
-                    <span aria-hidden="true">🏫</span> Schools &amp; Teachers
-                  </p>
-                  <h2>Bulk school orders, made simple</h2>
-                  <p className="home-bulk__description">
-                    Send us your school booklist and we&apos;ll prepare a quote,
-                    source every title and deliver on schedule — term after
-                    term.
-                  </p>
+                  <h2>Ordering for a whole school?</h2>
                   <div className="home-bulk__actions">
                     <a
                       className="home-bulk__whatsapp"
@@ -104,27 +96,10 @@ export default async function HomePage() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Request a Quote on WhatsApp
-                    </a>
-                    <a className="home-bulk__phone" href="tel:+254716815025">
-                      +254 716 815 025
+                      Talk to us on WhatsApp 0716 815 025
                     </a>
                   </div>
                 </div>
-                <dl className="home-bulk__stats">
-                  <div>
-                    <dt>Titles stocked</dt>
-                    <dd>10,000+</dd>
-                  </div>
-                  <div>
-                    <dt>Nairobi delivery</dt>
-                    <dd>48hrs</dd>
-                  </div>
-                  <div>
-                    <dt>Schools served</dt>
-                    <dd>300+</dd>
-                  </div>
-                </dl>
               </aside>
             </div>
           </section>

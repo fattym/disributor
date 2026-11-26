@@ -1177,3 +1177,7 @@ html.dark-mode .shop-active-filter--cat .remove,
   .shop-price-inputs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
   .shop-price-inputs input { flex: 1 1 96px; width: auto; min-height: 44px; box-sizing: border-box; }
 }
+
+/* Class pages (opened from a home page class button): a way out to the whole catalogue. */
+.shop-browse-all { display: flex; flex-wrap: wrap; align-items: center; column-gap: 0.4rem; margin: 0 0 0.75rem; font-weight: 600; }
+.shop-browse-all a { display: inline-flex; min-height: 44px; align-items: center; font-weight: 800; text-decoration: underline; text-underline-offset: 4px; }
