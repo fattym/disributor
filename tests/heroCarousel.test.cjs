@@ -8,8 +8,13 @@ const slides = JSON.parse(read('lib/heroSlides.json'));
 
 test('every carousel picture has one slide, in numeric order, with alt text', () => {
   const files = fs.readdirSync(path.join(__dirname, '..', 'assets/image/carousel'))
-    .map((f) => parseInt(f, 10)).sort((a, b) => a - b);
+    .filter((f) => /^\d+\.jpg$/.test(f)).map((f) => parseInt(f, 10)).sort((a, b) => a - b);
   assert.deepStrictEqual(slides.map((s) => s.n), files);
+  // A corrected picture is used wherever one exists, and the original stays beside it.
+  for (const s of slides) {
+    const fixed = fs.existsSync(path.join(__dirname, '..', 'assets/image/carousel', `${s.n}-fixed.jpg`));
+    assert.strictEqual(s.file, fixed ? `${s.n}-fixed.jpg` : undefined, `slide ${s.n} file`);
+  }
   for (const s of slides) assert.ok(s.alt.length > 30, `slide ${s.n} alt`);
 });
 
@@ -30,7 +35,7 @@ test('only the first slide is eager and preloaded', () => {
 test('pictures are shown whole: 16:9 sources and frame, no crop, no overlay, text outside the picture', async () => {
   const sharp = require('sharp');
   for (const s of slides) {
-    const { width, height } = await sharp(path.join(__dirname, '..', 'assets/image/carousel', `${s.n}.jpg`)).metadata();
+    const { width, height } = await sharp(path.join(__dirname, '..', 'assets/image/carousel', s.file ?? `${s.n}.jpg`)).metadata();
     assert.ok(Math.abs(width / height - 16 / 9) < 0.01, `slide ${s.n} is ${width}x${height}`);
   }
   const css = read('app/home.css');
