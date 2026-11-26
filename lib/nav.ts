@@ -1,11 +1,11 @@
-/** The one main menu: same items, same order, on every page and in the phone menu. */
+/** The one main menu: same items, same order, in the desktop menu row and the phone drawer. */
 export const MAIN_NAV: ReadonlyArray<{ href: string; label: string }> = [
   { href: '/shop/', label: 'Shop' },
-  { href: '/bookshop/', label: 'Bookshop' },
+  { href: '/find-my-school-list/', label: 'School lists' },
   { href: '/discovery/', label: 'Discovery' },
-  { href: '/find-my-school-list/', label: 'Find my school list' },
-  { href: '/upload-my-list/', label: 'Upload my list' },
   { href: '/product-category/student-boxes/', label: 'Signature pack' },
-  { href: '/track-your-order/', label: 'Track your order' },
   { href: '/contact/', label: 'Contact us' },
 ];
+
+/** Desktop: right side of the top row. Phone: inside the menu drawer. */
+export const TRACK_ORDER = { href: '/track-your-order/', label: 'Track order' } as const;

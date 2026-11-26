@@ -137,6 +137,10 @@ export default function FindMySchoolListPage() {
               Choose your child&apos;s school and grade to find the supplies
               they need for the school year.
             </p>
+            <p>
+              Already have the list?{" "}
+              <Link href="/upload-my-list/" style={{ textDecoration: "underline", fontWeight: 700 }}>Upload my list</Link>
+            </p>
             <div className="school-list-points">
               <span>Complete school supplies</span>
               <span>One simple order</span>

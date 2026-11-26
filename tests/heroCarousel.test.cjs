@@ -22,13 +22,14 @@ test('home hero: one h1 and the three main buttons; the checklist card is gone',
   const page = read('app/page.tsx');
   assert.strictEqual(page.match(/<h1/g).length, 1);
   const inside = page.slice(page.indexOf('<HeroCarousel>'), page.indexOf('</HeroCarousel>'));
-  for (const text of ['<h1', 'Shop CBC Books', 'Browse by Grade', 'Find my school list']) assert.ok(inside.includes(text), text);
+  for (const text of ['<h1', 'Shop by grade', 'Upload my list', 'Find my school list']) assert.ok(inside.includes(text), text);
   assert.ok(!page.includes('Your school list, all in one place'));
 });
 
-test('only the first slide is eager and preloaded', () => {
+test('the active slide and its neighbours have a picture; only the first is preloaded', () => {
   const c = read('components/HeroCarousel.tsx');
-  assert.match(c, /loading=\{i === 0 \? 'eager' : 'lazy'\}/);
+  assert.match(c, /seen\.includes\(i\) \|\| i === index \|\| \(warm && isNear\(i\)\)/);
+  assert.match(c, /loading="eager"/);
   assert.match(c, /rel="preload"/);
 });
 

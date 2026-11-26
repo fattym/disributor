@@ -37,9 +37,11 @@ test('wrong or missing catalogue photos become "No photo yet"; good ones are kep
 
 test('one main menu, same items and order, on the shared header and the home page', () => {
   const { MAIN_NAV } = load('lib/nav.ts');
-  assert.deepEqual(MAIN_NAV.map((i) => i.label), ['Shop', 'Bookshop', 'Discovery', 'Find my school list', 'Upload my list', 'Signature pack', 'Track your order', 'Contact us']);
+  assert.deepEqual(MAIN_NAV.map((i) => i.label), ['Shop', 'School lists', 'Discovery', 'Signature pack', 'Contact us']);
   for (const i of MAIN_NAV) assert.ok(fs.existsSync(path.join(root, 'app', i.href, 'page.tsx')), `${i.href} is a real page`);
-  for (const f of ['components/GlobalHeader.tsx', 'app/page.tsx']) assert.ok(read(f).includes('MAIN_NAV.map'), f);
+  assert.ok(read('components/GlobalHeader.tsx').includes('MAIN_NAV'));
+  assert.ok(read('app/page.tsx').includes('<GlobalHeader />'));
+  assert.ok(read('app/find-my-school-list/page.tsx').includes('href="/upload-my-list/"'), 'School lists still reaches upload');
   assert.ok(!read('components/GlobalHeader.tsx').includes('#signature'));
 });
 
@@ -62,6 +64,6 @@ test('shop filters stack full width on phones', () => {
 });
 
 test('the home page header shows the cart count too', () => {
-  assert.ok(read('app/page.tsx').includes('<CartCount />'));
+  assert.ok(read('components/GlobalHeader.tsx').includes('<CartCount />'));
   assert.ok(read('components/CartCount.tsx').includes('cart-count-badge'));
 });

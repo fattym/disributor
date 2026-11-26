@@ -1962,7 +1962,6 @@ html.dark-mode .lp-home .hero h1 span {
   color: #ff8065;
 }
 
-html.dark-mode .lp-home .hero p.lead,
 html.dark-mode .lp-home .home-levels__grid small,
 html.dark-mode .lp-home .btn:not(.btn--ghost) {
   border-color: #e85c43;
@@ -2944,17 +2943,8 @@ html.dark-mode .lp-home .hero--cbc .hero__cta-secondary:hover {
   }
 
   .lp-home .hero--cbc .actions {
-    display: flex;
-    width: auto;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
+    max-width: 34rem;
     margin-top: 1.5rem;
-  }
-
-  .lp-home .hero--cbc .actions .btn {
-    width: auto;
   }
 
   .lp-home .hero--cbc .hero__grades {
@@ -3009,16 +2999,6 @@ html.dark-mode .lp-home .hero--cbc .hero__cta-secondary:hover {
     text-align: left;
   }
 
-  .lp-home .hero--cbc .actions {
-    display: grid;
-    width: 100%;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.6rem;
-  }
-
-  .lp-home .hero--cbc .actions .btn {
-    width: 100%;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -3118,4 +3098,9 @@ html.dark-mode .cart-count-badge,
   html.dark-mode .lp-home .hero--cbc {
     padding-block: 1.5rem;
   }
+}
+
+/* Room under the last footer line for the floating WhatsApp link. */
+.lp-home .footer {
+  padding-bottom: 5.5rem;
 }

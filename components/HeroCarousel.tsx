@@ -36,6 +36,7 @@ export default function HeroCarousel({ children }: { children: React.ReactNode }
     setSeen((list) => (list.includes(next) ? list : [...list, next]));
     setIndex(next);
   }, [total]);
+  const isNear = (i: number) => i === (index + 1) % total || i === (index - 1 + total) % total;
   const pauseOnAttention = () => setChoice((c) => (c === true ? null : c));
 
   useEffect(() => {
@@ -91,7 +92,7 @@ export default function HeroCarousel({ children }: { children: React.ReactNode }
                 aria-hidden={i !== index}
                 data-active={i === index}
               >
-                {(seen.includes(i) || (warm && i === (index + 1) % total)) && (
+                {(seen.includes(i) || i === index || (warm && isNear(i))) && (
                   <picture>
                     <source type="image/avif" srcSet={srcSet(slide.n, 'avif')} sizes={SIZES} />
                     <source type="image/webp" srcSet={srcSet(slide.n, 'webp')} sizes={SIZES} />
@@ -102,7 +103,8 @@ export default function HeroCarousel({ children }: { children: React.ReactNode }
                       width={1600}
                       height={900}
                       alt={slide.alt}
-                      loading={i === 0 ? 'eager' : 'lazy'}
+                      // Only near slides are in the page, so each one loads at once; far slides have no <img> yet.
+                      loading="eager"
                       fetchPriority={i === 0 ? 'high' : 'auto'}
                     />
                   </picture>

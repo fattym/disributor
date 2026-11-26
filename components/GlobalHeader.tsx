@@ -1,111 +1,115 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
-import ThemeToggle from "./ThemeToggle";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { MAIN_NAV } from "@/lib/nav";
+import ThemeToggle from "./ThemeToggle";
+import CartCount from "./CartCount";
+import { MAIN_NAV, TRACK_ORDER } from "@/lib/nav";
 import { LOGO_SVG } from "./logo";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
+import "./site-header.css";
 
-const CART_SVG =
-  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.2a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L20.5 8H6"/></svg>';
+const Icon = ({ d }: { d: string }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d={d} />
+  </svg>
+);
+const CART = "M2 3h3l2.6 12.2a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L20.5 8H6M9 20h.01M18 20h.01";
+const SEARCH = "M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14ZM20.5 20.5 16 16";
+const MENU = "M4 7h16M4 12h16M4 17h16";
+const CLOSE = "M6 6l12 12M18 6 6 18";
 
 export default function GlobalHeader() {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const drawer = useRef<HTMLDialogElement>(null);
   const pathname = usePathname() || "";
-  const isCurrent = (href: string) => `${pathname.replace(/\/$/, "")}/`.startsWith(href);
+  const current = (href: string) => (`${pathname.replace(/\/$/, "")}/`.startsWith(href) ? "page" : undefined);
   const { user } = useAuth();
   const { getItemCount } = useCart();
   const cartCount = getItemCount();
   const showMyOrders = user && user.role !== "DISTRIBUTOR" && user.role !== "ADMIN" && user.role !== "SUPER_ADMIN";
+  const links = showMyOrders ? [...MAIN_NAV, { href: "/orders/", label: "My Orders" }] : MAIN_NAV;
+  const close = () => drawer.current?.close();
+
+  // The drawer belongs to the phone layout only.
+  useEffect(() => {
+    const wide = window.matchMedia("(min-width: 1024px)");
+    const shut = () => { if (wide.matches) drawer.current?.close(); };
+    wide.addEventListener("change", shut);
+    return () => wide.removeEventListener("change", shut);
+  }, []);
+
   return (
-    <div>
+    <div className="lph">
       <a className="skip" href="#main">
         Skip to content
       </a>
-
-      <div className="topbar">
-        <div className="wrap">
-          <p>
-            <a href="tel:0798734442">0798 734 442</a> /{" "}
-            <a href="tel:0716815025">0716 815 025</a> &nbsp;Mon–Fri, 8am to 6pm
-          </p>
-          <ul>
-            <li>
-              <a href="/track-your-order/">Track your order</a>
-            </li>
-            <li>
-              <a href="/supplier-portal">Supplier portal</a>
-            </li>
-            <li>
-              <a href="/contact/">Help</a>
-            </li>
-            <li>
-              <a href="/login">Log in</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <header className="header">
-        <div className="wrap header__top">
-          <div className="header__left">
-            <button
-              className="menu-btn"
-              id="menuBtn"
-              aria-expanded={menuOpen}
-              aria-controls="nav"
-              onClick={() => setMenuOpen(!menuOpen)}
-            >
-              Menu
-            </button>
-            <form className="search" role="search" action="/shop" method="get">
-              <input
-                type="search"
-                name="q"
-                placeholder="Search"
-                aria-label="Search products"
-              />
-              <input type="hidden" name="post_type" value="product" />
-              <button type="submit">Search</button>
-            </form>
-          </div>
-          <Link href="/" className="logo" aria-label="Learning Pack home">
+      <header>
+        <div className="lph__wrap lph__top">
+          <button type="button" className="lph__icon lph__menu" aria-label="Open menu" aria-haspopup="dialog" onClick={() => drawer.current?.showModal()}>
+            <Icon d={MENU} />
+          </button>
+          <Link href="/" className="lph__logo" aria-label="Learning Pack home">
             <span dangerouslySetInnerHTML={{ __html: LOGO_SVG }} />
           </Link>
-          <div className="header__right">
-            <ThemeToggle />
-            <Link href="/cart" className="cart" aria-label={`Cart with ${cartCount} item${cartCount === 1 ? "" : "s"}`}>
+          <form className="lph__search" role="search" action="/shop" method="get">
+            <input type="search" name="q" placeholder="Search books and stationery" aria-label="Search products" />
+            <button type="submit" aria-label="Search">
+              <Icon d={SEARCH} />
+            </button>
+          </form>
+          <div className="lph__actions">
+            <Link href={TRACK_ORDER.href} className="lph__track" aria-current={current(TRACK_ORDER.href)}>
+              {TRACK_ORDER.label}
+            </Link>
+            <ThemeToggle variant="icon" className="lph__icon lph__theme" />
+            <Link href="/cart" className="lph__icon lph__cart" aria-label={`Cart with ${cartCount} item${cartCount === 1 ? "" : "s"}`}>
               <span className="cart-icon-wrap">
-                <span dangerouslySetInnerHTML={{ __html: CART_SVG }} />
-                {cartCount > 0 && <span className="cart-count-badge">{cartCount > 99 ? "99+" : cartCount}</span>}
+                <Icon d={CART} />
+                <CartCount />
               </span>
-              <span className="cart-label">Cart</span>
             </Link>
           </div>
         </div>
-        <nav
-          className={menuOpen ? "nav is-open" : "nav"}
-          id="nav"
-          aria-label="Main"
-        >
-          <div className="wrap">
+        <nav className="lph__nav" aria-label="Main">
+          <div className="lph__wrap">
             <ul>
-              {MAIN_NAV.map((item) => (
+              {links.map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined}>{item.label}</Link>
+                  <Link href={item.href} aria-current={current(item.href)}>{item.label}</Link>
                 </li>
               ))}
-              {showMyOrders && (
-                <li>
-                  <Link href="/orders" aria-current={isCurrent("/orders/") ? "page" : undefined}>My Orders</Link>
-                </li>
-              )}
             </ul>
+            <Link href="/login" className="lph__login">Log in</Link>
           </div>
         </nav>
       </header>
+
+      <dialog
+        ref={drawer}
+        className="lph__drawer"
+        aria-label="Menu"
+        onClick={(e) => { if (e.target === e.currentTarget) close(); }}
+      >
+        <div className="lph__panel">
+          <button type="button" className="lph__icon lph__close" aria-label="Close menu" onClick={close}>
+            <Icon d={CLOSE} />
+          </button>
+          <nav aria-label="Menu links">
+            <ul>
+              {[...links, TRACK_ORDER, { href: "/login", label: "Log in" }].map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href} aria-current={current(item.href)} onClick={close}>{item.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <ThemeToggle className="lph__drawer-theme" />
+          <a className="lph__whatsapp" href="https://wa.me/254716815025" target="_blank" rel="noopener noreferrer">
+            WhatsApp 0716 815 025
+          </a>
+        </div>
+      </dialog>
     </div>
   );
 }
