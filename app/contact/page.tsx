@@ -51,8 +51,8 @@ export default function ContactPage() {
               order? Send us a message and our team will get back to you.
             </p>
             <div className="contact-details">
-              <a href="mailto:admin@codingclubs.co.ke">
-                admin@codingclubs.co.ke
+              <a href="mailto:codingclubsorders@proton.me">
+                codingclubsorders@proton.me
               </a>
               <a href="tel:0798734442">0798 734 442</a>
               <a href="tel:0716815025">0716 815 025</a>

@@ -20,8 +20,8 @@ export default function GlobalFooter() {
             <ul>
               <li>Online retail store, open 24 hours</li>
               <li>
-                <a href="mailto:info@theschoolbox.co.ke">
-                  info@theschoolbox.co.ke
+                <a href="mailto:codingclubsorders@proton.me">
+                  codingclubsorders@proton.me
                 </a>
               </li>
               <li>

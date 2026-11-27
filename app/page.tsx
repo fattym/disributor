@@ -171,8 +171,8 @@ export default async function HomePage() {
                 <ul>
                   <li>Online retail store, open 24 hours</li>
                   <li>
-                    <a href="mailto:codingclubskenya@gmail.com">
-                      codingclubskenya@gmail.com
+                    <a href="mailto:codingclubsorders@proton.me">
+                      codingclubsorders@proton.me
                     </a>
                   </li>
                   <li>
