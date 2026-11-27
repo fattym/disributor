@@ -114,9 +114,6 @@ export default function SchoolBooklistsPage() {
                 discover it by their child's grade and shop it online.
               </p>
             </div>
-            <Link href="/school/booklists/new" className="btn btn-primary">
-              + New booklist
-            </Link>
           </div>
 
           {actionMsg && <p className="booklists-note" role="status">{actionMsg}</p>}
@@ -127,9 +124,6 @@ export default function SchoolBooklistsPage() {
           ) : booklists.length === 0 ? (
             <div className="booklists-empty">
               <p>No booklists yet.</p>
-              <Link href="/school/booklists/new" className="btn btn-primary">
-                Create your first booklist
-              </Link>
             </div>
           ) : (
             <div className="booklists-grid">
@@ -152,9 +146,6 @@ export default function SchoolBooklistsPage() {
                     <span>KSh {Number(bl.total_required_price).toLocaleString('en-KE')}</span>
                   </div>
                   <div className="booklist-card__actions">
-                    <Link href={`/school/booklists/${bl.id}`} className="btn btn-ghost">
-                      Edit
-                    </Link>
                     {bl.status === 'draft' && (
                       <button type="button" className="btn btn-primary" onClick={() => handlePublish(bl.id)}>
                         Publish

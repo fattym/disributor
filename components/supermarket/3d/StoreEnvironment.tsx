@@ -405,8 +405,8 @@ export function StoreEnvironment({ sections, onBooklistKiosk }: { sections: Shel
         <Text position={[0, 74, 0]} fontSize={9} color="#FFFFFF" anchorX="center">
           CHECKOUT
         </Text>
-        <Text position={[0, 49, 31]} fontSize={4.5} color="#CBD5E1" anchorX="center">
-          M-PESA  ·  CARD  ·  CASH
+        <Text position={[0, 49, 31]} fontSize={4.5} color="#CBD5E1" anchorX="center" anchorY="middle" textAlign="center">
+          {'Pay with M-Pesa after we confirm\nyour order on WhatsApp'}
         </Text>
         <mesh position={[60, 0, 0]} castShadow>
           <boxGeometry args={[8, 100, 8]} />

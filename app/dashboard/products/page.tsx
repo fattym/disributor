@@ -110,11 +110,12 @@ export const KENYAN_PUBLISHERS = [
   'Spotlight',
 ];
 
+// Claims only Learning Pack may make: sellers cannot tag their own products with them.
+const RESERVED_TAG = /kicd|best[\s-]*seller|official/i;
+
 export const SHOP_TAG_BADGES = [
-  { id: 'kicd', label: 'KICD Approved', icon: '🏅', desc: 'Approved by Kenya Institute of Curriculum Development' },
-  { id: 'bestseller', label: 'Bestseller', icon: '🔥', desc: 'Popular high-demand item' },
   { id: 'new', label: 'New Syllabus', icon: '📘', desc: 'Compliant with latest CBC syllabus' },
-  { id: 'set', label: 'Set Books', icon: '📚', desc: 'Official literature & fasihi set book' },
+  { id: 'set', label: 'Set Books', icon: '📚', desc: 'Literature & fasihi set book' },
   { id: 'stem', label: 'STEM / Science', icon: '🔬', desc: 'Science, Technology, Engineering & Math' },
   { id: 'lab', label: 'Lab / Laboratory', icon: '🧪', desc: 'Chemistry, Physics, Biology lab materials' },
 ];
@@ -412,13 +413,13 @@ export default function ProductsPage() {
       ? formData.tags
           .split(',')
           .map((t) => t.trim())
-          .filter(Boolean)
+          .filter((t) => t && !RESERVED_TAG.test(t))
       : [];
   }, [formData.tags]);
 
   const addTag = (tag: string) => {
     const t = tag.trim();
-    if (t && !tagList.includes(t)) {
+    if (t && !RESERVED_TAG.test(t) && !tagList.includes(t)) {
       setFormData((prev) => ({
         ...prev,
         tags: [...tagList, t].join(', '),
@@ -553,8 +554,6 @@ export default function ProductsPage() {
     const matchedBadges = SHOP_TAG_BADGES.map((b) => b.id).filter((badgeId) =>
       productTags.some((t) => {
         const tl = t.toLowerCase();
-        if (badgeId === 'kicd' && (tl === 'kicd' || tl.includes('kicd'))) return true;
-        if (badgeId === 'bestseller' && (tl === 'bestseller' || tl.includes('bestseller'))) return true;
         if (badgeId === 'new' && (tl === 'new' || tl.includes('new syllabus'))) return true;
         if (badgeId === 'set' && (tl === 'set' || tl.includes('set book'))) return true;
         if (badgeId === 'stem' && (tl.includes('stem') || tl.includes('science'))) return true;
@@ -658,13 +657,7 @@ export default function ProductsPage() {
       tagList.forEach((t) => combinedTags.add(t));
       formData.selected_subjects.forEach((s) => combinedTags.add(s));
       formData.selected_badges.forEach((b) => {
-        if (b === 'kicd') {
-          combinedTags.add('kicd');
-          combinedTags.add('KICD Approved');
-        } else if (b === 'bestseller') {
-          combinedTags.add('bestseller');
-          combinedTags.add('Bestseller');
-        } else if (b === 'new') {
+        if (b === 'new') {
           combinedTags.add('new');
           combinedTags.add('New Syllabus');
           combinedTags.add('Textbook');
@@ -752,7 +745,7 @@ export default function ProductsPage() {
         applicable_levels: formData.grade_levels,
         learning_areas: formData.subjects,
         institution_categories: formData.institution_categories,
-        tags: Array.from(combinedTags),
+        tags: Array.from(combinedTags).filter((t) => !RESERVED_TAG.test(t)),
         attributes: attributesPayload,
         bulk_pricing: parsedBulkPricing,
         variants: attributesPayload.variants,
@@ -976,7 +969,7 @@ export default function ProductsPage() {
                 <span>{editingProduct ? 'Edit Product' : 'Add Product to Store'}</span>
                 {formData.is_active ? (
                   <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
-                    Will Publish to /shop
+                    Goes to the shop after Learning Pack approves it
                   </span>
                 ) : (
                   <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
@@ -1369,7 +1362,7 @@ export default function ProductsPage() {
                   </div>
                 </section>
 
-                {/* 7. Tag Badges (Reflecting /shop badges: KICD, Bestseller, etc.) */}
+                {/* 7. Tag Badges (Reflecting /shop badges) */}
                 <section className={cardCls}>
                   <div className="flex items-center justify-between">
                     <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
@@ -1752,16 +1745,6 @@ export default function ProductsPage() {
                       {formData.selected_badges.includes('set') && (
                         <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
                           Set Books
-                        </span>
-                      )}
-                      {formData.selected_badges.includes('kicd') && (
-                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-red-100 text-red-800">
-                          KICD Approved
-                        </span>
-                      )}
-                      {formData.selected_badges.includes('bestseller') && (
-                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
-                          Bestseller
                         </span>
                       )}
                     </div>

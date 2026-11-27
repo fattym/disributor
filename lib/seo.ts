@@ -4,7 +4,7 @@ import { shopApi, type ShopProduct, type Grade } from '@/lib/api';
 export const SITE_URL = 'https://learningpack.codingclubskenya.com';
 export const SITE_NAME = 'Learning Pack';
 export const SITE_DESCRIPTION =
-  "Find your child's school list, order everything in one go and pay with M-Pesa. Delivered to your door anywhere in Kenya.";
+  "Find your child's school list and order everything in one go. Pay with M-Pesa after we confirm your order on WhatsApp. Delivered to your door anywhere in Kenya.";
 export const DEFAULT_OG_IMAGE = '/og-default.png';
 
 export const abs = (path: string) => new URL(path, SITE_URL).toString();

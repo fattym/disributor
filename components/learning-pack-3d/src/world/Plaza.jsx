@@ -97,10 +97,12 @@ function infoTexture() {
       ["", "0716 815 025"],
       ["Pickup", "Free, in store"],
       ["Delivery", "Nairobi, 1–2 days"],
-      ["Pay", "M-Pesa"],
+      ["Pay", "With M-Pesa after we"],
+      ["", "confirm your order"],
+      ["", "on WhatsApp"],
     ];
     rows.forEach(([k, v], i) => {
-      const y = H * 0.3 + i * H * 0.115;
+      const y = H * 0.26 + i * H * 0.095;
       g.textAlign = "left";
       g.fillStyle = "#ffb089";
       g.font = `700 ${H * 0.07}px ${FONT}`;

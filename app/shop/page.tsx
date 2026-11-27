@@ -29,7 +29,7 @@ const CBC_SUBJECTS = [
 const KENYAN_PUBLISHERS = ["KLB", "Longhorn", "Oxford", "Moran", "Storymoja", "Spotlight"];
 
 
-type SortOption = "popularity" | "latest" | "rating" | "price-asc" | "price-desc";
+type SortOption = "latest" | "price-asc" | "price-desc";
 
 function ShopContent() {
   const { addItem } = useCart();
@@ -51,7 +51,7 @@ function ShopContent() {
   const [minChoice, setMinPrice] = useState<number | null>(null);
   const [maxChoice, setMaxPrice] = useState<number | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [sort, setSort] = useState<SortOption>("popularity");
+  const [sort, setSort] = useState<SortOption>("latest");
   const [currentPage, setCurrentPage] = useState(1);
   const [addedIds, setAddedIds] = useState<Record<number, boolean>>({});
 
@@ -297,9 +297,6 @@ function ShopContent() {
         const pTags = (p.tags || []).map((t) => (t?.name || "").toLowerCase());
         const pName = (p.name || "").toLowerCase();
         return selectedTags.every((st) => {
-          if (st === "kicd") return pTags.some((t) => t.includes("kicd")) || pName.includes("kicd");
-          if (st === "bestseller") return pTags.some((t) => t.includes("bestseller"));
-          if (st === "new") return pTags.some((t) => t.includes("new syllabus") || t.includes("cbc"));
           if (st === "set") return pTags.some((t) => t.includes("set") || t.includes("literature") || t.includes("fasihi"));
           return pTags.includes(st.toLowerCase());
         });
@@ -695,27 +692,6 @@ function ShopContent() {
                   <div className="shop-tags">
                     <button
                       type="button"
-                      className={`shop-tag tag-kicd ${selectedTags.includes("kicd") ? "is-active" : ""}`}
-                      onClick={() => handleTagToggle("kicd")}
-                    >
-                      KICD Approved
-                    </button>
-                    <button
-                      type="button"
-                      className={`shop-tag tag-bestseller ${selectedTags.includes("bestseller") ? "is-active" : ""}`}
-                      onClick={() => handleTagToggle("bestseller")}
-                    >
-                      Bestseller
-                    </button>
-                    <button
-                      type="button"
-                      className={`shop-tag tag-new-syllabus ${selectedTags.includes("new") ? "is-active" : ""}`}
-                      onClick={() => handleTagToggle("new")}
-                    >
-                      New Syllabus
-                    </button>
-                    <button
-                      type="button"
                       className={`shop-tag tag-set-books ${selectedTags.includes("set") ? "is-active" : ""}`}
                       onClick={() => handleTagToggle("set")}
                     >
@@ -781,7 +757,7 @@ function ShopContent() {
                   ))}
                   {selectedTags.map((t) => (
                     <span key={t} className="shop-active-filter">
-                      {t === "kicd" ? "KICD Approved" : t === "bestseller" ? "Bestseller" : t === "new" ? "New Syllabus" : "Set Books"}
+                      Set Books
                       <button
                         type="button"
                         className="remove"
@@ -831,9 +807,7 @@ function ShopContent() {
                       setCurrentPage(1);
                     }}
                   >
-                    <option value="popularity">Popularity</option>
                     <option value="latest">Latest</option>
-                    <option value="rating">Rating</option>
                     <option value="price-asc">Price (Low to High)</option>
                     <option value="price-desc">Price (High to Low)</option>
                   </select>

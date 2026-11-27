@@ -30,11 +30,12 @@ function drawPos(canvas, tex, count, subtotal, live) {
     g.font = `800 64px ${FONT}`;
     g.fillText(kes(subtotal), 256, 186);
     g.fillStyle = BRAND.orange;
-    roundRect(g, 96, 232, 320, 54, 12);
+    roundRect(g, 26, 222, 460, 80, 12);
     g.fill();
     g.fillStyle = "#fff";
-    g.font = `800 26px ${FONT}`;
-    g.fillText("Pay with M-Pesa", 256, 260);
+    g.font = `800 22px ${FONT}`;
+    g.fillText("Pay with M-Pesa after we confirm", 256, 248);
+    g.fillText("your order on WhatsApp", 256, 278);
   } else {
     g.fillStyle = "#fff";
     g.font = `800 44px ${FONT}`;
