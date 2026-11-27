@@ -120,7 +120,7 @@ export default function BooklistPanel() {
           ))}
           {!shown.length && <li className="lp-empty small"><Icon name="check" /><b>Nothing missing</b><p>Every required item is in your trolley.</p></li>}
         </ul>
-        <p className="note">Booklist suggestions are matched from our catalogue for {selection.grade}. Always confirm against your school’s official list.</p>
+        <p className="note">Booklist suggestions are matched from our catalogue for {selection.grade}. Always confirm against your school’s list.</p>
       </div>
       <footer className="p-foot">
         <button className="lp-btn wide" disabled={!cart.count} onClick={() => useShop.getState().setPanel("cart")}>

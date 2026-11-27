@@ -29,6 +29,9 @@ const CBC_SUBJECTS = [
 const KENYAN_PUBLISHERS = ["KLB", "Longhorn", "Oxford", "Moran", "Storymoja", "Spotlight"];
 
 
+// Only an explicit tag makes a set book; "Textbook" or a maths set does not.
+const SET_BOOK_TAG = /^set ?books?$/i;
+
 type SortOption = "latest" | "price-asc" | "price-desc";
 
 function ShopContent() {
@@ -297,7 +300,7 @@ function ShopContent() {
         const pTags = (p.tags || []).map((t) => (t?.name || "").toLowerCase());
         const pName = (p.name || "").toLowerCase();
         return selectedTags.every((st) => {
-          if (st === "set") return pTags.some((t) => t.includes("set") || t.includes("literature") || t.includes("fasihi"));
+          if (st === "set") return pTags.some((t) => SET_BOOK_TAG.test(t));
           return pTags.includes(st.toLowerCase());
         });
       });
@@ -848,14 +851,11 @@ function ShopContent() {
                     const price = parseFloat(product.effective_price || product.price || "0");
                     const gradeLabel = getGradeLabel(product.applicable_levels || []);
                     const brand = product.brand || product.distributor_name;
-                    const hasTextbook = (product.tags || []).some((t) => t?.name === "Textbook");
-                    const hasScience = (product.tags || []).some((t) => t?.name === "Science" || t?.name === "STEM");
-                    const hasLaboratory = (product.tags || []).some((t) => t?.name === "Laboratory" || t?.name === "Lab");
+                    const isSet = (product.tags || []).some((t) => SET_BOOK_TAG.test(t?.name || ""));
 
                     return (
                       <article key={product.id} className="shop-card">
                         <Link href={`/shop/${product.id}`} className="shop-card__img" aria-label={product.name}>
-                          {(hasTextbook || hasScience) && <span className="shop-card__badge">New Syllabus</span>}
                           {product.image_url ? (
                             <img src={product.image_url} alt={product.name} loading="lazy" />
                           ) : (
@@ -897,11 +897,11 @@ function ShopContent() {
                             </button>
                           </div>
                         </div>
-                        <div className="shop-card__tags">
-                          {hasTextbook && <span className="shop-card__tag card-tag-set">Set Books</span>}
-                          {hasLaboratory && <span className="shop-card__tag card-tag-kicd">KICD Approved</span>}
-                          {hasScience && <span className="shop-card__tag card-tag-bestseller">Bestseller</span>}
-                        </div>
+                        {isSet && (
+                          <div className="shop-card__tags">
+                            <span className="shop-card__tag card-tag-set">Set Books</span>
+                          </div>
+                        )}
                       </article>
                     );
                   })}

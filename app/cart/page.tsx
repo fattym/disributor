@@ -38,7 +38,7 @@ function PaymentMethods() {
       <label className="lp-co__pay on">
         <input type="radio" name="pay" defaultChecked />
         <span>
-          <b>Order on WhatsApp, pay by M-Pesa</b>
+          <b>Pay with M-Pesa after we confirm your order on WhatsApp</b>
           <small>We save your order and open WhatsApp with the details. Our team replies with the M-Pesa payment details and confirms delivery.</small>
         </span>
       </label>

@@ -1,4 +1,25 @@
-/* School booklists styles */
-.school-booklists-page {
-  padding: 2rem 1rem;
-}
+/* School booklists. Everything is scoped to .booklists-page so shared names like .btn stay local. */
+.booklists-page { padding: 2rem 1rem 3rem; background: var(--background); color: var(--foreground); }
+.booklists-page .booklists-wrap { max-width: var(--wrap); margin: 0 auto; }
+.booklists-page .booklists-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
+.booklists-page .crumbs { font-size: 0.85rem; margin-bottom: 0.75rem; }
+.booklists-page .crumbs a { display: inline-block; padding: 0.25rem 0; text-decoration: underline; }
+.booklists-page h1 { font-size: clamp(1.75rem, 4vw, 2.4rem); line-height: 1.15; margin-bottom: 0.5rem; }
+.booklists-page .sub { max-width: 38rem; }
+.booklists-page .booklists-note,
+.booklists-page .booklists-error { border: 1px solid var(--rule); border-left: 4px solid var(--orange); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem; }
+.booklists-page .booklists-empty { border: 1px dashed var(--rule); border-radius: var(--radius); background: var(--gray); padding: 3rem 1rem; text-align: center; }
+.booklists-page .booklists-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr)); gap: 1rem; }
+.booklists-page .booklist-card { display: flex; flex-direction: column; gap: 0.6rem; border: 1px solid var(--rule); border-radius: var(--radius); padding: 1.1rem; }
+.booklists-page .booklist-card__head { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+.booklists-page .booklist-grade { font-weight: 700; }
+.booklists-page .booklist-status { font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 999px; }
+.booklists-page .booklist-name { font-size: 1.1rem; }
+.booklists-page .booklist-meta,
+.booklists-page .booklist-stats { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; font-size: 0.85rem; }
+.booklists-page .booklist-stats { font-weight: 700; }
+.booklists-page .booklist-card__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: auto; padding-top: 0.5rem; }
+.booklists-page .btn { min-height: 44px; padding: 0.5rem 1.1rem; border: 1px solid var(--rule); border-radius: 999px; font-weight: 700; cursor: pointer; }
+.booklists-page .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.booklists-page .btn-primary { background: #c2410c; border-color: #c2410c; color: #fff; }
+.booklists-page .btn-danger { background: #b91c1c; border-color: #b91c1c; color: #fff; }

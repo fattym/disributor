@@ -60,7 +60,7 @@ export default function SchoolBooklistsPage() {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { (async () => { await load(); })(); }, []);
 
   async function handlePublish(id: number) {
     setActionMsg('');
@@ -111,7 +111,7 @@ export default function SchoolBooklistsPage() {
               <h1>School booklists</h1>
               <p className="sub">
                 Build a list of required items per grade and publish it so parents can
-                discover it by their child's grade and shop it online.
+                discover it by their child&apos;s grade and shop it online.
               </p>
             </div>
           </div>

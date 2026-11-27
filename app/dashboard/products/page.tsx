@@ -111,10 +111,9 @@ export const KENYAN_PUBLISHERS = [
 ];
 
 // Claims only Learning Pack may make: sellers cannot tag their own products with them.
-const RESERVED_TAG = /kicd|best[\s-]*seller|official/i;
+const RESERVED_TAG = /kicd|best[\s-]*seller|official|new[\s-]*syllabus/i;
 
 export const SHOP_TAG_BADGES = [
-  { id: 'new', label: 'New Syllabus', icon: '📘', desc: 'Compliant with latest CBC syllabus' },
   { id: 'set', label: 'Set Books', icon: '📚', desc: 'Literature & fasihi set book' },
   { id: 'stem', label: 'STEM / Science', icon: '🔬', desc: 'Science, Technology, Engineering & Math' },
   { id: 'lab', label: 'Lab / Laboratory', icon: '🧪', desc: 'Chemistry, Physics, Biology lab materials' },
@@ -221,7 +220,7 @@ export default function ProductsPage() {
     curriculum: '' as number | '',
     subjects: [] as number[],
     selected_subjects: ['Mathematics'] as string[],
-    selected_badges: ['new'] as string[],
+    selected_badges: [] as string[],
   });
 
   const [taxonomySearch, setTaxonomySearch] = useState('');
@@ -527,7 +526,7 @@ export default function ProductsPage() {
       curriculum: '',
       subjects: [],
       selected_subjects: ['Mathematics'],
-      selected_badges: ['new'],
+      selected_badges: [],
     });
     setTaxonomySearch('');
     setImages([]);
@@ -554,7 +553,6 @@ export default function ProductsPage() {
     const matchedBadges = SHOP_TAG_BADGES.map((b) => b.id).filter((badgeId) =>
       productTags.some((t) => {
         const tl = t.toLowerCase();
-        if (badgeId === 'new' && (tl === 'new' || tl.includes('new syllabus'))) return true;
         if (badgeId === 'set' && (tl === 'set' || tl.includes('set book'))) return true;
         if (badgeId === 'stem' && (tl.includes('stem') || tl.includes('science'))) return true;
         if (badgeId === 'lab' && (tl.includes('lab') || tl.includes('laboratory'))) return true;
@@ -657,11 +655,7 @@ export default function ProductsPage() {
       tagList.forEach((t) => combinedTags.add(t));
       formData.selected_subjects.forEach((s) => combinedTags.add(s));
       formData.selected_badges.forEach((b) => {
-        if (b === 'new') {
-          combinedTags.add('new');
-          combinedTags.add('New Syllabus');
-          combinedTags.add('Textbook');
-        } else if (b === 'set') {
+        if (b === 'set') {
           combinedTags.add('set');
           combinedTags.add('Set Books');
           combinedTags.add('Textbook');
@@ -1625,7 +1619,7 @@ export default function ProductsPage() {
                         className="accent-coral"
                       />
                       <div>
-                        <span className="font-bold text-sm block">🟢 Published (Live on /shop)</span>
+                        <span className="font-bold text-sm block">🟢 Published (Goes to the shop after Learning Pack approves it)</span>
                         <span className="text-xs opacity-75">Immediately searchable &amp; purchasable by customers</span>
                       </div>
                     </label>
@@ -1668,7 +1662,7 @@ export default function ProductsPage() {
                     {formData.is_active ? (
                       <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        Live on /shop
+                        Goes to the shop after Learning Pack approves it
                       </span>
                     ) : (
                       <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-zinc-200 text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
@@ -1681,11 +1675,6 @@ export default function ProductsPage() {
                   <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-md flex flex-col">
                     {/* Image Area */}
                     <div className="relative aspect-square bg-white dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 flex items-center justify-center p-4">
-                      {formData.selected_badges.includes('new') && (
-                        <span className="absolute top-2.5 left-2.5 z-10 bg-coral text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider shadow">
-                          New Syllabus
-                        </span>
-                      )}
                       {imagePreviewUrl ? (
                         <img
                           src={imagePreviewUrl}
