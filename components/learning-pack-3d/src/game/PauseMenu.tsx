@@ -195,9 +195,8 @@ function MainPanel(p: PauseMenuProps) {
       </MenuGroup>
 
       <footer className="lp-pause__footer">
-        <span>
-          {[p.contact.phones.join(" / "), p.contact.hours].filter(Boolean).join(" · ")}
-        </span>
+        <span>WhatsApp {p.contact.phones.join(" / ")}</span>
+        <span>{p.contact.hours}</span>
         <span>
           <a href={p.privacyHref}>Privacy</a> · <a href={p.termsHref}>Terms</a>
         </span>
@@ -409,13 +408,13 @@ function HelpPanel({ contact }: { contact: PauseMenuProps["contact"] }) {
       <h3 className="lp-menu-group__label">Need help?</h3>
       <p>
         {contact.phones.map((ph) => (
-          <a key={ph} className="lp-contact" href={`tel:${ph.replace(/\s/g, "")}`}>
-            <Icon name="phone" size={16} /> {ph}
+          <a key={ph} className="lp-contact" href={`https://wa.me/254${ph.replace(/\s/g, "").slice(1)}`} target="_blank" rel="noopener noreferrer">
+            <Icon name="phone" size={16} /> WhatsApp {ph}
           </a>
         ))}
       </p>
       <p className="lp-muted">
-        {contact.hours && `${contact.hours} · `}<a href={`mailto:${contact.email}`}>{contact.email}</a>
+        {contact.hours} <a href={`mailto:${contact.email}`}>{contact.email}</a>
       </p>
     </div>
   );

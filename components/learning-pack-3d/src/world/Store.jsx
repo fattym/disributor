@@ -148,7 +148,7 @@ function Walls() {
     () => [
       textSign("BACK TO SCHOOL", 3.6, 1.3, { bg: BRAND.navy, accent: BRAND.orange, sub: "Shop your child's booklist" }),
       textSign("CBC TEXTBOOKS", 3.6, 1.3, { bg: BRAND.orange, sub: "From Kenya's leading publishers" }),
-      textSign("FREE PICKUP", 3.6, 1.3, { bg: BRAND.navy, accent: BRAND.orange, sub: "Or delivery in Nairobi, 1–2 days" }),
+      textSign("Delivery from KES 300,\nconfirmed on WhatsApp before you pay.", 3.6, 1.3, { bg: BRAND.navy, accent: BRAND.orange, sub: "Orders over KES 5,000 may qualify for free delivery." }),
     ],
     []
   );

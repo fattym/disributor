@@ -1,5 +1,6 @@
 "use client";
 
+import { SHOP_HOURS, WHATSAPP_NUMBERS } from '@/lib/shopText';
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
@@ -19,7 +20,7 @@ export default function ParentHeader() {
     <>
       <div className="bg-[#E63B00] text-white text-sm font-medium">
         <div className="max-w-6xl mx-auto flex justify-between gap-2 flex-wrap py-2.5 px-4">
-          <p className="opacity-90">Mon–Fri, 8am to 6pm · 0798 734 442</p>
+          <p className="opacity-90">{SHOP_HOURS} WhatsApp {WHATSAPP_NUMBERS.map((n) => n.label).join(' / ')}</p>
           <ul className="flex items-center gap-5 flex-wrap">
             {!user && (
               <li>

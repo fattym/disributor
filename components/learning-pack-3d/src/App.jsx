@@ -1,3 +1,4 @@
+import { SHOP_HOURS, WHATSAPP_NUMBERS } from '@/lib/shopText';
 import { useCallback, useEffect } from "react";
 import Scene from "./world/Scene.jsx";
 import ProductCard from "./ui/ProductCard.jsx";
@@ -16,7 +17,7 @@ import { useCart, useInCart, useShop } from "./store/useShop.js";
 import "./game/gameUi.css";
 
 const MENU_AISLES = AISLES.map((a) => ({ id: String(a.id), number: a.id + 1, name: a.name }));
-const CONTACT = { phones: ["0798 734 442", "0716 815 025"], email: "codingclubsorders@proton.me" };
+const CONTACT = { phones: WHATSAPP_NUMBERS.map((n) => n.label), hours: SHOP_HOURS, email: "codingclubsorders@proton.me" };
 
 /** Esc closes an open shop panel or product card before it pauses the game. */
 const closeShopOverlay = () => {

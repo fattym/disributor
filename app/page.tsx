@@ -1,3 +1,4 @@
+import { SHOP_HOURS, WHATSAPP_NUMBERS } from '@/lib/shopText';
 import Link from "next/link";
 import Image from "next/image";
 import Script from "next/script";
@@ -169,18 +170,17 @@ export default async function HomePage() {
                   </svg>
                 </Link>
                 <ul>
-                  <li>Online retail store, open 24 hours</li>
+                  <li>{SHOP_HOURS}</li>
                   <li>
                     <a href="mailto:codingclubsorders@proton.me">
                       codingclubsorders@proton.me
                     </a>
                   </li>
-                  <li>
-                    <a href="tel:0798734442">0798 734 442</a>
-                  </li>
-                  <li>
-                    <a href="tel:0716815025">0716 815 025</a>
-                  </li>
+                  {WHATSAPP_NUMBERS.map((n) => (
+                    <li key={n.e164}>
+                      <a href={n.href} target="_blank" rel="noopener noreferrer">WhatsApp {n.label}</a>
+                    </li>
+                  ))}
                 </ul>
               </div>
               <div>

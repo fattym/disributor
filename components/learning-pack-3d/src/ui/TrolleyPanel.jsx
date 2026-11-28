@@ -1,3 +1,4 @@
+import { DELIVERY_NOTE } from '@/lib/shopText';
 import { kes } from "../data/catalogue.js";
 import { useCart, useShop } from "../store/useShop.js";
 import Icon from "./Icon.jsx";
@@ -55,7 +56,7 @@ export default function TrolleyPanel() {
       </div>
       <footer className="p-foot">
         <div className="sum-row big"><span>Subtotal</span><b>{kes(cart.subtotal)}</b></div>
-        <p className="note"><Icon name="truck" /> Collect free in store, or delivery in Nairobi within 1–2 days (KES 300). Delivery is added at checkout.</p>
+        <p className="note"><Icon name="truck" /> {DELIVERY_NOTE}</p>
         <div className="p-actions">
           <button className="lp-btn ghost" onClick={closeAll}>Continue Shopping</button>
           <button className="lp-btn" disabled={!cart.lines.length} onClick={() => window.location.assign("/cart/")}>Proceed to Checkout</button>

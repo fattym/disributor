@@ -1,5 +1,6 @@
 "use client";
 
+import { DELIVERY_NOTE } from '@/lib/shopText';
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import GlobalHeader from "@/components/GlobalHeader";
@@ -81,7 +82,7 @@ export default function StudentBoxesPage() {
               everything your child needs in one go.
             </p>
             <p className="pack-benefit">
-              Select 12 items and have them delivered free.
+              {DELIVERY_NOTE}
             </p>
           </div>
         </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { SHOP_HOURS, WHATSAPP_NUMBERS } from '@/lib/shopText';
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import GlobalHeader from "@/components/GlobalHeader";
@@ -54,9 +55,10 @@ export default function ContactPage() {
               <a href="mailto:codingclubsorders@proton.me">
                 codingclubsorders@proton.me
               </a>
-              <a href="tel:0798734442">0798 734 442</a>
-              <a href="tel:0716815025">0716 815 025</a>
-              <span>Mon–Fri, 8am to 6pm</span>
+              {WHATSAPP_NUMBERS.map((n) => (
+                <a key={n.e164} href={n.href} target="_blank" rel="noopener noreferrer">WhatsApp {n.label}</a>
+              ))}
+              <span>{SHOP_HOURS}</span>
             </div>
           </div>
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { DELIVERY_NOTE, WHATSAPP_NUMBERS } from '@/lib/shopText';
 import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { shopApi, type WhatsAppCheckoutResult } from '@/lib/api';
@@ -174,7 +175,7 @@ export default function CartPage() {
                       <span className="lp-co__name">
                         <b>{i.product_name}</b>
                         <small>{i.variant_label && i.variant_label !== 'Default' ? `${i.variant_label} · ` : ''}{kes(i.unit_price)} each</small>
-                        <span className={'lp-co__stock' + (backorder ? ' back' : '')}>{backorder ? 'Ships in 3–5 days' : 'In stock'}</span>
+                        <span className={'lp-co__stock' + (backorder ? ' back' : '')}>{backorder ? 'We confirm the delivery date on WhatsApp.' : 'In stock'}</span>
                       </span>
                       <span className="lp-co__qty">
                         <button type="button" aria-label={`One fewer ${i.product_name}`} onClick={() => updateQuantity(i.variant_id, i.quantity - 1)}>−</button>
@@ -219,6 +220,7 @@ export default function CartPage() {
           </section>
 
           <PaymentMethods />
+          <p className="lp-co__trust-m">{DELIVERY_NOTE}</p>
           <p className="lp-co__trust-m">Your order gets a tracking number before WhatsApp opens, and we hold your items for 48 hours while you pay.</p>
         </div>
 
@@ -226,6 +228,7 @@ export default function CartPage() {
           <h2>Order summary</h2>
           <div className="lp-co__row"><span>Items ({count})</span><span>{kes(total)}</span></div>
           <div className="lp-co__row"><span>Delivery</span><span>Confirmed on WhatsApp</span></div>
+          <p className="lp-co__hint">{DELIVERY_NOTE}</p>
           <hr />
           <div className="lp-co__row big"><span>Total</span><b>{kes(total)}</b></div>
           {error && <p className="lp-co__err" role="alert">{error}</p>}
@@ -233,7 +236,7 @@ export default function CartPage() {
           <ul className="lp-co__trust">
             <li><span aria-hidden="true">✓</span><p>Your order is saved with a tracking number before WhatsApp opens.</p></li>
             <li><span aria-hidden="true">✓</span><p>We hold your items for 48 hours while you pay.</p></li>
-            <li><span aria-hidden="true">✓</span><p>Questions? WhatsApp or call <a href="tel:0716815025">0716 815 025</a>.</p></li>
+            <li><span aria-hidden="true">✓</span><p>Questions? WhatsApp {WHATSAPP_NUMBERS.map((n, i) => <span key={n.e164}>{i > 0 && ' or '}<a href={n.href} target="_blank" rel="noopener noreferrer">{n.label}</a></span>)}.</p></li>
           </ul>
         </aside>
 

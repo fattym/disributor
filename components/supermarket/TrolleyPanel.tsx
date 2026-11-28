@@ -1,19 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { DELIVERY_NOTE } from '@/lib/shopText';
 import { useCart } from '@/lib/cart';
 import { formatCurrency } from '@/lib/utils';
 import Image from 'next/image';
 
-const DELIVERY_FEE = 150;
-
 export function TrolleyPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { items, removeItem, updateQuantity, getItemCount } = useCart();
-  const [deliveryOption, setDeliveryOption] = useState<'delivery' | 'collection'>('delivery');
 
   const subtotal = items.reduce((sum, i) => sum + i.unit_price * i.quantity, 0);
-  const deliveryFee = deliveryOption === 'delivery' ? DELIVERY_FEE : 0;
-  const total = subtotal + deliveryFee;
   const itemCount = getItemCount();
 
   const overlayClass = `lp-trolley-overlay ${open ? 'lp-trolley-open' : ''}`;
@@ -88,49 +83,22 @@ export function TrolleyPanel({ open, onClose }: { open: boolean; onClose: () => 
 
               <div className="lp-divider" />
 
-              <div className="lp-delivery">
-                <label className="lp-delivery-label">How would you like to receive your order?</label>
-                <div className="lp-delivery-options">
-                  <label className="lp-delivery-option">
-                    <input
-                      type="radio"
-                      name="delivery"
-                      value="delivery"
-                      checked={deliveryOption === 'delivery'}
-                      onChange={() => setDeliveryOption('delivery')}
-                    />
-                    <span className="lp-delivery-radio"></span>
-                    Delivery
-                    <span className="lp-delivery-fee">{formatCurrency(DELIVERY_FEE)}</span>
-                  </label>
-                  <label className="lp-delivery-option">
-                    <input
-                      type="radio"
-                      name="delivery"
-                      value="collection"
-                      checked={deliveryOption === 'collection'}
-                      onChange={() => setDeliveryOption('collection')}
-                    />
-                    <span className="lp-delivery-radio"></span>
-                    Collection (free)
-                  </label>
-                </div>
-              </div>
-
               <div className="lp-summary">
                 <div className="lp-summary-row">
                   <span>Subtotal ({itemCount} item{itemCount !== 1 ? 's' : ''})</span>
                   <span>{formatCurrency(subtotal)}</span>
                 </div>
                 <div className="lp-summary-row lp-summary-row--delivery">
-                  <span>{deliveryOption === 'delivery' ? 'Delivery' : 'Collection'}</span>
-                  <span>{deliveryFee === 0 ? 'Free' : formatCurrency(deliveryFee)}</span>
+                  <span>Delivery</span>
+                  <span>Confirmed on WhatsApp</span>
                 </div>
                 <div className="lp-summary-row lp-summary-row--total">
                   <span>Total</span>
-                  <span>{formatCurrency(total)}</span>
+                  <span>{formatCurrency(subtotal)}</span>
                 </div>
               </div>
+
+              <p className="lp-delivery-label">{DELIVERY_NOTE}</p>
 
               <div className="lp-trolley-actions-bottom">
                 <button type="button" className="lp-btn lp-btn--outline lp-btn--continue" onClick={onClose}>

@@ -417,7 +417,7 @@ export function StoreEnvironment({ sections, onBooklistKiosk }: { sections: Shel
           <meshStandardMaterial color="#94A3B8" />
         </mesh>
         <Text position={[0, 95, 0]} fontSize={6} color="#0B1F3A" anchorX="center">
-          PAY &amp; COLLECT
+          CHECKOUT
         </Text>
       </group>
 

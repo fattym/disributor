@@ -1,3 +1,4 @@
+import { DELIVERY_NOTE, SHOP_HOURS, WHATSAPP_NUMBERS } from '@/lib/shopText';
 import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useShop } from "../store/useShop.js";
@@ -85,6 +86,15 @@ function DisplayTable({ x, z, title, sub, seed, onSign }) {
   );
 }
 
+/** Splits text into lines of at most `max` characters, on spaces. */
+const wrap = (text, max = 34) =>
+  text.split(" ").reduce((lines, word) => {
+    const last = lines[lines.length - 1];
+    if (last && `${last} ${word}`.length <= max) lines[lines.length - 1] = `${last} ${word}`;
+    else lines.push(word);
+    return lines;
+  }, []);
+
 function infoTexture() {
   return signTexture("info", 2.2, 1.7, (g, W, H) => {
     g.fillStyle = BRAND.navy;
@@ -95,25 +105,23 @@ function infoTexture() {
     g.textAlign = "center";
     g.font = `800 ${H * 0.11}px ${FONT}`;
     g.fillText("STORE INFORMATION", W / 2, H * 0.09);
+    // [heading, text]: the shared wording, wrapped to the board
     const rows = [
-      ["Open", "Mon–Fri, 8am to 6pm"],
-      ["Call", "0798 734 442"],
-      ["", "0716 815 025"],
-      ["Pickup", "Free, in store"],
-      ["Delivery", "Nairobi, 1–2 days"],
-      ["Pay", "With M-Pesa after we"],
-      ["", "confirm your order"],
-      ["", "on WhatsApp"],
+      ...wrap(SHOP_HOURS).map((v, i) => [i ? "" : "Hours", v]),
+      ...WHATSAPP_NUMBERS.map((n, i) => [i ? "" : "WhatsApp", n.label]),
+      ...wrap(DELIVERY_NOTE).map((v, i) => [i ? "" : "Delivery", v]),
+      ...wrap("With M-Pesa after we confirm your order on WhatsApp").map((v, i) => [i ? "" : "Pay", v]),
     ];
+    const step = (H * 0.76) / rows.length;
     rows.forEach(([k, v], i) => {
-      const y = H * 0.26 + i * H * 0.095;
+      const y = H * 0.23 + i * step;
       g.textAlign = "left";
       g.fillStyle = "#ffb089";
-      g.font = `700 ${H * 0.07}px ${FONT}`;
-      g.fillText(k, W * 0.08, y);
+      g.font = `700 ${step * 0.75}px ${FONT}`;
+      g.fillText(k, W * 0.05, y);
       g.fillStyle = "#fff";
-      g.font = `600 ${H * 0.075}px ${FONT}`;
-      g.fillText(v, W * 0.34, y);
+      g.font = `600 ${step * 0.8}px ${FONT}`;
+      g.fillText(v, W * 0.31, y, W * 0.66);
     });
   });
 }

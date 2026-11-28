@@ -1,5 +1,6 @@
 "use client";
 
+import { DELIVERY_NOTE } from '@/lib/shopText';
 import { useEffect, useMemo, useState, Suspense } from "react";
 import { sellerHref, sellerOf, sellerOptions } from "@/lib/shopSeller";
 import Link from "next/link";
@@ -532,7 +533,7 @@ function ShopContent() {
               <p className="shop-hero__subtitle">
                 {activeNavLeaf
                   ? `${activeNavLeaf.groupLabel} — curated CBC & curriculum titles.`
-                  : "Textbooks, stationery, ECDE aids and reference materials — delivered across Kenya."}
+                  : `Textbooks, stationery, ECDE aids and reference materials. ${DELIVERY_NOTE}`}
               </p>
             </div>
             {activeNavLeaf && (

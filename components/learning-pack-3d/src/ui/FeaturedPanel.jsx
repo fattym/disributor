@@ -1,3 +1,4 @@
+import { DELIVERY_NOTE } from '@/lib/shopText';
 import { useEffect, useState } from "react";
 import { fetchHeroItems } from "../api.js";
 import { kes, normalise } from "../data/catalogue.js";
@@ -27,7 +28,7 @@ export default function FeaturedPanel() {
       <div className="p-body">
         <div className="promo">
           <b>Back to school</b>
-          <span>CBC textbooks, stationery and bundles, with free in-store pickup or delivery across Nairobi.</span>
+          <span>CBC textbooks, stationery and bundles. {DELIVERY_NOTE}</span>
         </div>
         <ul className="lp-grid">
           {items.map((p) => {

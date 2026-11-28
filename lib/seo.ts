@@ -1,10 +1,11 @@
 // Build-time SEO helpers (server only). Used by metadata, sitemap and JSON-LD.
+import { DELIVERY_NOTE, WHATSAPP_NUMBERS } from '@/lib/shopText';
 import { shopApi, type ShopProduct, type Grade } from '@/lib/api';
 
 export const SITE_URL = 'https://learningpack.codingclubskenya.com';
 export const SITE_NAME = 'Learning Pack';
 export const SITE_DESCRIPTION =
-  "Find your child's school list and order everything in one go. Pay with M-Pesa after we confirm your order on WhatsApp. Delivered to your door anywhere in Kenya.";
+  "Find your child's school list and order everything in one go. Pay with M-Pesa after we confirm your order on WhatsApp. " + DELIVERY_NOTE;
 export const DEFAULT_OG_IMAGE = '/og-default.png';
 
 export const abs = (path: string) => new URL(path, SITE_URL).toString();
@@ -134,5 +135,17 @@ export const organizationJsonLd = {
   url: SITE_URL,
   logo: abs('/icons/logo-512.png'),
   areaServed: 'KE',
-  contactPoint: [{ '@type': 'ContactPoint', telephone: '+254798734442', contactType: 'customer service', areaServed: 'KE', availableLanguage: 'en' }],
+  contactPoint: WHATSAPP_NUMBERS.map((n) => ({
+    '@type': 'ContactPoint',
+    telephone: n.e164,
+    contactType: 'customer service',
+    areaServed: 'KE',
+    availableLanguage: 'en',
+    hoursAvailable: {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+      opens: '08:00',
+      closes: '18:00',
+    },
+  })),
 };
