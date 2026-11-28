@@ -9,3 +9,14 @@ export const WHATSAPP_NUMBERS = [
   { label: '0716 815 025', e164: '+254716815025', href: 'https://wa.me/254716815025' },
   { label: '0798 734 442', e164: '+254798734442', href: 'https://wa.me/254798734442' },
 ];
+
+export const WHATSAPP_DELIVERY_LINE = '+ delivery from KES 300, confirmed here before you pay';
+
+/** Adds the delivery line under "Total:" in the order message the server puts in its wa.me link. */
+export function withDeliveryLine(url: string): string {
+  const [base, text] = url.split('?text=');
+  if (!text) return url;
+  const message = decodeURIComponent(text);
+  if (message.includes(WHATSAPP_DELIVERY_LINE)) return url;
+  return `${base}?text=${encodeURIComponent(message.replace(/^Total:.*$/m, `$&\n${WHATSAPP_DELIVERY_LINE}`))}`;
+}

@@ -71,6 +71,21 @@
 .lp-hud__pause { left: 16px; }
 .lp-hud__trolley { right: 16px; }
 
+.lp-hud__logo {
+  position: absolute;
+  top: calc(16px + var(--lp-safe-top));
+  left: 72px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 14px;
+  background: #fff; /* the wordmark is navy, so the chip stays light in both themes */
+  box-shadow: var(--lp-shadow);
+}
+.lp-hud__logo svg { display: block; width: 140px; height: auto; }
+.lp-hud__logo:focus-visible { outline: 3px solid var(--lp-orange); outline-offset: 2px; }
+
 .lp-badge {
   position: absolute;
   top: -4px;
@@ -478,6 +493,12 @@
 
 /* ---------------- Fitting the store's own styles ---------------- */
 .lp3d .lp-hud { z-index: 5; } /* shop panels and the product card sit above the HUD */
+
+/* Narrow screens: the logo takes the top row, so the aisle name and hint sit below it */
+@media (max-width: 720px) {
+  .lp-hud__aisle { top: calc(76px + var(--lp-safe-top)); }
+  .lp-hud__hint { top: calc(124px + var(--lp-safe-top)); }
+}
 .lp3d .lp-pause { z-index: 40; }
 .lp3d .lp-btn.lp-btn--primary { background: var(--lp-orange-text); }
 .lp3d .lp-btn.lp-btn--ghost { background: transparent; color: var(--lp-text); border: 1.5px solid var(--lp-line); box-shadow: none; }

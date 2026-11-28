@@ -15,6 +15,8 @@
  */
 import { ReactNode, useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { LOGO_SVG } from "@/components/logo";
 import { gameUi, useGameUi } from "./gameUiStore";
 import { Icon } from "./icons";
 
@@ -79,6 +81,13 @@ export function GameHUD({ trolleyCount, onTrolley, aisleLabel, facingProduct, jo
       >
         <Icon name="pause" />
       </button>
+
+      <Link
+        href="/shop"
+        className="lp-hud__logo"
+        aria-label="Learning Pack shop home"
+        dangerouslySetInnerHTML={{ __html: LOGO_SVG }}
+      />
 
       <button
         type="button"

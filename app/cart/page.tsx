@@ -1,6 +1,6 @@
 'use client';
 
-import { DELIVERY_NOTE, WHATSAPP_NUMBERS } from '@/lib/shopText';
+import { DELIVERY_NOTE, WHATSAPP_NUMBERS, withDeliveryLine } from '@/lib/shopText';
 import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { shopApi, type WhatsAppCheckoutResult } from '@/lib/api';
@@ -105,6 +105,7 @@ export default function CartPage() {
           : { product: i.product_id, quantity: i.quantity })),
       });
       // The order is saved. Only now is the cart emptied and WhatsApp opened.
+      result.whatsapp_url = withDeliveryLine(result.whatsapp_url);
       setDone({ ...result, total });
       clearCart();
       window.open(result.whatsapp_url, '_blank', 'noopener,noreferrer');
