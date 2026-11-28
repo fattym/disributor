@@ -1,8 +1,6 @@
 'use client';
 
 import dynamic from "next/dynamic";
-import GlobalHeader from "@/components/GlobalHeader";
-import GlobalFooter from "@/components/GlobalFooter";
 import "./bookshop.css";
 
 const Bookshop3D = dynamic(
@@ -23,14 +21,12 @@ const Bookshop3D = dynamic(
 
 export default function BookshopPage() {
   return (
-    <>
-      <GlobalHeader />
-      <main id="main" className="bookshop-page">
-        <div className="bookshop-viewport">
-          <Bookshop3D />
-        </div>
-      </main>
-      <GlobalFooter />
-    </>
+    // full screen, like a game: the way back to the site is in the pause menu
+    <main id="main" className="bookshop-page">
+      <h1 className="bookshop-sr">Learning Pack 3D bookshop</h1>
+      <div className="bookshop-viewport">
+        <Bookshop3D />
+      </div>
+    </main>
   );
 }

@@ -1,17 +1,21 @@
 @import "../../components/learning-pack-3d/src/index.css";
 
-#main {
-  position: relative;
-  min-height: 0;
-  padding: 0;
+.bookshop-page {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
 }
-
-/* The page header is ~190px tall; size the store so it fits on one screen without scrolling.
-   (The canvas captures the mouse wheel for zooming, so the page should not need scrolling over it.) */
+.bookshop-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
 .bookshop-viewport {
   position: relative;
   width: 100%;
-  height: clamp(540px, calc(100dvh - 200px), 940px);
+  height: 100dvh;
   overflow: hidden;
   background: #cfe6f5;
 }
@@ -41,13 +45,8 @@
   }
 }
 
-@media (max-width: 760px) {
-  .bookshop-viewport {
-    height: clamp(520px, calc(100dvh - 190px), 900px);
-  }
-}
-/* While the store is full screen, keep the page behind it still. */
-html.lp-full,
-html.lp-full body {
+/* Keep the page behind the store still. */
+html:has(.bookshop-page),
+html:has(.bookshop-page) body {
   overflow: hidden;
 }

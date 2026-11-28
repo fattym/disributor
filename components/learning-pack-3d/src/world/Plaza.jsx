@@ -41,7 +41,7 @@ function Piles({ origin, cols = 4, rows = 2, size = [1, 0.8], seed = 1 }) {
 }
 
 function DisplayTable({ x, z, title, sub, seed, onSign }) {
-  const tex = useMemo(() => textSign(title, 3.6, 0.9, { bg: BRAND.orange, sub }), [title, sub]);
+  const tex = useMemo(() => title && textSign(title, 3.6, 0.9, { bg: BRAND.orange, sub }), [title, sub]);
   const pointer = (on) => () => (document.body.style.cursor = on ? "pointer" : "");
   return (
     <group position={[x, 0, z]}>
@@ -58,25 +58,29 @@ function DisplayTable({ x, z, title, sub, seed, onSign }) {
         <meshStandardMaterial color={BRAND.orange} />
       </mesh>
       <Piles origin={[0, 0.86, 0]} size={[3.4, 1.9]} seed={seed} />
-      {/* header board on two poles, clickable to walk to that aisle */}
-      {[-1.6, 1.6].map((dx) => (
-        <mesh key={dx} position={[dx, 1.5, -0.9]}>
-          <cylinderGeometry args={[0.025, 0.025, 1.4, 8]} />
-          <meshStandardMaterial color={BRAND.navy} />
-        </mesh>
-      ))}
-      <group
-        position={[0, 2.15, -0.9]}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (e.delta <= 6) onSign();
-        }}
-        onPointerOver={pointer(true)}
-        onPointerOut={pointer(false)}
-      >
-        <Sign p={[0, 0, 0.02]} w={3.6} h={0.9} tex={tex} />
-        <Sign p={[0, 0, -0.02]} w={3.6} h={0.9} tex={tex} ry={Math.PI} />
-      </group>
+      {title && (
+        <>
+        {/* header board on two poles, clickable to walk to that aisle */}
+        {[-1.6, 1.6].map((dx) => (
+          <mesh key={dx} position={[dx, 1.5, -0.9]}>
+            <cylinderGeometry args={[0.025, 0.025, 1.4, 8]} />
+            <meshStandardMaterial color={BRAND.navy} />
+          </mesh>
+        ))}
+        <group
+          position={[0, 2.15, -0.9]}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (e.delta <= 6) onSign();
+          }}
+          onPointerOver={pointer(true)}
+          onPointerOut={pointer(false)}
+        >
+          <Sign p={[0, 0, 0.02]} w={3.6} h={0.9} tex={tex} />
+          <Sign p={[0, 0, -0.02]} w={3.6} h={0.9} tex={tex} ry={Math.PI} />
+        </group>
+        </>
+      )}
     </group>
   );
 }
@@ -163,7 +167,7 @@ export default function Plaza() {
   const goToAisle = useShop((s) => s.goToAisle);
   return (
     <group>
-      <DisplayTable x={6.2} z={8.5} title="NEW SYLLABUS" sub="Textbooks · Aisle 1" seed={1} onSign={() => goToAisle(0)} />
+      <DisplayTable x={6.2} z={8.5} seed={1} />
       <DisplayTable x={11.6} z={8.5} title="BUNDLES & BOOKLISTS" sub="Save time · Aisle 8" seed={3} onSign={() => goToAisle(7)} />
       <InfoKiosk />
       <Baskets />

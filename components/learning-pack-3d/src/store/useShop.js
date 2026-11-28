@@ -38,7 +38,6 @@ export const useShop = create(
       toast: null,
       teleport: null,
       tour: false,
-      resetToken: 0,
       aisleHere: -1,
 
       // ------------------------------------------------------------ catalogue
@@ -152,7 +151,6 @@ export const useShop = create(
         get().say("Guided tour. Move any time to take over.");
       },
       stopTour: () => set({ tour: false }),
-      resetCamera: () => set((s) => ({ resetToken: s.resetToken + 1, tour: false })),
     }),
     { name: "lp3d_v3", partialize: (s) => ({ selection: s.selection }) }
   )

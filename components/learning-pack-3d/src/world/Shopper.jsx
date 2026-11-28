@@ -1,6 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import Character from "./Character.jsx";
 import Trolley from "./Trolley.jsx";
@@ -9,6 +8,8 @@ import { joy, shopperHeading, shopperPos } from "./state.js";
 import { AISLES } from "../data/catalogue.js";
 import { FACING_DZ, FACING_Z0, PER_LEVEL, SPAWN, TOUR, UNIT_X, aisleSide, blocked, clampCamera, tileOfSlot } from "../data/layout.js";
 import { useShop } from "../store/useShop.js";
+import { FollowCamera } from "../game/FollowCamera";
+import { gameUi } from "../game/gameUiStore";
 
 const F = new THREE.Vector3();
 const R = new THREE.Vector3();
@@ -16,7 +17,7 @@ const UP = new THREE.Vector3(0, 1, 0);
 const D = new THREE.Vector3();
 const WALK_SPEED = 3.8;
 const TOUR_SPEED = 3.2;
-const LOOK_Y = 1.65; // the camera looks a little above the shopper so signs and shelf tops stay in frame
+const keepInStore = (position, target) => clampCamera(position, target.x);
 const REACH = 3.7; // how far from a shelf face the shopper can "reach" a product
 
 /** Which aisle is in front of the shopper, and which eye-level product is nearest to them. */
@@ -45,9 +46,7 @@ function lookAround(x, z, heading) {
   return { aisle: best, product: list.length ? list[tileOfSlot(k, list.length)] : null };
 }
 
-export default function Shopper() {
-  const g = useRef();
-  const ctl = useRef();
+export default function Shopper({ playerRef }) {
   const keys = useKeys();
   const { camera } = useThree();
   const [moving, setMoving] = useState(false);
@@ -55,40 +54,22 @@ export default function Shopper() {
   const tourState = useRef({ i: 0, pause: 0 });
   const scan = useRef(0);
   const teleport = useShop((s) => s.teleport);
-  const resetToken = useShop((s) => s.resetToken);
   const tour = useShop((s) => s.tour);
-
-  /** Put the camera behind the shopper at a comfortable distance, looking at them. */
-  const frameShopper = (dist = 5.8, height = 3.3, az = 0.42) => {
-    // slightly off to the shopper's right so the trolley stays visible in front of them
-    const h = g.current.rotation.y + az;
-    camera.position.set(shopperPos.x + Math.sin(h) * dist, height, shopperPos.z + Math.cos(h) * dist);
-    ctl.current.target.set(shopperPos.x, LOOK_Y, shopperPos.z);
-    clampCamera(camera.position, shopperPos.x);
-    ctl.current.update();
-  };
 
   useLayoutEffect(() => {
     shopperPos.set(SPAWN.x, 0, SPAWN.z);
-    g.current.rotation.y = SPAWN.heading;
-    frameShopper();
+    playerRef.current.position.copy(shopperPos);
+    playerRef.current.rotation.y = SPAWN.heading;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (!teleport) return;
     shopperPos.set(teleport.x, 0, teleport.z);
-    g.current.rotation.y = teleport.heading;
-    frameShopper(3.4, 2.3, 0);
+    playerRef.current.position.copy(shopperPos);
+    playerRef.current.rotation.y = teleport.heading;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teleport]);
-
-  useEffect(() => {
-    if (resetToken) {
-      frameShopper();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resetToken]);
 
   useEffect(() => {
     if (tour) tourState.current = { i: 0, pause: 0 };
@@ -106,7 +87,7 @@ export default function Shopper() {
   }, []);
 
   useFrame((_, rawDt) => {
-    if (!ctl.current) return;
+    if (!playerRef.current || gameUi.getState().paused) return;
     const dt = Math.min(rawDt, 0.05);
     const k = keys.current;
     const store = useShop.getState();
@@ -152,28 +133,21 @@ export default function Shopper() {
       const p = shopperPos;
       if (!blocked(p.x + D.x * s, p.z)) p.x += D.x * s;
       if (!blocked(p.x, p.z + D.z * s)) p.z += D.z * s;
-      let df = Math.atan2(-D.x, -D.z) - g.current.rotation.y;
+      let df = Math.atan2(-D.x, -D.z) - playerRef.current.rotation.y;
       df = Math.atan2(Math.sin(df), Math.cos(df));
-      g.current.rotation.y += df * Math.min(1, dt * 10);
+      playerRef.current.rotation.y += df * Math.min(1, dt * 10);
     }
     if (mv !== was.current) {
       was.current = mv;
       setMoving(mv);
     }
-    shopperHeading.value = g.current.rotation.y;
-    g.current.position.set(shopperPos.x, 0, shopperPos.z);
-
-    // camera follows the shopper; the user's orbit offset is preserved
-    D.set(shopperPos.x, LOOK_Y, shopperPos.z).sub(ctl.current.target);
-    camera.position.add(D);
-    ctl.current.target.add(D);
-    ctl.current.update();
-    clampCamera(camera.position, shopperPos.x);
+    shopperHeading.value = playerRef.current.rotation.y;
+    playerRef.current.position.set(shopperPos.x, 0, shopperPos.z);
 
     scan.current += dt;
     if (scan.current > 0.15) {
       scan.current = 0;
-      const { aisle, product } = lookAround(shopperPos.x, shopperPos.z, g.current.rotation.y);
+      const { aisle, product } = lookAround(shopperPos.x, shopperPos.z, playerRef.current.rotation.y);
       if (aisle !== store.aisleHere) store.setAisleHere(aisle);
       if ((product?.id ?? null) !== (store.nearby?.id ?? null)) store.setNearby(product);
     }
@@ -181,11 +155,12 @@ export default function Shopper() {
 
   return (
     <>
-      <OrbitControls ref={ctl} enablePan={false} minDistance={2.2} maxDistance={9} minPolarAngle={0.25} maxPolarAngle={Math.PI / 2.1} zoomSpeed={0.8} makeDefault />
-      <group ref={g}>
-        <Character moving={moving} pushing />
+      <group ref={playerRef}>
+        <Character moving={moving} pushing shirt="#1F8A8A" />
         <Trolley />
       </group>
+      {/* after the group, so it reads this frame's position */}
+      <FollowCamera target={playerRef} initialYaw={SPAWN.heading} snapKey={teleport} constrain={keepInStore} collision={false} />
     </>
   );
 }

@@ -2,7 +2,8 @@ import { useMemo } from "react";
 import * as THREE from "three";
 import { AISLES } from "../data/catalogue.js";
 import { AISLE_WALK, STORE, WALK_X } from "../data/layout.js";
-import { BRAND, FONT, ceilingTexture, fillBg, fitFont, floorTexture, signTexture, textSign, wallTexture } from "./textures.js";
+import { BRAND, FONT, ceilingTexture, fillBg, fitFont, signTexture, textSign, wallTexture } from "./textures.js";
+import { createFloorMaterial } from "../game/storePalette";
 
 const SIGN_W = 4.8;
 const SIGN_H = 1.3;
@@ -96,12 +97,11 @@ function WalkwaySign({ walk, z }) {
 // -------------------------------------------------------------------- shell
 
 function Floor() {
-  const map = useMemo(() => floorTexture(), []);
+  const material = useMemo(() => createFloorMaterial([W, D]), []);
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, CZ]} receiveShadow>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, CZ]} material={material} receiveShadow>
         <planeGeometry args={[W, D]} />
-        <meshStandardMaterial map={map} roughness={0.22} metalness={0.04} envMapIntensity={0.55} />
       </mesh>
       {/* welcome mat */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.006, STORE.zFront - 1.1]}>
