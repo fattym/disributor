@@ -46,7 +46,7 @@ export default function ChangePasswordPage() {
     try {
       await changePassword(current, next);
       const role = user?.role;
-      router.replace(role === 'ADMIN' ? '/admin' : role === 'DISTRIBUTOR' ? '/dashboard' : role === 'PARENT' ? '/shop' : '/');
+      router.replace(role === 'ADMIN' ? '/admin' : role === 'BOOKLIST_ADMIN' ? '/school' : role === 'DISTRIBUTOR' ? '/dashboard' : role === 'PARENT' ? '/shop' : '/');
     } catch (err) {
       setError(firstError(err));
     } finally {

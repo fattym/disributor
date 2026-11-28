@@ -39,9 +39,9 @@ const src = (p) => fs.readFileSync(path.join(__dirname, '..', p), 'utf8');
 
 test('no unbacked bulk-order claims and no hard-coded school names', () => {
   assert.ok(!/10,000|48 ?hrs|300\+|home-bulk__stats/.test(src('app/page.tsx')));
-  const find = src('app/find-my-school-list/page.tsx') + src('components/SchoolPicker.tsx');
+  const find = src('app/find-my-school-list/page.tsx') + src('app/find-my-school-list/FindList.tsx');
   assert.ok(!/Makini|Kigwa|Crawford|const schools = \[/.test(find));
-  assert.ok(find.includes('schoolsWithLists') && find.includes('href="/upload-my-list/"'));
+  assert.ok(find.includes('publicListApi.schools') && find.includes('href="/upload-my-list/"'));
 });
 
 test('booklist calls use /booklists/booklists/ and class pages link to all books', () => {

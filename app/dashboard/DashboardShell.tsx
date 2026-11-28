@@ -15,6 +15,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z' },
   { href: '/dashboard/products', label: 'Products', icon: 'M21 8 12 3 3 8v8l9 5 9-5zM3 8l9 5 9-5M12 13v8' },
+  { href: '/dashboard/catalogue', label: 'Catalogue', icon: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01' },
   { href: '/dashboard/fulfilments', label: 'Fulfilments', icon: 'M3 7h18v13H3zM3 7l3-4h12l3 4M9 12h6' },
   { href: '/dashboard/orders', label: 'School orders', icon: 'M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5M8 7h7' },
   { href: '/dashboard/deliveries', label: 'Deliveries', icon: 'M1 6h13v10H1zM14 10h4l3 3v3h-7M5.5 19a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM17.5 19a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z' },

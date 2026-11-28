@@ -44,11 +44,13 @@ const navItems: NavItem[] = [
     icon: '🛍️',
     label: 'Marketplace',
     children: [
+      { href: '/admin/catalogue', label: 'Catalogue', icon: '📚' },
       { href: '/admin/products', label: 'Products', icon: '📦' },
       { href: '/admin/categories', label: 'Categories', icon: '📁' },
       { href: '/admin/courses', label: 'Courses', icon: '🎓' },
     ],
   },
+  { href: '/admin/school-requests', label: 'School requests', icon: '🏫' },
   { href: '/admin/orders', label: 'Orders', icon: '📦' },
   {
     icon: '💳',
@@ -128,6 +130,10 @@ function SidebarItem({ item, isCollapsed }: { item: NavItem; isCollapsed: boolea
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const [openedAt, setOpenedAt] = useState(pathname);
+  if (openedAt !== pathname) { setOpenedAt(pathname); setMenuOpen(false); } // a menu link was followed
   const { user, logout, loading } = useAuth();
   const router = useRouter();
   const denied = !loading && (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN'));
@@ -148,8 +154,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="lp-app flex min-h-screen bg-zinc-50 dark:bg-zinc-950">
+      {menuOpen && <div className="fixed inset-0 z-30 bg-black/40 md:hidden" onClick={() => setMenuOpen(false)} aria-hidden="true" />}
       <aside
-        className={`flex flex-col bg-navy dark:bg-zinc-900 text-zinc-100 transition-all duration-300 ${
+        className={`max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-40 ${menuOpen ? '' : 'max-md:hidden'} flex flex-col bg-navy dark:bg-zinc-900 text-zinc-100 transition-all duration-300 ${
           isCollapsed ? 'w-16' : 'w-64'
         }`}
       >
@@ -186,8 +193,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 px-6 py-3 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-navy dark:text-zinc-100">Learning Pack Admin</h2>
+        <header className="bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 px-3 md:px-6 py-3 flex items-center justify-between gap-2">
+          <button type="button" onClick={() => { setIsCollapsed(false); setMenuOpen(true); }} className="md:hidden mr-2 flex h-11 w-11 flex-none items-center justify-center rounded-md border border-zinc-200 text-xl" aria-label="Open menu">☰</button>
+          <h2 className="mr-auto text-xl font-bold text-navy dark:text-zinc-100">Learning Pack Admin</h2>
           <div className="flex items-center gap-4">
             <button
               type="button"
@@ -213,7 +221,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
       </div>
     </div>
   );

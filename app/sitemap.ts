@@ -11,6 +11,7 @@ const STATIC_PAGES: Array<[string, number]> = [
   ['/bookshop/', 0.5],
   ['/product-category/student-boxes/', 0.7],
   ['/find-my-school-list/', 0.7],
+  ['/list-your-school/', 0.5],
   ['/upload-my-list/', 0.5],
   ['/contact/', 0.4],
 ];

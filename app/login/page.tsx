@@ -50,6 +50,8 @@ export default function LoginPage() {
       const destination =
         userData.role === "ADMIN" || userData.role === "SUPER_ADMIN"
           ? "/admin"
+          : userData.role === "BOOKLIST_ADMIN"
+          ? "/school"
           : userData.role === "DISTRIBUTOR"
             ? "/dashboard"
             : userData.role === "PARENT"

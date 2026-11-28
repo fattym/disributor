@@ -43,6 +43,13 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    // A school booklist account may not use shop endpoints while signed in: send those again as a visitor.
+    if (error.response?.status === 403 && error.response?.data?.code === 'booklist_only' && originalRequest && !originalRequest._asGuest
+        && !String(originalRequest.url || '').startsWith('/carts/')) { // visitors have no server cart
+      originalRequest._asGuest = true;
+      delete originalRequest.headers.Authorization;
+      return axios(originalRequest);
+    }
     // Account holds a temporary password: the API refuses everything until it is changed.
     if (
       error.response?.status === 403 &&
